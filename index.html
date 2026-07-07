@@ -1,0 +1,127 @@
+
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>EG-Finance Fx COT Data</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;700&family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            fontFamily: {
+              sans: ['Inter', 'sans-serif'],
+              heading: ['Outfit', 'sans-serif'],
+              mono: ['JetBrains Mono', 'monospace'],
+            },
+            colors: {
+                midnight: '#0f172a', /* Changed to Slate 900 */
+                'electric-blue': '#3b82f6',
+            }
+          }
+        }
+      }
+    </script>
+    <style>
+      /* Custom Scrollbar for dark theme tables */
+      ::-webkit-scrollbar {
+        width: 6px;
+        height: 6px;
+      }
+      ::-webkit-scrollbar-track {
+        background: transparent; 
+      }
+      ::-webkit-scrollbar-thumb {
+        background: rgba(59, 130, 246, 0.5); 
+        border-radius: 4px;
+      }
+      ::-webkit-scrollbar-thumb:hover {
+        background: rgba(59, 130, 246, 0.8); 
+      }
+
+      /* Animations */
+      @keyframes popUpSlow {
+        0% { 
+          opacity: 0; 
+          transform: translateY(30px) scale(0.98); 
+          filter: blur(2px);
+        }
+        100% { 
+          opacity: 1; 
+          transform: translateY(0) scale(1); 
+          filter: blur(0);
+        }
+      }
+      
+      .animate-fade-in {
+        animation: popUpSlow 1.0s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+      }
+
+      /* Ticker Animation */
+      @keyframes marquee {
+        0% { transform: translateX(0); }
+        100% { transform: translateX(-50%); }
+      }
+      
+      .animate-marquee {
+        animation: marquee 160s linear infinite;
+        width: max-content;
+        display: flex;
+      }
+      
+      .animate-marquee:hover {
+        animation-play-state: paused;
+      }
+
+      /* Twister Flip Animation */
+      @keyframes twisterFlip {
+        0% { transform: rotate3d(-1, 1, 0, 0deg) scale(1); }
+        50% { transform: rotate3d(-1, 1, 0, 90deg) scale(0.3); }
+        100% { transform: rotate3d(-1, 1, 0, 180deg) scale(1); }
+      }
+      @keyframes twisterFlipBack {
+        0% { transform: rotate3d(-1, 1, 0, 180deg) scale(1); }
+        50% { transform: rotate3d(-1, 1, 0, 90deg) scale(0.3); }
+        100% { transform: rotate3d(-1, 1, 0, 0deg) scale(1); }
+      }
+      .animate-twister-forward {
+        animation: twisterFlip 1s ease-in-out forwards;
+      }
+      .animate-twister-backward {
+        animation: twisterFlipBack 1s ease-in-out forwards;
+      }
+
+      /* Increased delays for slower, distinct staggering */
+      .delay-100 { animation-delay: 200ms; }
+      .delay-200 { animation-delay: 400ms; }
+      .delay-300 { animation-delay: 600ms; }
+      .delay-500 { animation-delay: 800ms; }
+
+      body {
+        margin: 0;
+        padding: 0;
+      }
+    </style>
+  <script type="importmap">
+{
+  "imports": {
+    "react": "https://esm.sh/react@^19.2.4",
+    "react-dom/": "https://esm.sh/react-dom@^19.2.4/",
+    "react/": "https://esm.sh/react@^19.2.4/",
+    "lucide-react": "https://esm.sh/lucide-react@^0.564.0",
+    "recharts": "https://esm.sh/recharts@^3.7.0",
+    "@google/genai": "https://esm.sh/@google/genai@^1.41.0"
+  }
+}
+</script>
+<link rel="stylesheet" href="/index.css">
+</head>
+  <body class="antialiased selection:bg-blue-500/30 font-sans">
+    <div id="root"></div>
+  <script type="module" src="/index.tsx"></script>
+</body>
+</html>
