@@ -1,5 +1,6 @@
 
 import React, { useState, useEffect, useRef } from 'react';
+import { createPortal } from 'react-dom';
 import { X, Bot, Loader2, Sparkles, Copy, Check, TrendingUp, TrendingDown, Minus, Languages, ChevronDown, Calendar, Filter, Activity, Scale, Target, Zap, ArrowRight, AlertTriangle, Info, AlertOctagon, Globe, Newspaper, Brain, ShieldAlert, Volume2, VolumeX } from 'lucide-react';
 import { GoogleGenAI } from "@google/genai";
 import { SummaryRow } from '../types';
@@ -60,10 +61,23 @@ const AIAnalysisOverlay: React.FC<AIAnalysisOverlayProps> = ({ isOpen, onClose, 
   // Voice State
   const [isPlayingVoice, setIsPlayingVoice] = useState(false);
   const synthRef = useRef<SpeechSynthesis | null>(null);
+  const [availableVoices, setAvailableVoices] = useState<SpeechSynthesisVoice[]>([]);
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
       synthRef.current = window.speechSynthesis;
+      
+      const loadVoices = () => {
+        if (synthRef.current) {
+          setAvailableVoices(synthRef.current.getVoices());
+        }
+      };
+      
+      // Load voices immediately and attach event listener for when they are ready (especially needed for Chrome)
+      loadVoices();
+      if (synthRef.current.onvoiceschanged !== undefined) {
+        synthRef.current.onvoiceschanged = loadVoices;
+      }
     }
     return () => {
       if (synthRef.current) {
@@ -71,6 +85,16 @@ const AIAnalysisOverlay: React.FC<AIAnalysisOverlayProps> = ({ isOpen, onClose, 
       }
     };
   }, []);
+
+  // Lock body scroll when modal is open
+  useEffect(() => {
+    if (!isOpen) return;
+    const prevOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    return () => {
+      document.body.style.overflow = prevOverflow;
+    };
+  }, [isOpen]);
 
   const toggleVoice = () => {
     if (!synthRef.current || !parsedData) return;
@@ -106,17 +130,28 @@ const AIAnalysisOverlay: React.FC<AIAnalysisOverlayProps> = ({ isOpen, onClose, 
     const utterance = new SpeechSynthesisUtterance(textToRead);
     
     // Set language based on current selection
+    let langCode = 'en-US';
     if (currentLang === 'Arabic') {
-      utterance.lang = 'ar-SA';
+      langCode = 'ar-SA';
     } else if (currentLang === 'French') {
-      utterance.lang = 'fr-FR';
-    } else {
-      utterance.lang = 'en-US';
+      langCode = 'fr-FR';
     }
+    
+    utterance.lang = langCode;
 
     // Try to find a voice that matches the language
-    const voices = synthRef.current.getVoices();
-    const targetVoice = voices.find(v => v.lang.startsWith(utterance.lang.substring(0, 2)));
+    const voices = availableVoices.length > 0 ? availableVoices : synthRef.current.getVoices();
+    let targetVoice;
+    
+    if (currentLang === 'Arabic') {
+       // Broad search for any Arabic voice (ar-SA, ar-AE, Google Arabic, etc.)
+       targetVoice = voices.find(v => v.lang.toLowerCase().startsWith('ar') || v.name.toLowerCase().includes('arabic') || v.name.includes('عربي'));
+    } else if (currentLang === 'French') {
+       targetVoice = voices.find(v => v.lang.toLowerCase().startsWith('fr') || v.name.toLowerCase().includes('french'));
+    } else {
+       targetVoice = voices.find(v => v.lang.toLowerCase().startsWith('en') || v.name.toLowerCase().includes('english'));
+    }
+
     if (targetVoice) {
       utterance.voice = targetVoice;
     }
@@ -202,7 +237,7 @@ const AIAnalysisOverlay: React.FC<AIAnalysisOverlayProps> = ({ isOpen, onClose, 
         ${JSON.stringify(parsedData)}`;
 
         const response = await ai.models.generateContent({
-            model: 'gemini-3-flash-preview',
+            model: 'gemini-3.1-flash-lite',
             contents: prompt,
             config: { responseMimeType: "application/json" }
         });
@@ -610,10 +645,13 @@ const AIAnalysisOverlay: React.FC<AIAnalysisOverlayProps> = ({ isOpen, onClose, 
       );
   };
 
-  return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-950/60 backdrop-blur-xl animate-fade-in">
+  return createPortal(
+    <div 
+      className="fixed inset-0 z-[9999] flex items-center justify-center p-3 sm:p-6 bg-slate-950/75 backdrop-blur-xl transition-opacity duration-200"
+      onClick={onClose}
+    >
       <div 
-        className="relative w-full max-w-5xl bg-slate-900/90 border border-white/10 rounded-3xl shadow-2xl overflow-hidden flex flex-col max-h-[95vh] animate-in zoom-in-95 duration-300 ring-1 ring-white/5"
+        className="relative w-full max-w-5xl bg-slate-900/90 border border-white/10 rounded-3xl shadow-2xl overflow-hidden flex flex-col max-h-[95vh] animate-in zoom-in-95 duration-200 ring-1 ring-white/5"
         onClick={(e) => e.stopPropagation()}
       >
         
@@ -755,7 +793,8 @@ const AIAnalysisOverlay: React.FC<AIAnalysisOverlayProps> = ({ isOpen, onClose, 
             </div>
         )}
       </div>
-    </div>
+    </div>,
+    document.body
   );
 };
 

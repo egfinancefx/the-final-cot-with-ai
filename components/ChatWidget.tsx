@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { MessageCircle, X, Send, Brain, User, Loader2 } from 'lucide-react';
 import { GoogleGenAI } from '@google/genai';
 import ReactMarkdown from 'react-markdown';
-import { ThemeMode } from '../types';
+import { ThemeMode, SummaryRow, HistoryRow } from '../types';
 
 interface Message {
   role: 'user' | 'model';
@@ -11,19 +11,22 @@ interface Message {
 
 interface ChatWidgetProps {
   themeMode: ThemeMode;
+  summaryData: SummaryRow[];
+  historyData: HistoryRow[];
+  historyDates: string[];
 }
 
 const SUGGESTED_PROMPTS = [
-  "اشرح لي كيف أقرأ بيانات COT كمتداول مبتدئ؟",
-  "ماذا يعني عندما تزيد صفقات الشراء (Long) بشكل كبير؟",
-  "كيف أكتشف انعكاس الاتجاه (Reversal) من هذه البيانات؟",
-  "ما هو الفرق بين Open Interest و Net Position؟"
+  "يعني إيه تقرير COT وإزاي أستفيد منه كطالب أو متداول مبتدئ؟",
+  "ما هو الفرق بين صفقات الشراء (Long) والبيع (Short) وصافي المراكز؟",
+  "النهارده إيه؟ وما هي الأخبار اللي ممكن تأثر على السوق هذا الأسبوع؟",
+  "ما هو تأثير الأخبار على الذهب؟ هل هيزيد ولا هيقل ولا محايد؟"
 ];
 
-const ChatWidget: React.FC<ChatWidgetProps> = ({ themeMode }) => {
+const ChatWidget: React.FC<ChatWidgetProps> = ({ themeMode, summaryData, historyData, historyDates }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState<Message[]>([
-    { role: 'model', text: 'مرحباً! أنا مساعدك الذكي للتداول. كيف يمكنني مساعدتك في تحليل الأسواق اليوم؟' }
+    { role: 'model', text: 'مرحباً بك! أنا كبير الخبراء الاقتصاديين والمرشد التعليمي لـ EG-Finance Fx. أنا هنا للإجابة عن أي سؤال حول تقرير COT وكيفية الاستفادة منه، بالإضافة لتحليل الأخبار الاقتصادية وتأثيرها على الأصول (هيزيد / هيقل / محايد). تحب نسأل عن إيه اليوم؟' }
   ]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -32,13 +35,11 @@ const ChatWidget: React.FC<ChatWidgetProps> = ({ themeMode }) => {
 
   const scrollToBottom = () => {
     if (chatContainerRef.current) {
-      // Using scrollTop instead of scrollIntoView to prevent layout thrashing/freezing
       chatContainerRef.current.scrollTop = chatContainerRef.current.scrollHeight;
     }
   };
 
   useEffect(() => {
-    // Small delay to ensure DOM has updated before scrolling
     const timeoutId = setTimeout(() => {
       scrollToBottom();
     }, 50);
@@ -62,13 +63,12 @@ const ChatWidget: React.FC<ChatWidgetProps> = ({ themeMode }) => {
       osc1.type = 'sine';
       osc2.type = 'triangle';
       
-      // Techy Arpeggio/Chime: C5 -> E5 -> G5 -> C6
       osc1.frequency.setValueAtTime(523.25, ctx.currentTime);
       osc1.frequency.setValueAtTime(659.25, ctx.currentTime + 0.05);
       osc1.frequency.setValueAtTime(783.99, ctx.currentTime + 0.1);
       osc1.frequency.setValueAtTime(1046.50, ctx.currentTime + 0.15);
 
-      osc2.frequency.setValueAtTime(261.63, ctx.currentTime); // C4 for depth
+      osc2.frequency.setValueAtTime(261.63, ctx.currentTime);
       osc2.frequency.setValueAtTime(329.63, ctx.currentTime + 0.05);
       osc2.frequency.setValueAtTime(392.00, ctx.currentTime + 0.1);
       osc2.frequency.setValueAtTime(523.25, ctx.currentTime + 0.15);
@@ -96,10 +96,56 @@ const ChatWidget: React.FC<ChatWidgetProps> = ({ themeMode }) => {
   const initChat = () => {
     if (!chatSessionRef.current) {
       const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
+      
+      // Prepare context Data
+      let contextDataStr = "بيانات تقرير COT الحالية والتاريخية:\n\n";
+      summaryData.forEach(row => {
+          const assetName = row.Commodity;
+          contextDataStr += `${assetName}:\n`;
+          contextDataStr += `  الأسبوع الحالي: صافي المراكز: ${row['Net Positions']} (تغير: ${row['Net Change']}), شراء: ${row['Long Positions']} (تغير: ${row['Long Change']}), بيع: ${row['Short Positions']} (تغير: ${row['Short Change']})\n`;
+          
+          const historyRecord = historyData.find(h => h.Commodity === assetName);
+          if (historyRecord) {
+              contextDataStr += `  صافي المراكز في الأسابيع السابقة:\n`;
+              historyDates.forEach(date => {
+                  if (historyRecord[date] !== undefined) {
+                      contextDataStr += `    - ${date}: ${historyRecord[date]}\n`;
+                  }
+              });
+          }
+          contextDataStr += "\n";
+      });
+      
+      const today = new Date().toLocaleDateString('ar-EG', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+
       chatSessionRef.current = ai.chats.create({
-        model: 'gemini-3-flash-preview',
+        model: 'gemini-2.5-flash',
         config: {
-          systemInstruction: 'You are an expert financial analyst and trading mentor for EG-Finance Fx. You help users understand COT (Commitments of Traders) data, market trends, and trading strategies. Be concise, professional, and insightful. IMPORTANT: When responding in Arabic, provide clean, well-organized text. Avoid using raw markdown symbols like ** or #. Use clear paragraph breaks, bullet points (using standard dashes), and a polite, professional tone.'
+          systemInstruction: `أنت كبير الخبراء الاقتصاديين والمرشد التعليمي المتخصص حصرياً في "التحليل الأساسي" (Fundamental Analysis) وبيانات "تقرير التزام المتاجرين" (COT - Commitments of Traders) لدى EG-Finance Fx. 
+تاريخ اليوم هو: ${today}.
+
+أنت ملم تماماً بالتحليل الأساسي والأخبار الاقتصادية، وتجمع بين كونك محللاً استراتيجياً ومعلماً مالياً يشرح ويبسط للطلاب والمتداولين المبتدئين كل ما يتعلق بتقارير COT.
+
+دليلك الشامل لتقرير COT للإجابة والتعليم:
+1. ما هو تقرير COT؟: تقرير تصدره هيئة تنظيم السلع الآجلة الأمريكية (CFTC) أسبوعياً كل يوم جمعة، يعكس تمركزات كبار المؤسسات الاستثمارية وصناديق التحوط والبنوك (Smart Money) مقارنة بالتجاريين في أسواق العقود الآجلة.
+2. صفقات الشراء (Longs) وصفقات البيع (Shorts): عقود الشراء تراهن على ارتفاع السعر، وعقود البيع تراهن على انخفاض السعر.
+3. صافي المراكز (Net Positions): هو ناتج طرح عقود البيع من عقود الشراء (Longs - Shorts). إذا كان الناتج إيجابياً يعني سيطرة النزعة الشرائية، وإذا كان سلبياً يعني سيطرة النزعة البيعية.
+4. التغير الحالي لهذا الأسبوع (Weekly Change): يبين التغير الصافي لصفقات الشراء والبيع؛ الزيادة الكبيرة في صفقات الشراء تدل على تدفق سيولة وتراكم شرائي (Accumulation)، وانخفاضها مع زيادة البيع يدل على تصريف (Distribution).
+5. كيف يستفيد الطالب والمتداول لبناء نتائجه؟: يفهم المتداول اتجاه السيولة المؤسسية الحقيقية ويتداول مع اتجاه الأموال الذكية بدلاً من السير عكسها، مع دمج ذلك بالأخبار الاقتصادية، وعند بلوغ المراكز قيماً قياسية تاريخية غير مسبوقة يتم الحذر من احتمال حدوث انعكاس.
+
+قواعد صارمة جداً لعملك:
+1. تخصص مطلق في التحليل الأساسي وتقارير COT: ممنوع منعاً باتاً ذكر أي أدوات تحليل فني (دعوم ومقاومات، مؤشرات فنية كـ RSI و Moving Averages، أو نماذج شموع). التحليل الفني خط أحمر.
+2. الجانب التعليمي والمبسط: إذا سألك طالب أو مبتدئ أي سؤال تعليمي حول التقرير أو مصطلحاته، اشرح له ببساطة ووضوح وبأمثلة من الواقع.
+3. الحكم المباشر والواضح (هيزيد / هيقل / محايد): لكل أصل مالي يُسأل عنه، حدد التأثير في بداية إجابتك:
+   - [هيزيد / صعود 📈]
+   - أو [هيقل / هبوط 📉]
+   - أو [محايد / تذبذب ⚖️]
+   مع شرح السبب الاقتصادي الأساسي وتأكيد ذلك بأرقام الشراء والبيع وتغيرات الأسبوع في تقرير COT.
+4. الوعي بتاريخ اليوم وأجندة الأسبوع: عند سؤالك "النهارده إيه؟" أو عن أحداث الأسبوع، اذكر اليوم وتاريخه كاملاً وأهم الأخبار الاقتصادية المؤثرة لهذا الأسبوع.
+5. لغة الخطاب: تحدث باللغة العربية بأسلوب راقٍ واحترافي وتعليمي مشجع، سريع ومباشر.
+
+السياق المالي الحالي (البيانات):
+${contextDataStr}`
         }
       });
     }
@@ -118,8 +164,26 @@ const ChatWidget: React.FC<ChatWidgetProps> = ({ themeMode }) => {
 
     try {
       initChat();
-      const response = await chatSessionRef.current.sendMessage({ message: userMsg });
-      setMessages(prev => [...prev, { role: 'model', text: response.text }]);
+      const responseStream = await chatSessionRef.current.sendMessageStream({ message: userMsg });
+      
+      let fullText = '';
+      let isFirstChunk = true;
+
+      for await (const chunk of responseStream) {
+        if (isFirstChunk) {
+          setIsLoading(false);
+          isFirstChunk = false;
+          setMessages(prev => [...prev, { role: 'model', text: chunk.text || '' }]);
+          fullText = chunk.text || '';
+        } else {
+          fullText += chunk.text || '';
+          setMessages(prev => {
+            const updated = [...prev];
+            updated[updated.length - 1] = { role: 'model', text: fullText };
+            return updated;
+          });
+        }
+      }
     } catch (error) {
       console.error('Chat error:', error);
       setMessages(prev => [...prev, { role: 'model', text: 'عذراً، حدث خطأ أثناء معالجة طلبك.' }]);

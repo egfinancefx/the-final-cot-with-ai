@@ -30,14 +30,14 @@ const KPICard: React.FC<KPICardProps> = ({ title, value, change, subtext, icon, 
             chartStroke: "#60a5fa", chartFill: "#3b82f6", glow: "bg-blue-500/20" 
         },
         success: { 
-            bg: "bg-slate-900", border: "border-emerald-500/30", text: "text-white", 
-            iconBg: "bg-emerald-500/20", iconText: "text-emerald-400", sub: "text-emerald-200/60",
-            chartStroke: "#34d399", chartFill: "#10b981", glow: "bg-emerald-500/20" 
+            bg: "bg-slate-900", border: "border-blue-500/40", text: "text-white", 
+            iconBg: "bg-blue-500/25", iconText: "text-cyan-300", sub: "text-blue-200/70",
+            chartStroke: "#38bdf8", chartFill: "#0284c7", glow: "bg-blue-500/25" 
         },
         danger: { 
-            bg: "bg-slate-900", border: "border-rose-500/30", text: "text-white", 
-            iconBg: "bg-rose-500/20", iconText: "text-rose-400", sub: "text-rose-200/60",
-            chartStroke: "#fb7185", chartFill: "#f43f5e", glow: "bg-rose-500/20" 
+            bg: "bg-slate-900", border: "border-slate-400/40", text: "text-white", 
+            iconBg: "bg-white/15", iconText: "text-white", sub: "text-slate-300",
+            chartStroke: "#f8fafc", chartFill: "#cbd5e1", glow: "bg-white/15" 
         },
         info: { 
             bg: "bg-slate-900", border: "border-cyan-500/30", text: "text-white", 
@@ -53,14 +53,14 @@ const KPICard: React.FC<KPICardProps> = ({ title, value, change, subtext, icon, 
             chartStroke: "#2563eb", chartFill: "#3b82f6", glow: "bg-blue-400/10" 
         },
         success: { 
-            bg: "bg-white", border: "border-emerald-200", text: "text-slate-900", 
-            iconBg: "bg-emerald-100", iconText: "text-emerald-600", sub: "text-slate-500",
-            chartStroke: "#059669", chartFill: "#10b981", glow: "bg-emerald-400/10" 
+            bg: "bg-white", border: "border-blue-200", text: "text-slate-900", 
+            iconBg: "bg-blue-50", iconText: "text-blue-600", sub: "text-slate-500",
+            chartStroke: "#2563eb", chartFill: "#3b82f6", glow: "bg-blue-400/10" 
         },
         danger: { 
-            bg: "bg-white", border: "border-rose-200", text: "text-slate-900", 
-            iconBg: "bg-rose-100", iconText: "text-rose-600", sub: "text-slate-500",
-            chartStroke: "#e11d48", chartFill: "#f43f5e", glow: "bg-rose-400/10" 
+            bg: "bg-white", border: "border-slate-300", text: "text-slate-900", 
+            iconBg: "bg-slate-100", iconText: "text-slate-700", sub: "text-slate-500",
+            chartStroke: "#64748b", chartFill: "#94a3b8", glow: "bg-slate-400/10" 
         },
         info: { 
             bg: "bg-white", border: "border-cyan-200", text: "text-slate-900", 
@@ -80,13 +80,13 @@ const KPICard: React.FC<KPICardProps> = ({ title, value, change, subtext, icon, 
   // Dynamic pill style based on theme and value
   const getPillStyle = () => {
     if (themeMode === 'light') {
-        if (isPositive) return 'bg-emerald-100 text-emerald-700 border-emerald-200';
-        if (isNegative) return 'bg-rose-100 text-rose-700 border-rose-200';
+        if (isPositive) return 'bg-blue-50 text-blue-700 border-blue-200';
+        if (isNegative) return 'bg-slate-100 text-slate-700 border-slate-300';
         return 'bg-slate-100 text-slate-600 border-slate-200';
     }
-    // Dark themes (Ocean)
-    if (isPositive) return 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20 group-hover:bg-emerald-500/20';
-    if (isNegative) return 'bg-rose-500/10 text-rose-400 border-rose-500/20 group-hover:bg-rose-500/20';
+    // Dark themes (Ocean): Blue for positive, White for negative
+    if (isPositive) return 'bg-blue-500/15 text-cyan-300 border-blue-500/30 group-hover:bg-blue-500/25';
+    if (isNegative) return 'bg-white/10 text-white border-white/30 group-hover:bg-white/20';
     return 'bg-slate-800/40 text-slate-400 border-slate-700';
   };
 

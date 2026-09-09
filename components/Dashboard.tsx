@@ -1,6 +1,7 @@
 
 import React, { useState, useMemo, useRef, useEffect } from 'react';
 import { XAxis, CartesianGrid, Tooltip, ResponsiveContainer, ReferenceLine, AreaChart, Area, YAxis, PieChart, Pie, LineChart, Line, Cell, ComposedChart } from 'recharts';
+import { motion, AnimatePresence } from 'framer-motion';
 import { GoogleGenAI } from "@google/genai";
 import { SummaryRow, HistoryRow, ThemeMode } from '../types';
 import KPICard from './KPICard';
@@ -8,10 +9,11 @@ import AssetTrendCard from './AssetTrendCard';
 import AIAnalysisOverlay from './AIAnalysisOverlay';
 import CompareModal from './CompareModal';
 import HeatmapModal from './HeatmapModal';
+import EducationalGuideModal from './EducationalGuideModal';
 import TradingViewWidget from './TradingViewWidget';
 import { formatCurrency } from '../utils';
 import { TV_SYMBOL_MAP, ASSET_GROUPS } from '../constants';
-import { LayoutDashboard, TrendingUp, TrendingDown, Activity, ChevronDown, ArrowUpRight, ArrowDownRight, Scale, Minus, Check, Sparkles, Search, ArrowUp, ArrowDown, ArrowUpDown, BarChart2, ArrowLeft, Info, AlertTriangle, Edit3, Map as MapIcon } from 'lucide-react';
+import { LayoutDashboard, TrendingUp, TrendingDown, Activity, ChevronDown, ArrowUpRight, ArrowDownRight, Scale, Minus, Check, Sparkles, Search, ArrowUp, ArrowDown, ArrowUpDown, BarChart2, ArrowLeft, Info, AlertTriangle, Edit3, Map as MapIcon, Star, GraduationCap } from 'lucide-react';
 
 interface DashboardProps {
   summaryData: SummaryRow[];
@@ -143,9 +145,13 @@ const Dashboard: React.FC<DashboardProps> = ({ summaryData, historyData, history
   const [aiAnalysis, setAiAnalysis] = useState<string | null>(null);
   const [isCompareModalOpen, setIsCompareModalOpen] = useState(false);
   const [isHeatmapOpen, setIsHeatmapOpen] = useState(false);
+  const [isGuideOpen, setIsGuideOpen] = useState(false);
 
   // Notes State
   const [notes, setNotes] = useState<Record<string, string>>({});
+
+  // Favorites State
+  const [favorites, setFavorites] = useState<string[]>([]);
   
   useEffect(() => {
     const savedNotes = localStorage.getItem('cot_trading_notes');
@@ -156,7 +162,28 @@ const Dashboard: React.FC<DashboardProps> = ({ summaryData, historyData, history
         console.error("Failed to parse notes", e);
       }
     }
+
+    const savedFavorites = localStorage.getItem('cot_favorites');
+    if (savedFavorites) {
+        try {
+            setFavorites(JSON.parse(savedFavorites));
+        } catch(e) {
+            console.error("Failed to parse favorites", e);
+        }
+    }
   }, []);
+
+  const toggleFavorite = (e: React.MouseEvent, asset: string) => {
+    e.stopPropagation();
+    let newFavorites;
+    if (favorites.includes(asset)) {
+        newFavorites = favorites.filter(a => a !== asset);
+    } else {
+        newFavorites = [...favorites, asset];
+    }
+    setFavorites(newFavorites);
+    localStorage.setItem('cot_favorites', JSON.stringify(newFavorites));
+  };
 
   const handleNoteChange = (asset: string, text: string) => {
     const newNotes = { ...notes, [asset]: text };
@@ -475,7 +502,7 @@ const Dashboard: React.FC<DashboardProps> = ({ summaryData, historyData, history
         }
 
         const response = await ai.models.generateContent({
-            model: 'gemini-3-flash-preview',
+            model: 'gemini-3.1-flash-lite',
             contents: prompt,
             config: {
                 tools: [{ googleSearch: {} }],
@@ -540,66 +567,91 @@ const Dashboard: React.FC<DashboardProps> = ({ summaryData, historyData, history
             </div>
         </div>
         
-        <div className="flex items-center gap-3 w-full sm:w-auto">
-            {/* Heatmap Button */}
-            <button
-                onClick={() => setIsHeatmapOpen(true)}
-                className="relative group px-4 py-3 rounded-xl overflow-hidden shadow-lg transition-all active:scale-95"
-            >
-                {/* Animated Border Gradient */}
-                <div className="absolute inset-[-100%] bg-[conic-gradient(from_90deg_at_50%_50%,#0000_0%,#10b981_50%,#0000_100%)] animate-[spin_4s_linear_infinite]" />
-                
-                {/* Inner Background */}
-                <div className={`absolute inset-[1.5px] rounded-[10px] z-0 ${themeMode === 'light' ? 'bg-white' : 'bg-slate-900'}`}></div>
-                
-                {/* Content */}
-                <div className={`relative z-10 flex items-center gap-2 text-sm font-bold ${themeMode === 'light' ? 'text-emerald-600' : 'text-emerald-400'}`}>
-                    <MapIcon className="w-4 h-4 group-hover:animate-pulse" />
-                    <span className="hidden sm:inline">Heatmap</span>
-                </div>
-            </button>
+        <div className="flex flex-col sm:flex-row items-center gap-2.5 w-full md:w-auto">
+            {/* Action Buttons Group - Exact equal widths and identical heights */}
+            <div className="grid grid-cols-4 gap-2 w-full sm:w-auto sm:flex sm:items-center">
+                {/* Heatmap Button */}
+                <button
+                    onClick={() => setIsHeatmapOpen(true)}
+                    className="relative group h-11 w-full sm:w-28 rounded-xl overflow-hidden shadow-lg transition-all active:scale-95 flex items-center justify-center shrink-0"
+                    title="خريطة الحرارة لتمركزات السوق (Market Heatmap)"
+                >
+                    {/* Animated Border Gradient */}
+                    <div className="absolute inset-[-100%] bg-[conic-gradient(from_90deg_at_50%_50%,#0000_0%,#10b981_50%,#0000_100%)] animate-[spin_4s_linear_infinite]" />
+                    
+                    {/* Inner Background */}
+                    <div className={`absolute inset-[1.5px] rounded-[10px] z-0 ${themeMode === 'light' ? 'bg-white' : 'bg-slate-900'}`}></div>
+                    
+                    {/* Content */}
+                    <div className={`relative z-10 flex items-center justify-center gap-1.5 sm:gap-2 w-full px-1.5 text-xs sm:text-[13px] font-bold ${themeMode === 'light' ? 'text-emerald-600' : 'text-emerald-400'}`}>
+                        <MapIcon className="w-4 h-4 shrink-0 group-hover:animate-pulse" />
+                        <span className="truncate">Heatmap</span>
+                    </div>
+                </button>
 
-            {/* Compare Button */}
-            <button
-                onClick={() => setIsCompareModalOpen(true)}
-                className="relative group px-4 py-3 rounded-xl overflow-hidden shadow-lg transition-all active:scale-95"
-            >
-                {/* Animated Border Gradient */}
-                <div className="absolute inset-[-100%] bg-[conic-gradient(from_90deg_at_50%_50%,#0000_0%,#8b5cf6_50%,#0000_100%)] animate-[spin_3s_linear_infinite_reverse]" />
-                
-                {/* Inner Background */}
-                <div className={`absolute inset-[1.5px] rounded-[10px] z-0 ${themeMode === 'light' ? 'bg-white' : 'bg-slate-900'}`}></div>
-                
-                {/* Content */}
-                <div className={`relative z-10 flex items-center gap-2 text-sm font-bold ${themeMode === 'light' ? 'text-indigo-600' : 'text-indigo-400'}`}>
-                    <Scale className="w-4 h-4 group-hover:animate-pulse" />
-                    <span className="hidden sm:inline">Compare</span>
-                </div>
-            </button>
+                {/* Compare Button */}
+                <button
+                    onClick={() => setIsCompareModalOpen(true)}
+                    className="relative group h-11 w-full sm:w-28 rounded-xl overflow-hidden shadow-lg transition-all active:scale-95 flex items-center justify-center shrink-0"
+                    title="مقارنة الأصول وتمركزات الحيتان (Compare Assets)"
+                >
+                    {/* Animated Border Gradient */}
+                    <div className="absolute inset-[-100%] bg-[conic-gradient(from_90deg_at_50%_50%,#0000_0%,#8b5cf6_50%,#0000_100%)] animate-[spin_3s_linear_infinite_reverse]" />
+                    
+                    {/* Inner Background */}
+                    <div className={`absolute inset-[1.5px] rounded-[10px] z-0 ${themeMode === 'light' ? 'bg-white' : 'bg-slate-900'}`}></div>
+                    
+                    {/* Content */}
+                    <div className={`relative z-10 flex items-center justify-center gap-1.5 sm:gap-2 w-full px-1.5 text-xs sm:text-[13px] font-bold ${themeMode === 'light' ? 'text-indigo-600' : 'text-indigo-400'}`}>
+                        <Scale className="w-4 h-4 shrink-0 group-hover:animate-pulse" />
+                        <span className="truncate">Compare</span>
+                    </div>
+                </button>
 
-            {/* AI Insight Button */}
-            <button
-                onClick={handleAIAnalysis}
-                className="relative group px-4 py-3 rounded-xl overflow-hidden shadow-lg transition-all active:scale-95"
-            >
-                {/* Animated Border Gradient */}
-                <div className="absolute inset-[-100%] bg-[conic-gradient(from_90deg_at_50%_50%,#0000_0%,#3b82f6_50%,#0000_100%)] animate-[spin_3s_linear_infinite]" />
-                
-                {/* Inner Background */}
-                <div className={`absolute inset-[1.5px] rounded-[10px] z-0 ${themeMode === 'light' ? 'bg-white' : 'bg-slate-900'}`}></div>
-                
-                {/* Content */}
-                <div className={`relative z-10 flex items-center gap-2 text-sm font-bold ${themeMode === 'light' ? 'text-blue-600' : 'text-cyan-400'}`}>
-                    <Sparkles className="w-4 h-4 group-hover:animate-pulse" />
-                    <span className="hidden sm:inline">AI Insight</span>
-                </div>
-            </button>
+                {/* AI Insight Button */}
+                <button
+                    onClick={handleAIAnalysis}
+                    className="relative group h-11 w-full sm:w-28 rounded-xl overflow-hidden shadow-lg transition-all active:scale-95 flex items-center justify-center shrink-0"
+                    title="التحليل الذكي وتوليد الرؤى (AI Insights)"
+                >
+                    {/* Animated Border Gradient */}
+                    <div className="absolute inset-[-100%] bg-[conic-gradient(from_90deg_at_50%_50%,#0000_0%,#3b82f6_50%,#0000_100%)] animate-[spin_3s_linear_infinite]" />
+                    
+                    {/* Inner Background */}
+                    <div className={`absolute inset-[1.5px] rounded-[10px] z-0 ${themeMode === 'light' ? 'bg-white' : 'bg-slate-900'}`}></div>
+                    
+                    {/* Content */}
+                    <div className={`relative z-10 flex items-center justify-center gap-1.5 sm:gap-2 w-full px-1.5 text-xs sm:text-[13px] font-bold ${themeMode === 'light' ? 'text-blue-600' : 'text-cyan-400'}`}>
+                        <Sparkles className="w-4 h-4 shrink-0 group-hover:animate-pulse" />
+                        <span className="truncate">AI Insight</span>
+                    </div>
+                </button>
+
+                {/* Educational Guide Button */}
+                <button
+                    onClick={() => setIsGuideOpen(true)}
+                    className="relative group h-11 w-full sm:w-28 rounded-xl overflow-hidden shadow-lg transition-all active:scale-95 flex items-center justify-center shrink-0"
+                    title="الدليل التعليمي التفاعلي لتقرير COT ومحاكي ميزان القوى"
+                >
+                    {/* Animated Border Gradient */}
+                    <div className="absolute inset-[-100%] bg-[conic-gradient(from_90deg_at_50%_50%,#0000_0%,#06b6d4_50%,#0000_100%)] animate-[spin_4s_linear_infinite]" />
+                    
+                    {/* Inner Background */}
+                    <div className={`absolute inset-[1.5px] rounded-[10px] z-0 ${themeMode === 'light' ? 'bg-white' : 'bg-slate-900'}`}></div>
+                    
+                    {/* Content */}
+                    <div className={`relative z-10 flex items-center justify-center gap-1.5 sm:gap-2 w-full px-1.5 text-xs sm:text-[13px] font-bold ${themeMode === 'light' ? 'text-cyan-700' : 'text-cyan-400'}`}>
+                        <GraduationCap className="w-4 h-4 shrink-0 group-hover:scale-110 transition-transform" />
+                        <span className="truncate">Guide</span>
+                    </div>
+                </button>
+            </div>
 
             {/* Dropdown */}
-            <div className="relative w-full sm:w-64" ref={dropdownRef}>
+            <div className="relative w-full sm:w-60 shrink-0" ref={dropdownRef}>
             <button
                 onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-                className={`w-full flex items-center justify-between backdrop-blur-xl border rounded-xl pl-4 pr-4 py-3 text-sm transition-all ${isDropdownOpen ? 'ring-2' : ''} ${themeMode === 'light' ? 'bg-white border-slate-200 text-slate-700 hover:bg-slate-50 ring-blue-500/30' : 'bg-white/5 border-white/10 text-white hover:bg-white/10 ring-white/10'}`}
+                className={`w-full h-11 flex items-center justify-between backdrop-blur-xl border rounded-xl px-4 text-sm transition-all ${isDropdownOpen ? 'ring-2' : ''} ${themeMode === 'light' ? 'bg-white border-slate-200 text-slate-700 hover:bg-slate-50 ring-blue-500/30' : 'bg-white/5 border-white/10 text-white hover:bg-white/10 ring-white/10'}`}
             >
                 <span className={`truncate font-medium ${!selectedCommodity ? 'opacity-60' : ''}`}>
                     {selectedCommodity || "Select Asset..."}
@@ -864,14 +916,21 @@ const Dashboard: React.FC<DashboardProps> = ({ summaryData, historyData, history
                     
                     <div className="flex-1 min-h-0 relative z-10 p-4">
                              {mainChartData.length > 0 ? (
-                                 <ResponsiveContainer width="100%" height="100%">
-                                     <ComposedChart data={mainChartData} margin={{ top: 20, right: 10, left: 0, bottom: 0 }}>
-                                         <defs>
-                                             <linearGradient id="colorValue" x1="0" y1="0" x2="0" y2="1">
-                                                 <stop offset="5%" stopColor={trendColor} stopOpacity={0.4}/>
-                                                 <stop offset="95%" stopColor={trendColor} stopOpacity={0}/>
-                                             </linearGradient>
-                                         </defs>
+                                 <motion.div 
+                                     key={`chart-container-${selectedCommodity}`}
+                                     initial={{ opacity: 0, y: 20 }}
+                                     animate={{ opacity: 1, y: 0 }}
+                                     transition={{ duration: 0.5, ease: "easeOut" }}
+                                     className="w-full h-full"
+                                 >
+                                     <ResponsiveContainer width="100%" height="100%">
+                                         <ComposedChart key={`main-chart-${selectedCommodity}`} data={mainChartData} margin={{ top: 20, right: 10, left: 0, bottom: 0 }}>
+                                             <defs>
+                                                 <linearGradient id="colorValue" x1="0" y1="0" x2="0" y2="1">
+                                                     <stop offset="5%" stopColor={trendColor} stopOpacity={0.4}/>
+                                                     <stop offset="95%" stopColor={trendColor} stopOpacity={0}/>
+                                                 </linearGradient>
+                                             </defs>
                                          <CartesianGrid strokeDasharray="3 3" stroke={themeStyles.chartGrid} vertical={false} opacity={0.5} />
                                          <XAxis 
                                            dataKey="date" 
@@ -965,6 +1024,7 @@ const Dashboard: React.FC<DashboardProps> = ({ summaryData, historyData, history
                                          ))}
                                      </ComposedChart>
                                  </ResponsiveContainer>
+                                 </motion.div>
                              ) : (
                                 <div className="w-full h-full flex items-center justify-center text-slate-500">
                                     No historical data available.
@@ -979,24 +1039,31 @@ const Dashboard: React.FC<DashboardProps> = ({ summaryData, historyData, history
           </div>
       ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 shrink-0 animate-fade-in">
-            {FEATURED_ASSETS.map(assetName => {
-                const summary = filteredSummaryData.find(s => s.Commodity === assetName);
-                const history = historyData.find(h => h.Commodity === assetName);
-                if (!summary) return null;
-                return (
-                    <AssetTrendCard
-                        key={assetName}
-                        title={assetName}
-                        commodity={assetName}
-                        summaryRow={summary}
-                        historyRow={history}
-                        dates={historyDates}
-                        onClick={() => setSelectedCommodity(assetName)}
-                        isSelected={false}
-                        themeMode={themeMode}
-                    />
-                );
-            })}
+            {/* Determine what to show: User favorites if they exist (up to 4), otherwise fallback to FEATURED_ASSETS */}
+            {(() => {
+                const assetsToShow = favorites.length > 0 
+                    ? favorites.slice(0, 4) 
+                    : FEATURED_ASSETS;
+                
+                return assetsToShow.map(assetName => {
+                    const summary = filteredSummaryData.find(s => s.Commodity === assetName);
+                    const history = historyData.find(h => h.Commodity === assetName);
+                    if (!summary) return null;
+                    return (
+                        <AssetTrendCard
+                            key={assetName}
+                            title={assetName}
+                            commodity={assetName}
+                            summaryRow={summary}
+                            historyRow={history}
+                            dates={historyDates}
+                            onClick={() => setSelectedCommodity(assetName)}
+                            isSelected={false}
+                            themeMode={themeMode}
+                        />
+                    );
+                });
+            })()}
           </div>
       )}
 
@@ -1040,6 +1107,7 @@ const Dashboard: React.FC<DashboardProps> = ({ summaryData, historyData, history
                     <thead className={`text-[11px] font-bold uppercase sticky top-0 z-10 shadow-lg backdrop-blur-md ${themeStyles.tableHeader}`}>
                     <tr>
                         {[
+                            { key: 'star', label: '', align: 'center', noSort: true },
                             { key: 'Commodity', label: 'Asset', align: 'left' },
                             { key: 'Net Positions', label: 'Net Pos', align: 'right' },
                             { key: 'Sentiment', label: 'Sentiment', align: 'center' },
@@ -1089,6 +1157,14 @@ const Dashboard: React.FC<DashboardProps> = ({ summaryData, historyData, history
                             className={`cursor-pointer transition-all duration-200 group border-l-4 hover:bg-white/5 ${selectedCommodity === row.Commodity ? themeStyles.tableRowSelected : `border-l-transparent ${themeStyles.tableRow}`}`}
                             onClick={() => setSelectedCommodity(row.Commodity)}
                         >
+                            <td className="px-4 py-4 text-center">
+                                <button
+                                    onClick={(e) => toggleFavorite(e, row.Commodity)}
+                                    className={`transition-colors focus:outline-none ${favorites.includes(row.Commodity) ? 'text-yellow-500 hover:text-yellow-600' : 'text-slate-400 hover:text-yellow-500 opacity-30 group-hover:opacity-100'}`}
+                                >
+                                    <Star className={`w-4 h-4 ${favorites.includes(row.Commodity) ? 'fill-current' : ''}`} />
+                                </button>
+                            </td>
                             <td className={`px-6 py-4 font-bold tracking-tight transition-colors ${themeStyles.textMain}`}>
                                 <div className="flex items-center gap-3">
                                     <div className={`w-2 h-2 rounded-full ${row["Net Change"] > 0 ? 'bg-cyan-400 shadow-[0_0_8px_rgba(34,211,238,0.5)]' : 'bg-slate-400'}`}></div>
@@ -1184,6 +1260,17 @@ const Dashboard: React.FC<DashboardProps> = ({ summaryData, historyData, history
         isOpen={isHeatmapOpen}
         onClose={() => setIsHeatmapOpen(false)}
         data={summaryData}
+        themeMode={themeMode}
+        onSelectAsset={(commodity) => {
+          setSelectedCommodity(commodity);
+          setIsHeatmapOpen(false);
+        }}
+      />
+
+      {/* Educational Guide Modal */}
+      <EducationalGuideModal
+        isOpen={isGuideOpen}
+        onClose={() => setIsGuideOpen(false)}
         themeMode={themeMode}
       />
     </div>

@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { X, Activity, Check, Scale } from 'lucide-react';
 import { ThemeMode } from '../types';
 import { ASSET_GROUPS } from '../constants';
@@ -13,6 +14,16 @@ interface CompareModalProps {
 const CompareModal: React.FC<CompareModalProps> = ({ isOpen, onClose, onCompare, themeMode }) => {
   const [selectedAssets, setSelectedAssets] = useState<string[]>([]);
   const maxSelection = 3;
+
+  // Lock body scroll when modal is open
+  useEffect(() => {
+    if (!isOpen) return;
+    const prevOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    return () => {
+      document.body.style.overflow = prevOverflow;
+    };
+  }, [isOpen]);
 
   if (!isOpen) return null;
 
@@ -32,7 +43,7 @@ const CompareModal: React.FC<CompareModalProps> = ({ isOpen, onClose, onCompare,
   };
 
   const themeStyles = {
-    overlay: themeMode === 'light' ? 'bg-slate-900/20 backdrop-blur-sm' : 'bg-black/60 backdrop-blur-sm',
+    overlay: themeMode === 'light' ? 'bg-slate-900/40 backdrop-blur-md' : 'bg-black/75 backdrop-blur-md',
     modal: themeMode === 'light' ? 'bg-white border-slate-200' : 'bg-slate-900 border-white/10',
     textMain: themeMode === 'light' ? 'text-slate-900' : 'text-white',
     textSub: themeMode === 'light' ? 'text-slate-500' : 'text-slate-400',
@@ -42,9 +53,15 @@ const CompareModal: React.FC<CompareModalProps> = ({ isOpen, onClose, onCompare,
     itemBorder: themeMode === 'light' ? 'border-slate-200' : 'border-white/5',
   };
 
-  return (
-    <div className={`fixed inset-0 z-[100] flex items-center justify-center p-4 ${themeStyles.overlay}`}>
-      <div className={`w-full max-w-2xl rounded-3xl border shadow-2xl overflow-hidden flex flex-col max-h-[85vh] animate-fade-in ${themeStyles.modal}`}>
+  return createPortal(
+    <div 
+      className={`fixed inset-0 z-[9999] flex items-center justify-center p-4 transition-opacity duration-200 ${themeStyles.overlay}`}
+      onClick={onClose}
+    >
+      <div 
+        className={`w-full max-w-2xl rounded-3xl border shadow-2xl overflow-hidden flex flex-col max-h-[85vh] animate-in zoom-in-95 duration-200 ${themeStyles.modal}`}
+        onClick={(e) => e.stopPropagation()}
+      >
         
         {/* Header */}
         <div className={`flex items-center justify-between p-6 border-b ${themeMode === 'light' ? 'border-slate-200' : 'border-white/10'}`}>
@@ -139,7 +156,8 @@ const CompareModal: React.FC<CompareModalProps> = ({ isOpen, onClose, onCompare,
         </div>
 
       </div>
-    </div>
+    </div>,
+    document.body
   );
 };
 

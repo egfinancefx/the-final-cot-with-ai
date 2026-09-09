@@ -5,6 +5,7 @@ import CompareView from './components/CompareView';
 import MarketTicker from './components/MarketTicker';
 import LoginGate from './components/LoginGate';
 import ChatWidget from './components/ChatWidget';
+import VoiceChatWidget from './components/VoiceChatWidget';
 import { parseSummaryCSV, parseHistoryCSV } from './utils';
 import { SUMMARY_SHEET_URL, HISTORY_SHEET_URL } from './constants';
 import { BarChart3, RefreshCw, AlertCircle, Loader2, Sun, LogOut } from 'lucide-react';
@@ -232,7 +233,13 @@ const App: React.FC = () => {
         )}
       </main>
 
-      <ChatWidget themeMode={themeMode} />
+      <ChatWidget 
+        themeMode={themeMode} 
+        summaryData={summaryData} 
+        historyData={historyData} 
+        historyDates={historyDates} 
+      />
+      <VoiceChatWidget themeMode={themeMode} summaryData={summaryData} historyData={historyData} historyDates={historyDates} />
     </div>
   );
 };

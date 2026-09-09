@@ -1,5 +1,10 @@
 {
   "name": "Remix: استكمال التجربه",
   "description": "Interactive dashboard to analyze Commodity Futures Trading Commission (CFTC) Net Position data.",
-  "requestFramePermissions": []
+  "requestFramePermissions": [
+    "microphone"
+  ],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
 }
