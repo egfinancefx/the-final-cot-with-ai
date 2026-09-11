@@ -1,6 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { MessageCircle, X, Send, Brain, User, Loader2 } from 'lucide-react';
-import { GoogleGenAI } from '@google/genai';
 import ReactMarkdown from 'react-markdown';
 import { ThemeMode, SummaryRow, HistoryRow } from '../types';
 
@@ -31,7 +30,6 @@ const ChatWidget: React.FC<ChatWidgetProps> = ({ themeMode, summaryData, history
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const chatContainerRef = useRef<HTMLDivElement>(null);
-  const chatSessionRef = useRef<any>(null);
 
   const scrollToBottom = () => {
     if (chatContainerRef.current) {
@@ -93,35 +91,29 @@ const ChatWidget: React.FC<ChatWidgetProps> = ({ themeMode, summaryData, history
     }
   };
 
-  const initChat = () => {
-    if (!chatSessionRef.current) {
-      const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
-      
-      // Prepare context Data
-      let contextDataStr = "بيانات تقرير COT الحالية والتاريخية:\n\n";
-      summaryData.forEach(row => {
-          const assetName = row.Commodity;
-          contextDataStr += `${assetName}:\n`;
-          contextDataStr += `  الأسبوع الحالي: صافي المراكز: ${row['Net Positions']} (تغير: ${row['Net Change']}), شراء: ${row['Long Positions']} (تغير: ${row['Long Change']}), بيع: ${row['Short Positions']} (تغير: ${row['Short Change']})\n`;
-          
-          const historyRecord = historyData.find(h => h.Commodity === assetName);
-          if (historyRecord) {
-              contextDataStr += `  صافي المراكز في الأسابيع السابقة:\n`;
-              historyDates.forEach(date => {
-                  if (historyRecord[date] !== undefined) {
-                      contextDataStr += `    - ${date}: ${historyRecord[date]}\n`;
-                  }
-              });
-          }
-          contextDataStr += "\n";
-      });
-      
-      const today = new Date().toLocaleDateString('ar-EG', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+  const getSystemInstruction = () => {
+    // Prepare context Data
+    let contextDataStr = "بيانات تقرير COT الحالية والتاريخية:\n\n";
+    summaryData.forEach(row => {
+        const assetName = row.Commodity;
+        contextDataStr += `${assetName}:\n`;
+        contextDataStr += `  الأسبوع الحالي: صافي المراكز: ${row['Net Positions']} (تغير: ${row['Net Change']}), شراء: ${row['Long Positions']} (تغير: ${row['Long Change']}), بيع: ${row['Short Positions']} (تغير: ${row['Short Change']})\n`;
+        
+        const historyRecord = historyData.find(h => h.Commodity === assetName);
+        if (historyRecord) {
+            contextDataStr += `  صافي المراكز في الأسابيع السابقة:\n`;
+            historyDates.forEach(date => {
+                if (historyRecord[date] !== undefined) {
+                    contextDataStr += `    - ${date}: ${historyRecord[date]}\n`;
+                }
+            });
+        }
+        contextDataStr += "\n";
+    });
+    
+    const today = new Date().toLocaleDateString('ar-EG', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
 
-      chatSessionRef.current = ai.chats.create({
-        model: 'gemini-2.5-flash',
-        config: {
-          systemInstruction: `أنت كبير الخبراء الاقتصاديين والمرشد التعليمي المتخصص حصرياً في "التحليل الأساسي" (Fundamental Analysis) وبيانات "تقرير التزام المتاجرين" (COT - Commitments of Traders) لدى EG-Finance Fx. 
+    return `أنت كبير الخبراء الاقتصاديين والمرشد التعليمي المتخصص حصرياً في "التحليل الأساسي" (Fundamental Analysis) وبيانات "تقرير التزام المتاجرين" (COT - Commitments of Traders) لدى EG-Finance Fx. 
 تاريخ اليوم هو: ${today}.
 
 أنت ملم تماماً بالتحليل الأساسي والأخبار الاقتصادية، وتجمع بين كونك محللاً استراتيجياً ومعلماً مالياً يشرح ويبسط للطلاب والمتداولين المبتدئين كل ما يتعلق بتقارير COT.
@@ -145,10 +137,7 @@ const ChatWidget: React.FC<ChatWidgetProps> = ({ themeMode, summaryData, history
 5. لغة الخطاب: تحدث باللغة العربية بأسلوب راقٍ واحترافي وتعليمي مشجع، سريع ومباشر.
 
 السياق المالي الحالي (البيانات):
-${contextDataStr}`
-        }
-      });
-    }
+${contextDataStr}`;
   };
 
   const handleSend = async (textToSend?: string) => {
@@ -159,34 +148,33 @@ ${contextDataStr}`
       setInput('');
     }
     
-    setMessages(prev => [...prev, { role: 'user', text: userMsg }]);
+    const nextMessages = [...messages, { role: 'user' as const, text: userMsg }];
+    setMessages(nextMessages);
     setIsLoading(true);
 
     try {
-      initChat();
-      const responseStream = await chatSessionRef.current.sendMessageStream({ message: userMsg });
-      
-      let fullText = '';
-      let isFirstChunk = true;
-
-      for await (const chunk of responseStream) {
-        if (isFirstChunk) {
-          setIsLoading(false);
-          isFirstChunk = false;
-          setMessages(prev => [...prev, { role: 'model', text: chunk.text || '' }]);
-          fullText = chunk.text || '';
-        } else {
-          fullText += chunk.text || '';
-          setMessages(prev => {
-            const updated = [...prev];
-            updated[updated.length - 1] = { role: 'model', text: fullText };
-            return updated;
-          });
-        }
+      const res = await fetch('/api/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          message: userMsg,
+          history: messages,
+          systemInstruction: getSystemInstruction(),
+          model: 'gemini-3.1-flash-lite'
+        })
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        throw new Error(data.error || 'Failed to generate response');
       }
-    } catch (error) {
+      setMessages([...nextMessages, { role: 'model', text: data.text || 'لم يتم استلام رد.' }]);
+    } catch (error: any) {
       console.error('Chat error:', error);
-      setMessages(prev => [...prev, { role: 'model', text: 'عذراً، حدث خطأ أثناء معالجة طلبك.' }]);
+      const isQuota = error.message?.includes('quota') || error.message?.includes('429') || error.message?.includes('RESOURCE_EXHAUSTED');
+      const errTxt = isQuota
+        ? 'عذراً، تم تجاوز حد استهلاك خدمة الذكاء الاصطناعي (Quota Exceeded) مؤقتاً. يرجى الانتظار دقيقة والمحاولة مجدداً.'
+        : ('عذراً، حدث خطأ أثناء معالجة طلبك: ' + (error.message || 'يرجى المحاولة لاحقاً'));
+      setMessages([...nextMessages, { role: 'model', text: errTxt }]);
     } finally {
       setIsLoading(false);
     }
@@ -334,7 +322,7 @@ ${contextDataStr}`
               style={{ minHeight: '48px', maxHeight: '120px' }}
             />
             <button
-              onClick={handleSend}
+              onClick={() => handleSend()}
               disabled={!input.trim() || isLoading}
               className={`absolute right-2 bottom-2 p-1.5 rounded-lg transition-colors disabled:opacity-50 ${
                 isLight 

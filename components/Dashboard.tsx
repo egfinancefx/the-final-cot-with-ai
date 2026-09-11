@@ -1,8 +1,13 @@
 
 import React, { useState, useMemo, useRef, useEffect } from 'react';
-import { XAxis, CartesianGrid, Tooltip, ResponsiveContainer, ReferenceLine, AreaChart, Area, YAxis, PieChart, Pie, LineChart, Line, Cell, ComposedChart } from 'recharts';
+import { YAxis, PieChart, Pie, LineChart, Cell } from 'recharts';
+import { AreaChart, Area } from './charts/area-chart';
+import { ComposedChart } from './charts/composed-chart';
+import { Line } from './charts/line';
+import { ReferenceArea } from './charts/reference-area';
+import { XAxis } from './charts/x-axis';
+import { ChartTooltip } from './charts/tooltip';
 import { motion, AnimatePresence } from 'framer-motion';
-import { GoogleGenAI } from "@google/genai";
 import { SummaryRow, HistoryRow, ThemeMode } from '../types';
 import KPICard from './KPICard';
 import AssetTrendCard from './AssetTrendCard';
@@ -11,7 +16,7 @@ import CompareModal from './CompareModal';
 import HeatmapModal from './HeatmapModal';
 import EducationalGuideModal from './EducationalGuideModal';
 import TradingViewWidget from './TradingViewWidget';
-import { formatCurrency } from '../utils';
+import { formatCurrency, generateLocalFallbackAnalysis } from '../utils';
 import { TV_SYMBOL_MAP, ASSET_GROUPS } from '../constants';
 import { LayoutDashboard, TrendingUp, TrendingDown, Activity, ChevronDown, ArrowUpRight, ArrowDownRight, Scale, Minus, Check, Sparkles, Search, ArrowUp, ArrowDown, ArrowUpDown, BarChart2, ArrowLeft, Info, AlertTriangle, Edit3, Map as MapIcon, Star, GraduationCap } from 'lucide-react';
 
@@ -384,8 +389,21 @@ const Dashboard: React.FC<DashboardProps> = ({ summaryData, historyData, history
     setIsAnalyzing(true);
     setAiAnalysis(null);
 
+    let liveQuote: any = null;
+
     try {
-        const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+        // 1. Fetch live spot market price to anchor realistic technical key levels
+        if (selectedItem?.Commodity) {
+            try {
+                const qRes = await fetch(`/api/market-price?commodity=${encodeURIComponent(selectedItem.Commodity)}`);
+                if (qRes.ok) {
+                    liveQuote = await qRes.json();
+                }
+            } catch (err) {
+                console.warn("Could not fetch live market price for prompt anchoring:", err);
+            }
+        }
+
         let prompt = "";
         
         const today = new Date().toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
@@ -400,6 +418,29 @@ const Dashboard: React.FC<DashboardProps> = ({ summaryData, historyData, history
         `;
 
         if (selectedItem) {
+            const quoteContext = liveQuote && liveQuote.price ? `
+            REAL-TIME LIVE SPOT MARKET DATA (MANDATORY TECHNICAL ANCHOR):
+            - Current Spot Price: $${liveQuote.price} ${liveQuote.currency || "USD"}
+            - Day Range: Low $${liveQuote.low} - High $${liveQuote.high}
+            - Previous Close: $${liveQuote.prevClose}
+            - Intraday Momentum: ${liveQuote.changePercent > 0 ? '+' : ''}${liveQuote.changePercent}%
+
+            CRITICAL DIRECTIVES FOR REALISTIC KEY PRICE LEVELS:
+            - The actual live market price is strictly $${liveQuote.price}. ALL key price levels MUST be realistic, specific NUMERICAL prices centered directly around $${liveQuote.price}.
+            - DO NOT output generic descriptions without concrete prices. State the exact numerical price first, followed by institutional technical context (e.g. Order Block, Liquidity Pool, VWAP).
+            - "current_price": "$${liveQuote.price}"
+            - "resistance": Realistic near-term ceiling price ABOVE $${liveQuote.price} (R1 - e.g. Buy-side Liquidity Pool / Previous Session High)
+            - "resistance_2": Higher structural resistance price (R2 - e.g. Major Supply Zone / Weekly High)
+            - "pivot_point": Equilibrium balance price near $${liveQuote.price} (PP - e.g. Weekly Volume-Weighted Pivot)
+            - "support": Realistic near-term floor price BELOW $${liveQuote.price} (S1 - e.g. Bullish Order Block / Previous Session Low)
+            - "support_2": Deeper discount demand price (S2 - e.g. Macro Institutional Demand / Liquidity Void)
+            - "invalidation_level": The exact price where a daily close invalidates the institutional COT thesis.
+            ` : `
+            CRITICAL DIRECTIVES FOR REALISTIC KEY PRICE LEVELS:
+            - You MUST provide realistic, concrete numerical price levels (not generic descriptions) reflecting current real-world market prices for ${selectedItem.Commodity}.
+            - Always state the exact numerical price first (e.g., "$2,915.50 - Institutional Order Block"), followed by the technical reasoning.
+            `;
+
             prompt = `Act as a friendly, expert trading mentor. Speak directly to me (the user) in a supportive, conversational tone.
             Analyze this COT report data for ${selectedItem.Commodity}:
             ${dateContext}
@@ -410,6 +451,8 @@ const Dashboard: React.FC<DashboardProps> = ({ summaryData, historyData, history
             - Short Positions: ${selectedItem["Short Positions"]} (Change: ${selectedItem["Short Change"]})
             Historical Net Positions (Past 6 Weeks, newest to oldest): 
             ${JSON.stringify(selectedHistory.map(h => h.value).reverse())}
+
+            ${quoteContext}
             
             ${searchInstruction}
             
@@ -422,9 +465,13 @@ const Dashboard: React.FC<DashboardProps> = ({ summaryData, historyData, history
               "perspective": "Your friendly explanation of the market situation. What is smart money doing?",
               "actionable_advice": "Specific 'If I Were You' advice. Tell me exactly what you would do.",
               "key_levels": {
-                "support": "Key support levels to watch",
-                "resistance": "Key resistance levels to watch",
-                "pivot_point": "Critical pivot level for the week"
+                "current_price": "$${liveQuote ? liveQuote.price : 'Current spot price'}",
+                "resistance": "Exact numerical price (e.g. $4,485.50) - Tactical R1 resistance / Liquidity sweep",
+                "resistance_2": "Exact higher numerical price (e.g. $4,510.00) - Major R2 supply zone",
+                "pivot_point": "Exact numerical price (e.g. $4,455.00) - Weekly equilibrium PP",
+                "support": "Exact numerical price (e.g. $4,432.00) - Tactical S1 support / Bullish Order Block",
+                "support_2": "Exact lower numerical price (e.g. $4,410.00) - S2 discount demand pool",
+                "invalidation_level": "Exact numerical price (e.g. $4,395.00) - Structural thesis invalidation"
               },
               "institutional_bias": "Brief analysis of institutional positioning changes (Accumulation/Distribution).",
               "global_context": {
@@ -501,21 +548,34 @@ const Dashboard: React.FC<DashboardProps> = ({ summaryData, historyData, history
             `;
         }
 
-        const response = await ai.models.generateContent({
-            model: 'gemini-3.1-flash-lite',
-            contents: prompt,
-            config: {
-                tools: [{ googleSearch: {} }],
+        const apiRes = await fetch('/api/gemini', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                model: 'gemini-3.1-flash-lite',
+                prompt,
                 responseMimeType: "application/json",
                 systemInstruction: "You are a friendly, experienced trading mentor. You explain things simply and clearly. You are not a robot; you are a helpful guide. Always ground your advice in the data and news provided. Be decisive but responsible. Return ONLY valid JSON."
-            }
+            })
         });
 
-        setAiAnalysis(response.text || "No analysis generated.");
+        const resData = await apiRes.json();
+        if (!apiRes.ok || !resData.text) {
+            throw new Error(resData.error || "Failed to generate analysis");
+        }
 
-    } catch (error) {
-        console.error("AI Generation Error:", error);
-        setAiAnalysis("Failed to generate analysis. Please ensure the API Key is configured correctly or try again later.");
+        setAiAnalysis(resData.text);
+
+    } catch (error: any) {
+        console.warn("AI Generation encountered an issue, generating automated COT quantitative analysis:", error?.message || error);
+        // Fallback to intelligent quantitative analysis so user always receives structured data without JSON parse errors
+        const fallbackText = generateLocalFallbackAnalysis(
+            selectedItem ? selectedItem.Commodity : "Market Overview",
+            selectedItem,
+            selectedHistory,
+            liveQuote
+        );
+        setAiAnalysis(fallbackText);
     } finally {
         setIsAnalyzing(false);
     }
@@ -923,107 +983,58 @@ const Dashboard: React.FC<DashboardProps> = ({ summaryData, historyData, history
                                      transition={{ duration: 0.5, ease: "easeOut" }}
                                      className="w-full h-full"
                                  >
-                                     <ResponsiveContainer width="100%" height="100%">
-                                         <ComposedChart key={`main-chart-${selectedCommodity}`} data={mainChartData} margin={{ top: 20, right: 10, left: 0, bottom: 0 }}>
-                                             <defs>
-                                                 <linearGradient id="colorValue" x1="0" y1="0" x2="0" y2="1">
-                                                     <stop offset="5%" stopColor={trendColor} stopOpacity={0.4}/>
-                                                     <stop offset="95%" stopColor={trendColor} stopOpacity={0}/>
-                                                 </linearGradient>
-                                             </defs>
-                                         <CartesianGrid strokeDasharray="3 3" stroke={themeStyles.chartGrid} vertical={false} opacity={0.5} />
-                                         <XAxis 
-                                           dataKey="date" 
-                                           stroke={themeStyles.chartAxis} 
-                                           tick={{fontSize: 11, fill: themeStyles.chartAxis, fontWeight: 600}} 
-                                           axisLine={{stroke: themeStyles.chartGrid}}
-                                           tickLine={false}
-                                           dy={10}
+                                     <ComposedChart
+                                       data={mainChartData}
+                                       xDataKey="date"
+                                       animationDuration={1100}
+                                       animationEasing="cubic-bezier(0.85, 0, 0.15, 1)"
+                                     >
+                                     
+                                       <ReferenceArea
+                                         y1={chartStats.avg * 0.9}
+                                         y2={chartStats.avg * 1.1}
+                                         fill="color-mix(in oklch, var(--chart-foreground-muted) 15%, transparent)"
+                                         fillOpacity={1}
+                                         pattern="none"
+                                         patternColor="var(--chart-foreground-muted)"
+                                         stroke="var(--chart-foreground-muted)"
+                                         strokeStyle="dashed"
+                                         strokeDasharray="4,4"
+                                         fadeEdges={true}
+                                         fadeEdgesLength={10}
+                                         axisLabelColor={themeStyles.chartAxis}
+                                         showMarkers={true}
+                                         markerColor={themeStyles.chartAxis}
+                                       />
+                                     
+                                       <Area
+                                         dataKey="value"
+                                         
+                                         fillOpacity={0.3}
+                                         strokeWidth={3}
+                                         fill={trendColor}
+                                         stroke={trendColor}
+                                         fadeEdges
+                                         gradientToOpacity={0}
+                                         showLine
+                                         showHighlight
+                                       />
+                                     
+                                       {mainCompareAssets.map((asset, idx) => (
+                                         <Line
+                                           key={asset}
+                                           dataKey={`compare_${idx}`}
+                                           
+                                           strokeWidth={2}
+                                           stroke={COMPARE_COLORS[idx]}
+                                           fadeEdges
+                                           showHighlight
                                          />
-                                         <YAxis 
-                                             yAxisId="left"
-                                             stroke={themeStyles.chartAxis} 
-                                             tickFormatter={(val) => `${(val / 1000).toFixed(0)}k`} 
-                                             tick={{fontSize: 11, fill: themeStyles.chartAxis, fontWeight: 600}}
-                                             axisLine={false}
-                                             tickLine={false}
-                                             dx={-5}
-                                         />
-                                         {mainCompareAssets.length > 0 && (
-                                           <YAxis 
-                                               yAxisId="right"
-                                               orientation="right"
-                                               stroke={COMPARE_COLORS[0]} 
-                                               tickFormatter={(val) => `${(val / 1000).toFixed(0)}k`} 
-                                               tick={{fontSize: 11, fill: COMPARE_COLORS[0], fontWeight: 600}}
-                                               axisLine={false}
-                                               tickLine={false}
-                                               dx={5}
-                                           />
-                                         )}
-                                         <Tooltip 
-                                           content={({ active, payload, label }) => {
-                                                if (active && payload && payload.length) {
-                                                    const data = payload[0].payload;
-                                                    return (
-                                                        <div className={`backdrop-blur-xl border rounded-xl p-4 shadow-2xl min-w-[180px] ${themeMode === 'light' ? 'bg-white/95 border-slate-200' : 'bg-slate-900/95 border-blue-500/30'}`}>
-                                                            <div className={`text-xs font-bold uppercase tracking-widest mb-2 border-b pb-2 ${themeMode === 'light' ? 'text-slate-500 border-slate-100' : 'text-slate-400 border-white/10'}`}>
-                                                                {data.fullDate}
-                                                            </div>
-                                                            <div className="flex flex-col gap-2 mt-2">
-                                                                <div className="flex items-center justify-between gap-4">
-                                                                    <span className={`text-sm font-medium ${themeMode === 'light' ? 'text-slate-700' : 'text-slate-300'}`}>{selectedCommodity}</span>
-                                                                    <span className={`text-sm font-mono font-bold ${data.value > 0 ? (themeMode === 'light' ? 'text-blue-600' : 'text-blue-400') : (themeMode === 'light' ? 'text-slate-600' : 'text-slate-200')}`}>
-                                                                        {formatCurrency(data.value)}
-                                                                    </span>
-                                                                </div>
-                                                                {mainCompareAssets.map((asset, idx) => (
-                                                                  <div key={asset} className="flex items-center justify-between gap-4">
-                                                                      <span className={`text-sm font-medium ${themeMode === 'light' ? 'text-slate-700' : 'text-slate-300'}`}>{asset}</span>
-                                                                      <span className={`text-sm font-mono font-bold`} style={{ color: COMPARE_COLORS[idx] }}>
-                                                                          {formatCurrency(data[`compare_${idx}`])}
-                                                                      </span>
-                                                                  </div>
-                                                                ))}
-                                                            </div>
-                                                        </div>
-                                                    );
-                                                }
-                                                return null;
-                                           }}
-                                         />
-                                         <ReferenceLine y={0} yAxisId="left" stroke={themeStyles.chartAxis} strokeDasharray="3 3" opacity={0.3} strokeWidth={1} />
-                                         <ReferenceLine y={chartStats.avg} yAxisId="left" stroke={trendColor} strokeDasharray="5 5" opacity={0.2} label={{ value: 'AVG', fill: trendColor, fontSize: 10, opacity: 0.5, position: 'insideRight' }} />
-                                         <Area 
-                                           key={`area-${selectedCommodity}`}
-                                           yAxisId="left"
-                                           type="monotone" 
-                                           dataKey="value" 
-                                           stroke={trendColor} 
-                                           strokeWidth={3}
-                                           fillOpacity={1} 
-                                           fill="url(#colorValue)"
-                                           activeDot={{ r: 6, fill: themeMode === 'light' ? '#fff' : '#0f172a', stroke: trendColor, strokeOpacity: 1, strokeWidth: 3 }}
-                                           dot={renderCustomDot}
-                                           isAnimationActive={true}
-                                           animationDuration={1000}
-                                         />
-                                         {mainCompareAssets.map((asset, idx) => (
-                                           <Line
-                                             key={`line-${asset}-${selectedCommodity}`}
-                                             yAxisId={mainCompareAssets.length > 0 ? "right" : "left"}
-                                             type="monotone"
-                                             dataKey={`compare_${idx}`}
-                                             stroke={COMPARE_COLORS[idx]}
-                                             strokeWidth={3}
-                                             dot={false}
-                                             activeDot={{ r: 6, fill: themeMode === 'light' ? '#fff' : '#0f172a', stroke: COMPARE_COLORS[idx], strokeWidth: 3 }}
-                                             isAnimationActive={true}
-                                             animationDuration={1000}
-                                           />
-                                         ))}
+                                       ))}
+                                     
+                                       <XAxis />
+                                       <ChartTooltip />
                                      </ComposedChart>
-                                 </ResponsiveContainer>
                                  </motion.div>
                              ) : (
                                 <div className="w-full h-full flex items-center justify-center text-slate-500">
@@ -1038,29 +1049,41 @@ const Dashboard: React.FC<DashboardProps> = ({ summaryData, historyData, history
             </div>
           </div>
       ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 shrink-0 animate-fade-in">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 shrink-0">
             {/* Determine what to show: User favorites if they exist (up to 4), otherwise fallback to FEATURED_ASSETS */}
             {(() => {
                 const assetsToShow = favorites.length > 0 
                     ? favorites.slice(0, 4) 
                     : FEATURED_ASSETS;
                 
-                return assetsToShow.map(assetName => {
+                return assetsToShow.map((assetName, index) => {
                     const summary = filteredSummaryData.find(s => s.Commodity === assetName);
                     const history = historyData.find(h => h.Commodity === assetName);
                     if (!summary) return null;
                     return (
-                        <AssetTrendCard
+                        <motion.div
                             key={assetName}
-                            title={assetName}
-                            commodity={assetName}
-                            summaryRow={summary}
-                            historyRow={history}
-                            dates={historyDates}
-                            onClick={() => setSelectedCommodity(assetName)}
-                            isSelected={false}
-                            themeMode={themeMode}
-                        />
+                            initial={{ opacity: 0, y: 32, x: (index - 1.5) * 16 }}
+                            animate={{ opacity: 1, y: 0, x: 0 }}
+                            transition={{ 
+                              duration: 0.7, 
+                              delay: index * 0.12, 
+                              ease: [0.22, 1, 0.36, 1] 
+                            }}
+                            className="h-full"
+                        >
+                            <AssetTrendCard
+                                index={index}
+                                title={assetName}
+                                commodity={assetName}
+                                summaryRow={summary}
+                                historyRow={history}
+                                dates={historyDates}
+                                onClick={() => setSelectedCommodity(assetName)}
+                                isSelected={false}
+                                themeMode={themeMode}
+                            />
+                        </motion.div>
                     );
                 });
             })()}

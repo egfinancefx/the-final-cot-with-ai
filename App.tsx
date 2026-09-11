@@ -12,7 +12,13 @@ import { BarChart3, RefreshCw, AlertCircle, Loader2, Sun, LogOut } from 'lucide-
 import { SummaryRow, HistoryRow, ThemeMode } from './types';
 
 const App: React.FC = () => {
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [isAuthenticated, setIsAuthenticated] = useState(() => {
+    try {
+      return localStorage.getItem('eg_auth') === 'true';
+    } catch (e) {
+      return false;
+    }
+  });
   const [summaryData, setSummaryData] = useState<SummaryRow[]>([]);
   const [historyData, setHistoryData] = useState<HistoryRow[]>([]);
   const [historyDates, setHistoryDates] = useState<string[]>([]);
@@ -27,7 +33,17 @@ const App: React.FC = () => {
   // Theme State
   const [themeMode, setThemeMode] = useState<ThemeMode>('ocean');
 
+  const handleLogin = useCallback(() => {
+    try {
+      localStorage.setItem('eg_auth', 'true');
+    } catch (e) {}
+    setIsAuthenticated(true);
+  }, []);
+
   const handleLogout = useCallback(() => {
+    try {
+      localStorage.removeItem('eg_auth');
+    } catch (e) {}
     setIsAuthenticated(false);
   }, []);
 
@@ -100,7 +116,7 @@ const App: React.FC = () => {
   };
 
   if (!isAuthenticated) {
-    return <LoginGate onLogin={() => setIsAuthenticated(true)} />;
+    return <LoginGate onLogin={handleLogin} />;
   }
 
   return (

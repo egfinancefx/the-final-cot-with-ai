@@ -1,3 +1,4 @@
+import { motion, AnimatePresence } from "motion/react";
 import React, { useState, useMemo } from 'react';
 import { SummaryRow, HistoryRow, ThemeMode } from '../types';
 import { 
@@ -9,6 +10,11 @@ import {
   BarChart, Bar, LineChart, Line, XAxis, YAxis, CartesianGrid, 
   Tooltip, ResponsiveContainer, Legend, ReferenceLine 
 } from 'recharts';
+import { RadarChart } from './charts/radar-chart';
+import { RadarGrid } from './charts/radar-grid';
+import { RadarAxis } from './charts/radar-axis';
+import { RadarLabels } from './charts/radar-labels';
+import { RadarArea } from './charts/radar-area';
 import TradingViewWidget from './TradingViewWidget';
 import { TV_SYMBOL_MAP } from '../constants';
 
@@ -112,7 +118,7 @@ const CompareView: React.FC<CompareViewProps> = ({
   themeMode,
   onBack,
 }) => {
-  const [chartView, setChartView] = useState<'normalized' | 'historical' | 'delta'>('normalized');
+  const [chartView, setChartView] = useState<'normalized' | 'historical' | 'delta' | 'radar'>('radar');
   const isLight = themeMode === 'light';
 
   // Base Theme styling
@@ -206,6 +212,44 @@ const CompareView: React.FC<CompareViewProps> = ({
   }, [assets, summaryData, historyData, historyDates]);
 
   // Historical Charts Data
+  
+  const radarMetrics = useMemo(() => [
+    { key: "long", label: "قوة الشراء" },
+    { key: "short", label: "قوة البيع" },
+    { key: "net", label: "كثافة التمركز" },
+    { key: "momentum", label: "زخم التغير" },
+    { key: "control", label: "السيطرة" }
+  ], []);
+
+  const radarData = useMemo(() => {
+    let maxLong = 1;
+    let maxShort = 1;
+    let maxNet = 1;
+    let maxMomentum = 1;
+
+    processedAssets.forEach(p => {
+      maxLong = Math.max(maxLong, Math.abs(p.longPos));
+      maxShort = Math.max(maxShort, Math.abs(p.shortPos));
+      maxNet = Math.max(maxNet, Math.abs(p.netPos));
+      maxMomentum = Math.max(maxMomentum, Math.abs(p.netChange));
+    });
+
+    return processedAssets.map(p => {
+      const controlScore = p.totalPositions > 0 ? (p.longPos / p.totalPositions) * 100 : 50;
+      return {
+        label: p.asset,
+        color: p.color,
+        values: {
+          long: (Math.abs(p.longPos) / maxLong) * 100,
+          short: (Math.abs(p.shortPos) / maxShort) * 100,
+          net: (Math.abs(p.netPos) / maxNet) * 100,
+          momentum: (Math.abs(p.netChange) / maxMomentum) * 100,
+          control: controlScore
+        }
+      };
+    });
+  }, [processedAssets]);
+
   const { historicalBarsData, normalizedTrajectoryData, flowDeltaData } = useMemo(() => {
     // 1. Normalized Trajectory (% Net of Total over history dates)
     const normData = historyDates.map((date) => {
@@ -387,6 +431,7 @@ const CompareView: React.FC<CompareViewProps> = ({
       </div>
 
       <div className="p-4 sm:p-6 space-y-8 max-w-[1600px] mx-auto w-full">
+        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8, delay: 0.1, ease: [0.16, 1, 0.3, 1] }}>
         {/* TradingView Charts Grid (Preserved exactly as requested) */}
         <div className="space-y-3">
           <div className="flex items-center justify-between">
@@ -437,6 +482,391 @@ const CompareView: React.FC<CompareViewProps> = ({
           </div>
         </div>
 
+        </motion.div>
+        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8, delay: 0.2, ease: [0.16, 1, 0.3, 1] }}>
+        {/* 3. Advanced Comparison Charts Section */}
+        <div className={`rounded-3xl border p-5 sm:p-7 shadow-xl ${themeStyles.panelBg}`}>
+          {/* Chart Header with Mode Toggle */}
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6 border-b pb-4 border-blue-500/15">
+            <div>
+              <h3 className={`text-base sm:text-lg font-black flex items-center gap-2 ${themeStyles.textMain}`}>
+                <BarChart3 className="w-5 h-5 text-blue-500" />
+                استوديو الرسوم البيانية المقارنة المتقدمة (Comparative Analytical Studio)
+              </h3>
+              <p className={`text-xs mt-0.5 ${themeStyles.textSub}`}>
+                تتبع مسارات القوة النسبية، تطور صافي العقود، وتشريح تدفقات الدخول والخروج الأسبوعية
+              </p>
+            </div>
+
+            {/* View Selector Tabs */}
+            <div className={`flex items-center p-1 rounded-2xl border ${isLight ? 'bg-slate-100 border-slate-200' : 'bg-slate-900 border-blue-500/30'}`}>
+              <button
+                onClick={() => setChartView('radar')}
+                className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all ${
+                  chartView === 'radar'
+                    ? isLight
+                      ? 'bg-white text-blue-700 shadow-sm font-black'
+                      : 'bg-blue-600 text-white shadow-sm font-black'
+                    : isLight
+                    ? 'text-slate-600 hover:text-slate-900'
+                    : 'text-blue-200/70 hover:text-white'
+                }`}
+              >
+                الرادار الهيكلي
+              </button>
+              <button
+                onClick={() => setChartView('normalized')}
+                className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all ${
+                  chartView === 'normalized'
+                    ? isLight
+                      ? 'bg-white text-blue-700 shadow-sm font-black'
+                      : 'bg-blue-600 text-white shadow-sm font-black'
+                    : isLight
+                    ? 'text-slate-600 hover:text-slate-900'
+                    : 'text-blue-200/70 hover:text-white'
+                }`}
+              >
+                مؤشر القوة المعياري (-100% إلى +100%)
+              </button>
+              <button
+                onClick={() => setChartView('historical')}
+                className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all ${
+                  chartView === 'historical'
+                    ? isLight
+                      ? 'bg-white text-blue-700 shadow-sm font-black'
+                      : 'bg-blue-600 text-white shadow-sm font-black'
+                    : isLight
+                    ? 'text-slate-600 hover:text-slate-900'
+                    : 'text-blue-200/70 hover:text-white'
+                }`}
+              >
+                صافي العقود التاريخية
+              </button>
+              <button
+                onClick={() => setChartView('delta')}
+                className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all ${
+                  chartView === 'delta'
+                    ? isLight
+                      ? 'bg-white text-blue-700 shadow-sm font-black'
+                      : 'bg-blue-600 text-white shadow-sm font-black'
+                    : isLight
+                    ? 'text-slate-600 hover:text-slate-900'
+                    : 'text-blue-200/70 hover:text-white'
+                }`}
+              >
+                تشريح تدفقات الدخول/الخروج
+              </button>
+            </div>
+          </div>
+
+          {/* Chart Content Body */}
+          <div className="h-[380px] w-full">
+            <AnimatePresence mode="wait">
+            {chartView === 'normalized' && (
+              <motion.div
+                key="normalized"
+                initial={{ opacity: 0, y: 15 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -15 }}
+                transition={{ duration: 0.3, ease: "easeOut" }}
+                className="w-full h-full flex flex-col"
+              >
+                <div className={`text-xs mb-2 flex items-center justify-between ${themeStyles.textSub}`}>
+                  <span>
+                    يقيس نسبة صافي التمركز إلى إجمالي العقود عبر الأسابيع الأخيرة. إشارة الصفر (0%) تفصل بين السيطرة الشرائية والبيعية.
+                  </span>
+                  <span className="font-mono text-[11px] font-bold text-blue-500">مقياس موحّد عادل</span>
+                </div>
+                <div className="flex-1 w-full">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <LineChart data={normalizedTrajectoryData} margin={{ top: 10, right: 20, left: 10, bottom: 5 }}>
+                      <CartesianGrid
+                        strokeDasharray="3 3"
+                        stroke={isLight ? '#e2e8f0' : '#1e293b'}
+                        vertical={false}
+                      />
+                      <XAxis
+                        dataKey="date"
+                        stroke={isLight ? '#94a3b8' : '#64748b'}
+                        fontSize={11}
+                        tickLine={false}
+                        axisLine={false}
+                      />
+                      <YAxis
+                        stroke={isLight ? '#94a3b8' : '#64748b'}
+                        fontSize={11}
+                        tickLine={false}
+                        axisLine={false}
+                        tickFormatter={(v) => `${v}%`}
+                        domain={[-100, 100]}
+                      />
+                      <ReferenceLine y={0} stroke={isLight ? '#64748b' : '#94a3b8'} strokeDasharray="3 3" />
+                      <Tooltip
+                        content={({ active, payload, label }) => {
+                          if (active && payload && payload.length) {
+                            return (
+                              <div
+                                className={`px-4 py-3 rounded-2xl shadow-2xl border ${
+                                  isLight ? 'bg-white border-slate-200 text-slate-900' : 'bg-slate-900 border-blue-500/30 text-white'
+                                }`}
+                              >
+                                <div className="text-xs font-bold mb-2 text-center text-blue-400">{label}</div>
+                                <div className="space-y-1.5">
+                                  {payload.map((entry: any, i: number) => {
+                                    const assetIdx = parseInt(entry.dataKey.replace('norm_', ''));
+                                    const assetObj = processedAssets[assetIdx];
+                                    if (!assetObj) return null;
+                                    return (
+                                      <div key={i} className="flex items-center justify-between gap-4 text-xs">
+                                        <div className="flex items-center gap-1.5">
+                                          <div className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: entry.color }} />
+                                          <span className="font-bold">{assetObj.asset}:</span>
+                                        </div>
+                                        <span className="font-mono font-black">{entry.value}%</span>
+                                      </div>
+                                    );
+                                  })}
+                                </div>
+                              </div>
+                            );
+                          }
+                          return null;
+                        }}
+                      />
+                      <Legend
+                        formatter={(val) => {
+                          const idx = parseInt(val.replace('norm_', ''));
+                          return processedAssets[idx] ? processedAssets[idx].asset : val;
+                        }}
+                        iconType="circle"
+                      />
+                      {processedAssets.map((item) => (
+                        <Line
+                          key={item.asset}
+                          type="monotone"
+                          dataKey={`norm_${item.index}`}
+                          stroke={item.color}
+                          strokeWidth={3}
+                          dot={{ r: 5, fill: item.color }}
+                          activeDot={{ r: 7 }}
+                          name={`norm_${item.index}`}
+                          isAnimationActive={true}
+                          animationBegin={300}
+                          animationDuration={1200}
+                          animationEasing="ease-out"
+                        />
+                      ))}
+                    </LineChart>
+                  </ResponsiveContainer>
+                </div>
+              </motion.div>
+            )}
+
+            {chartView === 'historical' && (
+              <motion.div
+                key="historical"
+                initial={{ opacity: 0, y: 15 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -15 }}
+                transition={{ duration: 0.3, ease: "easeOut" }}
+                className="w-full h-full flex flex-col"
+              >
+                <div className={`text-xs mb-2 ${themeStyles.textSub}`}>
+                  حجم صافي العقود الفعلي لكل أصل على مدار الأسابيع الستة الأخيرة.
+                </div>
+                <div className="flex-1 w-full">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <BarChart data={historicalBarsData} margin={{ top: 10, right: 10, left: 10, bottom: 5 }} barGap={4}>
+                      <CartesianGrid
+                        strokeDasharray="3 3"
+                        stroke={isLight ? '#e2e8f0' : '#1e293b'}
+                        vertical={false}
+                      />
+                      <XAxis
+                        dataKey="date"
+                        stroke={isLight ? '#94a3b8' : '#64748b'}
+                        fontSize={11}
+                        tickLine={false}
+                        axisLine={false}
+                      />
+                      <YAxis
+                        stroke={isLight ? '#94a3b8' : '#64748b'}
+                        fontSize={11}
+                        tickLine={false}
+                        axisLine={false}
+                        tickFormatter={(v) => (v >= 1000 || v <= -1000 ? `${(v / 1000).toFixed(0)}k` : v)}
+                      />
+                      <ReferenceLine y={0} stroke={isLight ? '#94a3b8' : '#475569'} />
+                      <Tooltip
+                        content={({ active, payload, label }) => {
+                          if (active && payload && payload.length) {
+                            return (
+                              <div
+                                className={`px-4 py-3 rounded-2xl shadow-2xl border ${
+                                  isLight ? 'bg-white border-slate-200 text-slate-900' : 'bg-slate-900 border-blue-500/30 text-white'
+                                }`}
+                              >
+                                <div className="text-xs font-bold mb-2 text-center text-blue-400">{label}</div>
+                                <div className="space-y-1.5">
+                                  {payload.map((entry: any, i: number) => {
+                                    const assetIdx = parseInt(entry.dataKey.replace('asset_', ''));
+                                    const assetObj = processedAssets[assetIdx];
+                                    if (!assetObj) return null;
+                                    return (
+                                      <div key={i} className="flex items-center justify-between gap-4 text-xs">
+                                        <div className="flex items-center gap-1.5">
+                                          <div className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: entry.color }} />
+                                          <span className="font-bold">{assetObj.asset}:</span>
+                                        </div>
+                                        <span className="font-mono font-black">{formatCurrency(entry.value)} عقد</span>
+                                      </div>
+                                    );
+                                  })}
+                                </div>
+                              </div>
+                            );
+                          }
+                          return null;
+                        }}
+                      />
+                      <Legend
+                        formatter={(val) => {
+                          const idx = parseInt(val.replace('asset_', ''));
+                          return processedAssets[idx] ? processedAssets[idx].asset : val;
+                        }}
+                        iconType="circle"
+                      />
+                      {processedAssets.map((item) => (
+                        <Bar
+                          key={item.asset}
+                          dataKey={`asset_${item.index}`}
+                          fill={item.color}
+                          radius={[4, 4, 0, 0]}
+                          isAnimationActive={true}
+                          animationBegin={300}
+                          animationDuration={1200}
+                          animationEasing="ease-out"
+                        />
+                      ))}
+                    </BarChart>
+                  </ResponsiveContainer>
+                </div>
+              </motion.div>
+            )}
+
+            {chartView === 'radar' && (
+              <motion.div
+                key="radar"
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.95 }}
+                transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
+                className="w-full h-full flex flex-col items-center justify-center relative"
+              >
+                <div className={`absolute top-0 right-0 left-0 text-xs text-center ${isLight ? 'text-slate-500' : 'text-slate-400'}`}>
+                  خريطة رادارية متقدمة لتفكيك مكامن القوة المؤسسية بين الأصول
+                </div>
+                <div className="flex-1 w-full flex items-center justify-center pt-6">
+                  <RadarChart data={radarData} metrics={radarMetrics} size={340} margin={60}>
+                    <RadarGrid showLabels={false} />
+                    <RadarAxis />
+                    <RadarLabels fontSize={12} offset={24} />
+                    {radarData.map((item, index) => (
+                      <RadarArea key={item.label} index={index} showPoints={true} showGlow={true} />
+                    ))}
+                  </RadarChart>
+                </div>
+              </motion.div>
+            )}
+            {chartView === 'delta' && (
+              <motion.div
+                key="delta"
+                initial={{ opacity: 0, y: 15 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -15 }}
+                transition={{ duration: 0.3, ease: "easeOut" }}
+                className="w-full h-full flex flex-col"
+              >
+                <div className={`text-xs mb-2 ${themeStyles.textSub}`}>
+                  مقارنة التغير الأسبوعي في عقود الشراء (Long Delta) مقابل عقود البيع (Short Delta) لكشف طبيعة تحركات الحيتان.
+                </div>
+                <div className="flex-1 w-full">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <BarChart data={flowDeltaData} margin={{ top: 10, right: 10, left: 10, bottom: 5 }} barGap={6}>
+                      <CartesianGrid
+                        strokeDasharray="3 3"
+                        stroke={isLight ? '#e2e8f0' : '#1e293b'}
+                        vertical={false}
+                      />
+                      <XAxis
+                        dataKey="name"
+                        stroke={isLight ? '#94a3b8' : '#64748b'}
+                        fontSize={11}
+                        tickLine={false}
+                        axisLine={false}
+                      />
+                      <YAxis
+                        stroke={isLight ? '#94a3b8' : '#64748b'}
+                        fontSize={11}
+                        tickLine={false}
+                        axisLine={false}
+                        tickFormatter={(v) => (v >= 1000 || v <= -1000 ? `${(v / 1000).toFixed(0)}k` : v)}
+                      />
+                      <ReferenceLine y={0} stroke={isLight ? '#94a3b8' : '#475569'} />
+                      <Tooltip
+                        content={({ active, payload, label }) => {
+                          if (active && payload && payload.length) {
+                            return (
+                              <div
+                                className={`px-4 py-3 rounded-2xl shadow-2xl border ${
+                                  isLight ? 'bg-white border-slate-200 text-slate-900' : 'bg-slate-900 border-blue-500/30 text-white'
+                                }`}
+                              >
+                                <div className="text-xs font-bold mb-2 text-center text-blue-400">{label}</div>
+                                <div className="space-y-1.5">
+                                  {payload.map((entry: any, i: number) => (
+                                    <div key={i} className="flex items-center justify-between gap-4 text-xs">
+                                      <div className="flex items-center gap-1.5">
+                                        <div className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: entry.color }} />
+                                        <span>{entry.name}:</span>
+                                      </div>
+                                      <span className="font-mono font-black">{formatCurrency(entry.value)}</span>
+                                    </div>
+                                  ))}
+                                </div>
+                              </div>
+                            );
+                          }
+                          return null;
+                        }}
+                      />
+                      <Legend iconType="circle" />
+                      <Bar dataKey="longChange" name="تغير الشراء (Long Δ)" fill="#3b82f6" radius={[4, 4, 0, 0]}
+                        isAnimationActive={true}
+                        animationBegin={300}
+                        animationDuration={1200}
+                        animationEasing="ease-out" />
+                      <Bar 
+                        dataKey="shortChange" 
+                        name="تغير البيع (Short Δ)" 
+                        fill={isLight ? '#64748b' : '#f8fafc'} 
+                        radius={[4, 4, 0, 0]}
+                        isAnimationActive={true}
+                        animationBegin={300}
+                        animationDuration={1200}
+                        animationEasing="ease-out" 
+                      />
+                    </BarChart>
+                  </ResponsiveContainer>
+                </div>
+              </motion.div>
+            )}
+            </AnimatePresence>
+          </div>
+        </div>
+
+        </motion.div>
+        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8, delay: 0.3, ease: [0.16, 1, 0.3, 1] }}>
         {/* 1. The Core Institutional Verdict & Actionable Trade Synthesis Panel */}
         {synthesis && (
           <div
@@ -555,6 +985,8 @@ const CompareView: React.FC<CompareViewProps> = ({
           </div>
         )}
 
+        </motion.div>
+        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8, delay: 0.4, ease: [0.16, 1, 0.3, 1] }}>
         {/* 2. Side-by-Side Deep Institutional Intelligence Cards */}
         <div className="space-y-4">
           <div className="flex items-center justify-between">
@@ -747,310 +1179,8 @@ const CompareView: React.FC<CompareViewProps> = ({
           </div>
         </div>
 
-        {/* 3. Advanced Comparison Charts Section */}
-        <div className={`rounded-3xl border p-5 sm:p-7 shadow-xl ${themeStyles.panelBg}`}>
-          {/* Chart Header with Mode Toggle */}
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6 border-b pb-4 border-blue-500/15">
-            <div>
-              <h3 className={`text-base sm:text-lg font-black flex items-center gap-2 ${themeStyles.textMain}`}>
-                <BarChart3 className="w-5 h-5 text-blue-500" />
-                استوديو الرسوم البيانية المقارنة المتقدمة (Comparative Analytical Studio)
-              </h3>
-              <p className={`text-xs mt-0.5 ${themeStyles.textSub}`}>
-                تتبع مسارات القوة النسبية، تطور صافي العقود، وتشريح تدفقات الدخول والخروج الأسبوعية
-              </p>
-            </div>
-
-            {/* View Selector Tabs */}
-            <div className={`flex items-center p-1 rounded-2xl border ${isLight ? 'bg-slate-100 border-slate-200' : 'bg-slate-900 border-blue-500/30'}`}>
-              <button
-                onClick={() => setChartView('normalized')}
-                className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all ${
-                  chartView === 'normalized'
-                    ? isLight
-                      ? 'bg-white text-blue-700 shadow-sm font-black'
-                      : 'bg-blue-600 text-white shadow-sm font-black'
-                    : isLight
-                    ? 'text-slate-600 hover:text-slate-900'
-                    : 'text-blue-200/70 hover:text-white'
-                }`}
-              >
-                مؤشر القوة المعياري (-100% إلى +100%)
-              </button>
-              <button
-                onClick={() => setChartView('historical')}
-                className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all ${
-                  chartView === 'historical'
-                    ? isLight
-                      ? 'bg-white text-blue-700 shadow-sm font-black'
-                      : 'bg-blue-600 text-white shadow-sm font-black'
-                    : isLight
-                    ? 'text-slate-600 hover:text-slate-900'
-                    : 'text-blue-200/70 hover:text-white'
-                }`}
-              >
-                صافي العقود التاريخية
-              </button>
-              <button
-                onClick={() => setChartView('delta')}
-                className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all ${
-                  chartView === 'delta'
-                    ? isLight
-                      ? 'bg-white text-blue-700 shadow-sm font-black'
-                      : 'bg-blue-600 text-white shadow-sm font-black'
-                    : isLight
-                    ? 'text-slate-600 hover:text-slate-900'
-                    : 'text-blue-200/70 hover:text-white'
-                }`}
-              >
-                تشريح تدفقات الدخول/الخروج
-              </button>
-            </div>
-          </div>
-
-          {/* Chart Content Body */}
-          <div className="h-[380px] w-full">
-            {chartView === 'normalized' && (
-              <div className="w-full h-full flex flex-col">
-                <div className={`text-xs mb-2 flex items-center justify-between ${themeStyles.textSub}`}>
-                  <span>
-                    يقيس نسبة صافي التمركز إلى إجمالي العقود عبر الأسابيع الأخيرة. إشارة الصفر (0%) تفصل بين السيطرة الشرائية والبيعية.
-                  </span>
-                  <span className="font-mono text-[11px] font-bold text-blue-500">مقياس موحّد عادل</span>
-                </div>
-                <div className="flex-1 w-full">
-                  <ResponsiveContainer width="100%" height="100%">
-                    <LineChart data={normalizedTrajectoryData} margin={{ top: 10, right: 20, left: 10, bottom: 5 }}>
-                      <CartesianGrid
-                        strokeDasharray="3 3"
-                        stroke={isLight ? '#e2e8f0' : '#1e293b'}
-                        vertical={false}
-                      />
-                      <XAxis
-                        dataKey="date"
-                        stroke={isLight ? '#94a3b8' : '#64748b'}
-                        fontSize={11}
-                        tickLine={false}
-                        axisLine={false}
-                      />
-                      <YAxis
-                        stroke={isLight ? '#94a3b8' : '#64748b'}
-                        fontSize={11}
-                        tickLine={false}
-                        axisLine={false}
-                        tickFormatter={(v) => `${v}%`}
-                        domain={[-100, 100]}
-                      />
-                      <ReferenceLine y={0} stroke={isLight ? '#64748b' : '#94a3b8'} strokeDasharray="3 3" />
-                      <Tooltip
-                        content={({ active, payload, label }) => {
-                          if (active && payload && payload.length) {
-                            return (
-                              <div
-                                className={`px-4 py-3 rounded-2xl shadow-2xl border ${
-                                  isLight ? 'bg-white border-slate-200 text-slate-900' : 'bg-slate-900 border-blue-500/30 text-white'
-                                }`}
-                              >
-                                <div className="text-xs font-bold mb-2 text-center text-blue-400">{label}</div>
-                                <div className="space-y-1.5">
-                                  {payload.map((entry: any, i: number) => {
-                                    const assetIdx = parseInt(entry.dataKey.replace('norm_', ''));
-                                    const assetObj = processedAssets[assetIdx];
-                                    if (!assetObj) return null;
-                                    return (
-                                      <div key={i} className="flex items-center justify-between gap-4 text-xs">
-                                        <div className="flex items-center gap-1.5">
-                                          <div className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: entry.color }} />
-                                          <span className="font-bold">{assetObj.asset}:</span>
-                                        </div>
-                                        <span className="font-mono font-black">{entry.value}%</span>
-                                      </div>
-                                    );
-                                  })}
-                                </div>
-                              </div>
-                            );
-                          }
-                          return null;
-                        }}
-                      />
-                      <Legend
-                        formatter={(val) => {
-                          const idx = parseInt(val.replace('norm_', ''));
-                          return processedAssets[idx] ? processedAssets[idx].asset : val;
-                        }}
-                        iconType="circle"
-                      />
-                      {processedAssets.map((item) => (
-                        <Line
-                          key={item.asset}
-                          type="monotone"
-                          dataKey={`norm_${item.index}`}
-                          stroke={item.color}
-                          strokeWidth={3}
-                          dot={{ r: 5, fill: item.color }}
-                          activeDot={{ r: 7 }}
-                          name={`norm_${item.index}`}
-                        />
-                      ))}
-                    </LineChart>
-                  </ResponsiveContainer>
-                </div>
-              </div>
-            )}
-
-            {chartView === 'historical' && (
-              <div className="w-full h-full flex flex-col">
-                <div className={`text-xs mb-2 ${themeStyles.textSub}`}>
-                  حجم صافي العقود الفعلي لكل أصل على مدار الأسابيع الستة الأخيرة.
-                </div>
-                <div className="flex-1 w-full">
-                  <ResponsiveContainer width="100%" height="100%">
-                    <BarChart data={historicalBarsData} margin={{ top: 10, right: 10, left: 10, bottom: 5 }} barGap={4}>
-                      <CartesianGrid
-                        strokeDasharray="3 3"
-                        stroke={isLight ? '#e2e8f0' : '#1e293b'}
-                        vertical={false}
-                      />
-                      <XAxis
-                        dataKey="date"
-                        stroke={isLight ? '#94a3b8' : '#64748b'}
-                        fontSize={11}
-                        tickLine={false}
-                        axisLine={false}
-                      />
-                      <YAxis
-                        stroke={isLight ? '#94a3b8' : '#64748b'}
-                        fontSize={11}
-                        tickLine={false}
-                        axisLine={false}
-                        tickFormatter={(v) => (v >= 1000 || v <= -1000 ? `${(v / 1000).toFixed(0)}k` : v)}
-                      />
-                      <ReferenceLine y={0} stroke={isLight ? '#94a3b8' : '#475569'} />
-                      <Tooltip
-                        content={({ active, payload, label }) => {
-                          if (active && payload && payload.length) {
-                            return (
-                              <div
-                                className={`px-4 py-3 rounded-2xl shadow-2xl border ${
-                                  isLight ? 'bg-white border-slate-200 text-slate-900' : 'bg-slate-900 border-blue-500/30 text-white'
-                                }`}
-                              >
-                                <div className="text-xs font-bold mb-2 text-center text-blue-400">{label}</div>
-                                <div className="space-y-1.5">
-                                  {payload.map((entry: any, i: number) => {
-                                    const assetIdx = parseInt(entry.dataKey.replace('asset_', ''));
-                                    const assetObj = processedAssets[assetIdx];
-                                    if (!assetObj) return null;
-                                    return (
-                                      <div key={i} className="flex items-center justify-between gap-4 text-xs">
-                                        <div className="flex items-center gap-1.5">
-                                          <div className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: entry.color }} />
-                                          <span className="font-bold">{assetObj.asset}:</span>
-                                        </div>
-                                        <span className="font-mono font-black">{formatCurrency(entry.value)} عقد</span>
-                                      </div>
-                                    );
-                                  })}
-                                </div>
-                              </div>
-                            );
-                          }
-                          return null;
-                        }}
-                      />
-                      <Legend
-                        formatter={(val) => {
-                          const idx = parseInt(val.replace('asset_', ''));
-                          return processedAssets[idx] ? processedAssets[idx].asset : val;
-                        }}
-                        iconType="circle"
-                      />
-                      {processedAssets.map((item) => (
-                        <Bar
-                          key={item.asset}
-                          dataKey={`asset_${item.index}`}
-                          fill={item.color}
-                          radius={[4, 4, 0, 0]}
-                        />
-                      ))}
-                    </BarChart>
-                  </ResponsiveContainer>
-                </div>
-              </div>
-            )}
-
-            {chartView === 'delta' && (
-              <div className="w-full h-full flex flex-col">
-                <div className={`text-xs mb-2 ${themeStyles.textSub}`}>
-                  مقارنة التغير الأسبوعي في عقود الشراء (Long Delta) مقابل عقود البيع (Short Delta) لكشف طبيعة تحركات الحيتان.
-                </div>
-                <div className="flex-1 w-full">
-                  <ResponsiveContainer width="100%" height="100%">
-                    <BarChart data={flowDeltaData} margin={{ top: 10, right: 10, left: 10, bottom: 5 }} barGap={6}>
-                      <CartesianGrid
-                        strokeDasharray="3 3"
-                        stroke={isLight ? '#e2e8f0' : '#1e293b'}
-                        vertical={false}
-                      />
-                      <XAxis
-                        dataKey="name"
-                        stroke={isLight ? '#94a3b8' : '#64748b'}
-                        fontSize={11}
-                        tickLine={false}
-                        axisLine={false}
-                      />
-                      <YAxis
-                        stroke={isLight ? '#94a3b8' : '#64748b'}
-                        fontSize={11}
-                        tickLine={false}
-                        axisLine={false}
-                        tickFormatter={(v) => (v >= 1000 || v <= -1000 ? `${(v / 1000).toFixed(0)}k` : v)}
-                      />
-                      <ReferenceLine y={0} stroke={isLight ? '#94a3b8' : '#475569'} />
-                      <Tooltip
-                        content={({ active, payload, label }) => {
-                          if (active && payload && payload.length) {
-                            return (
-                              <div
-                                className={`px-4 py-3 rounded-2xl shadow-2xl border ${
-                                  isLight ? 'bg-white border-slate-200 text-slate-900' : 'bg-slate-900 border-blue-500/30 text-white'
-                                }`}
-                              >
-                                <div className="text-xs font-bold mb-2 text-center text-blue-400">{label}</div>
-                                <div className="space-y-1.5">
-                                  {payload.map((entry: any, i: number) => (
-                                    <div key={i} className="flex items-center justify-between gap-4 text-xs">
-                                      <div className="flex items-center gap-1.5">
-                                        <div className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: entry.color }} />
-                                        <span>{entry.name}:</span>
-                                      </div>
-                                      <span className="font-mono font-black">{formatCurrency(entry.value)}</span>
-                                    </div>
-                                  ))}
-                                </div>
-                              </div>
-                            );
-                          }
-                          return null;
-                        }}
-                      />
-                      <Legend iconType="circle" />
-                      <Bar dataKey="longChange" name="تغير الشراء (Long Δ)" fill="#3b82f6" radius={[4, 4, 0, 0]} />
-                      <Bar 
-                        dataKey="shortChange" 
-                        name="تغير البيع (Short Δ)" 
-                        fill={isLight ? '#64748b' : '#f8fafc'} 
-                        radius={[4, 4, 0, 0]} 
-                      />
-                    </BarChart>
-                  </ResponsiveContainer>
-                </div>
-              </div>
-            )}
-          </div>
-        </div>
-
+        </motion.div>
+        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8, delay: 0.5, ease: [0.16, 1, 0.3, 1] }}>
         {/* 4. Comprehensive Comparison Matrix Table */}
         <div className={`rounded-3xl border shadow-xl overflow-hidden ${themeStyles.panelBg}`}>
           <div className={`p-5 border-b border-blue-500/15 flex items-center justify-between`}>
@@ -1204,6 +1334,7 @@ const CompareView: React.FC<CompareViewProps> = ({
             </table>
           </div>
         </div>
+        </motion.div>
       </div>
     </div>
   );

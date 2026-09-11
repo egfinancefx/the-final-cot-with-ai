@@ -40,19 +40,19 @@ const LoginGate: React.FC<LoginGateProps> = ({ onLogin }) => {
       const rows = csvText.split(/\r?\n/);
       let isAuthorized = false;
 
-      for (let i = 1; i < rows.length; i++) {
+      for (let i = 0; i < rows.length; i++) {
         const row = rows[i];
         if (!row) continue;
 
         const cols = row.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/);
-        
-        if (cols.length > 3) {
-          const cellEmail = cols[3].replace(/^"|"$/g, '').trim().toLowerCase();
+        for (const col of cols) {
+          const cellEmail = col.replace(/^"|"$/g, '').trim().toLowerCase();
           if (cellEmail === trimmedEmail) {
             isAuthorized = true;
             break;
           }
         }
+        if (isAuthorized) break;
       }
 
       if (isAuthorized) {

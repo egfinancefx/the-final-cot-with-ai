@@ -1,6 +1,7 @@
 
 import React, { useMemo, useState } from 'react';
-import { ResponsiveContainer, AreaChart, Area, YAxis, Tooltip, ReferenceLine } from 'recharts';
+import { ResponsiveContainer, AreaChart, Area, YAxis, Tooltip, ReferenceLine, CartesianGrid } from 'recharts';
+import { curveMonotoneX } from "@visx/curve";
 import { HistoryRow, SummaryRow, ThemeMode } from '../types';
 import { formatCurrency } from '../utils';
 import { 
@@ -33,6 +34,7 @@ interface AssetTrendCardProps {
   onClick: () => void;
   isSelected: boolean;
   themeMode: ThemeMode;
+  index?: number;
 }
 
 const AssetTrendCard: React.FC<AssetTrendCardProps> = ({ 
@@ -42,7 +44,8 @@ const AssetTrendCard: React.FC<AssetTrendCardProps> = ({
   dates,
   onClick,
   isSelected,
-  themeMode
+  themeMode,
+  index = 0
 }) => {
   const [isHovered, setIsHovered] = useState(false);
 
@@ -235,18 +238,43 @@ const AssetTrendCard: React.FC<AssetTrendCardProps> = ({
                 <stop offset="5%" stopColor={gradientColor} stopOpacity={gradientOpacity}/>
                 <stop offset="95%" stopColor={gradientColor} stopOpacity={0}/>
               </linearGradient>
+              {/* Segment sweep highlight animation across X axis */}
+              <linearGradient id={`${chartId}-shimmer`} x1="0%" y1="0%" x2="100%" y2="0%">
+                <stop offset="0%" stopColor={strokeColor} stopOpacity="0.1" />
+                <stop offset="50%" stopColor={strokeColor} stopOpacity="0.8">
+                  <animate attributeName="offset" values="-0.3; 1.3" dur="3s" repeatCount="indefinite" />
+                </stop>
+                <stop offset="100%" stopColor={strokeColor} stopOpacity="0.1" />
+              </linearGradient>
             </defs>
+            <CartesianGrid vertical={false} stroke={themeMode === 'light' ? '#e2e8f0' : '#1e293b'} strokeDasharray="3 3" opacity={0.5} />
             <ReferenceLine y={0} stroke={themeMode === 'light' ? '#cbd5e1' : '#334155'} strokeDasharray="3 3" />
             <Area 
-              type="monotone" 
+              type={curveMonotoneX as any} 
               dataKey="value" 
               stroke={strokeColor} 
-              strokeWidth={isHovered ? 3 : 2}
+              strokeWidth={isHovered ? 2.5 : 2}
               fill={`url(#${chartId})`}
-              fillOpacity={1}
-              animationDuration={1500}
+              fillOpacity={0.3}
+              isAnimationActive={true}
+              animationDuration={1600}
+              animationEasing="ease-in-out"
+              animationBegin={index * 140}
               dot={false}
               activeDot={{ r: 4, strokeWidth: 2, stroke: themeMode === 'light' ? '#fff' : "#000", fill: strokeColor }}
+            />
+            {/* Animated Segment Line Highlight */}
+            <Area 
+              type={curveMonotoneX as any} 
+              dataKey="value" 
+              stroke={`url(#${chartId}-shimmer)`}
+              strokeWidth={isHovered ? 3 : 2}
+              fill="none"
+              isAnimationActive={true}
+              animationDuration={1800}
+              animationEasing="ease-in-out"
+              animationBegin={index * 140 + 150}
+              dot={false}
             />
             <YAxis domain={['dataMin', 'dataMax']} hide />
             <Tooltip 

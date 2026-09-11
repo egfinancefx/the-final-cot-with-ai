@@ -6,6 +6,9 @@ export const SUMMARY_SHEET_URL = "https://docs.google.com/spreadsheets/d/1vERLh_
 // Historical Data Sheet
 export const HISTORY_SHEET_URL = "https://docs.google.com/spreadsheets/d/1OWvhPM8OG8x1YHc_uxp5UgD9RCsSavVWUiCl22l-e8I/export?format=csv";
 
+export const RAW_SUMMARY_CSV = "";
+export const RAW_HISTORY_CSV = "";
+
 export const TV_SYMBOL_MAP: Record<string, string> = {
   "Gold": "OANDA:XAUUSD",
   "Silver": "OANDA:XAGUSD",

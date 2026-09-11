@@ -2,7 +2,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import { X, Bot, Loader2, Sparkles, Copy, Check, TrendingUp, TrendingDown, Minus, Languages, ChevronDown, Calendar, Filter, Activity, Scale, Target, Zap, ArrowRight, AlertTriangle, Info, AlertOctagon, Globe, Newspaper, Brain, ShieldAlert, Volume2, VolumeX } from 'lucide-react';
-import { GoogleGenAI } from "@google/genai";
 import { SummaryRow } from '../types';
 import { formatCurrency } from '../utils';
 
@@ -36,6 +35,10 @@ interface AnalysisData {
         support: string;
         resistance: string;
         pivot_point: string;
+        support_2?: string;
+        resistance_2?: string;
+        current_price?: string;
+        invalidation_level?: string;
     };
     institutional_bias?: string;
     global_context?: {
@@ -166,14 +169,16 @@ const AIAnalysisOverlay: React.FC<AIAnalysisOverlayProps> = ({ isOpen, onClose, 
   useEffect(() => {
     if (analysis) {
         try {
-            // Attempt to parse JSON
-            // Clean up markdown code blocks if present
-            const cleanJson = analysis.replace(/```json\n?|\n?```/g, '');
-            const data = JSON.parse(cleanJson);
-            setParsedData(data);
+            // Attempt to parse JSON safely
+            const cleanJson = analysis.replace(/```json\n?|\n?```/g, '').trim();
+            if (cleanJson.startsWith('{') || cleanJson.startsWith('[')) {
+                const data = JSON.parse(cleanJson);
+                setParsedData(data);
+            } else {
+                setParsedData(null);
+            }
         } catch (e) {
-            console.error("Failed to parse AI JSON:", e);
-            // Fallback for non-JSON response (shouldn't happen with new prompt, but safety first)
+            console.warn("Could not parse AI JSON format:", e);
             setParsedData(null);
         }
         setCurrentLang('English');
@@ -218,10 +223,12 @@ const AIAnalysisOverlay: React.FC<AIAnalysisOverlayProps> = ({ isOpen, onClose, 
     if (lang === 'English') {
         if (analysis) {
              try {
-                const cleanJson = analysis.replace(/```json\n?|\n?```/g, '');
-                setParsedData(JSON.parse(cleanJson));
+                const cleanJson = analysis.replace(/```json\n?|\n?```/g, '').trim();
+                if (cleanJson.startsWith('{') || cleanJson.startsWith('[')) {
+                  setParsedData(JSON.parse(cleanJson));
+                }
             } catch (e) {
-                console.error("Failed to parse original JSON:", e);
+                console.warn("Failed to parse original JSON:", e);
             }
         }
         return;
@@ -231,20 +238,31 @@ const AIAnalysisOverlay: React.FC<AIAnalysisOverlayProps> = ({ isOpen, onClose, 
 
     setIsTranslating(true);
     try {
-        const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
         // Optimized prompt for speed
         const prompt = `Translate values to ${lang}. Return JSON only.
         ${JSON.stringify(parsedData)}`;
 
-        const response = await ai.models.generateContent({
-            model: 'gemini-3.1-flash-lite',
-            contents: prompt,
-            config: { responseMimeType: "application/json" }
+        const res = await fetch('/api/gemini', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                model: 'gemini-3.1-flash-lite',
+                prompt,
+                responseMimeType: "application/json"
+            })
         });
 
-        if (response.text) {
-            const translatedData = JSON.parse(response.text);
-            setParsedData(translatedData);
+        const resData = await res.json();
+        if (res.ok && resData.text) {
+            try {
+                const clean = resData.text.replace(/```json\n?|\n?```/g, '').trim();
+                if (clean.startsWith('{') || clean.startsWith('[')) {
+                    const translatedData = JSON.parse(clean);
+                    setParsedData(translatedData);
+                }
+            } catch (parseErr) {
+                console.warn("Could not parse translated JSON:", parseErr);
+            }
         }
     } catch (error) {
         console.error("Translation failed:", error);
@@ -275,10 +293,14 @@ const AIAnalysisOverlay: React.FC<AIAnalysisOverlayProps> = ({ isOpen, onClose, 
 
   const renderContent = () => {
       if (!parsedData) {
-          // Fallback text rendering if JSON parse fails
+          // Fallback rendering if JSON parse fails or error text
           return (
-              <div className="prose prose-invert max-w-none">
-                  <pre className="whitespace-pre-wrap font-sans text-slate-300">{analysis}</pre>
+              <div className="rounded-3xl border border-slate-700/60 bg-slate-900/60 p-8 backdrop-blur-md flex flex-col items-center justify-center text-center space-y-4 my-6">
+                  <div className="p-3.5 bg-amber-500/10 border border-amber-500/20 rounded-2xl">
+                      <AlertTriangle className="w-8 h-8 text-amber-400" />
+                  </div>
+                  <h3 className="text-xl font-bold text-white">Market Analysis</h3>
+                  <p className="text-slate-300 text-sm max-w-lg leading-relaxed whitespace-pre-wrap font-sans">{analysis || "No analysis available."}</p>
               </div>
           );
       }
@@ -374,70 +396,159 @@ const AIAnalysisOverlay: React.FC<AIAnalysisOverlayProps> = ({ isOpen, onClose, 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                       {parsedData.key_levels && (
                           <div className="bg-slate-800/30 border border-white/5 rounded-2xl p-6 relative overflow-hidden flex flex-col">
-                              <div className="flex items-center gap-3 mb-6 text-purple-400">
-                                  <div className="p-2 bg-purple-500/10 rounded-lg">
-                                    <Scale className="w-4 h-4" />
+                              <div className="flex items-center justify-between mb-5 flex-wrap gap-2">
+                                  <div className="flex items-center gap-3 text-purple-400">
+                                      <div className="p-2 bg-purple-500/10 rounded-lg">
+                                        <Scale className="w-4 h-4" />
+                                      </div>
+                                      <div>
+                                          <span className="text-xs font-bold uppercase tracking-widest block">Key Price Levels</span>
+                                          <span className="text-[10px] text-slate-400 font-normal">ICT Order Flow & Technical Anchors</span>
+                                      </div>
                                   </div>
-                                  <span className="text-xs font-bold uppercase tracking-widest">Key Price Levels</span>
+                                  {parsedData.key_levels.current_price && (
+                                      <div className="flex items-center gap-2 px-3 py-1 bg-cyan-500/10 border border-cyan-500/30 rounded-full">
+                                          <span className="relative flex h-2 w-2">
+                                            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-cyan-400 opacity-75"></span>
+                                            <span className="relative inline-flex rounded-full h-2 w-2 bg-cyan-500"></span>
+                                          </span>
+                                          <span className="text-[11px] font-mono font-bold text-cyan-300">
+                                              Spot: {parsedData.key_levels.current_price}
+                                          </span>
+                                      </div>
+                                  )}
                               </div>
                               
                               {(() => {
                                   // Vertical Price Ladder Visualization
                                   return (
-                                      <div className="flex flex-col h-full justify-between gap-2 relative py-2">
+                                      <div className="flex flex-col h-full justify-between gap-2.5 relative py-1">
                                           {/* Connecting Line */}
-                                          <div className="absolute left-6 top-4 bottom-4 w-0.5 bg-gradient-to-b from-rose-500/30 via-yellow-500/30 to-emerald-500/30 border-l border-dashed border-white/10"></div>
+                                          <div className="absolute left-6 top-4 bottom-4 w-0.5 bg-gradient-to-b from-purple-500/30 via-rose-500/30 via-yellow-500/30 to-emerald-500/30 border-l border-dashed border-white/10"></div>
 
-                                          {/* Resistance Level */}
+                                          {/* Macro Resistance 2 (if present) */}
+                                          {parsedData.key_levels.resistance_2 && (
+                                              <div className="relative flex items-center gap-4 group">
+                                                  <div className="w-12 h-12 rounded-xl bg-purple-500/10 border border-purple-500/30 flex items-center justify-center shrink-0 z-10 shadow-[0_0_15px_rgba(168,85,247,0.1)] group-hover:bg-purple-500/20 group-hover:border-purple-500/50 transition-all">
+                                                      <TrendingDown className="w-5 h-5 text-purple-400" />
+                                                  </div>
+                                                  <div className="flex-1 flex flex-col min-w-0">
+                                                      <div className="flex justify-between items-baseline">
+                                                          <span className="text-[10px] font-bold text-purple-400 uppercase tracking-widest mb-0.5">Macro Supply</span>
+                                                          <span className="text-[10px] text-purple-400/60 font-mono">R2</span>
+                                                      </div>
+                                                      <div className="p-2.5 bg-slate-900/50 border border-white/5 rounded-lg flex justify-between items-center group-hover:border-purple-500/30 transition-colors">
+                                                          <span className="font-mono font-bold text-slate-100 text-sm md:text-base tracking-tight truncate">{parsedData.key_levels.resistance_2}</span>
+                                                      </div>
+                                                  </div>
+                                              </div>
+                                          )}
+
+                                          {/* Resistance 1 Level */}
                                           <div className="relative flex items-center gap-4 group">
                                               <div className="w-12 h-12 rounded-xl bg-rose-500/10 border border-rose-500/30 flex items-center justify-center shrink-0 z-10 shadow-[0_0_15px_rgba(244,63,94,0.1)] group-hover:bg-rose-500/20 group-hover:border-rose-500/50 transition-all">
                                                   <TrendingDown className="w-5 h-5 text-rose-400" />
                                               </div>
-                                              <div className="flex-1 flex flex-col">
+                                              <div className="flex-1 flex flex-col min-w-0">
                                                   <div className="flex justify-between items-baseline">
                                                       <span className="text-[10px] font-bold text-rose-400 uppercase tracking-widest mb-0.5">Resistance</span>
-                                                      <span className="text-[10px] text-rose-400/50 font-mono">R1</span>
+                                                      <span className="text-[10px] text-rose-400/60 font-mono">R1</span>
                                                   </div>
                                                   <div className="p-2.5 bg-slate-900/50 border border-white/5 rounded-lg flex justify-between items-center group-hover:border-rose-500/30 transition-colors">
-                                                      <span className="font-mono font-bold text-white text-lg tracking-tight">{parsedData.key_levels.resistance}</span>
-                                                      <div className="w-2 h-2 rounded-full bg-rose-500 animate-pulse"></div>
+                                                      <span className="font-mono font-bold text-white text-sm md:text-base tracking-tight truncate">{parsedData.key_levels.resistance}</span>
+                                                      <div className="w-2 h-2 rounded-full bg-rose-500 animate-pulse shrink-0 ml-2"></div>
                                                   </div>
                                               </div>
                                           </div>
+
+                                          {/* Current Spot Price Anchor Marker (if available) */}
+                                          {parsedData.key_levels.current_price && (
+                                              <div className="relative flex items-center gap-4 py-0.5 z-10">
+                                                  <div className="w-12 flex justify-center shrink-0">
+                                                      <div className="w-3.5 h-3.5 rounded-full bg-cyan-400 shadow-[0_0_12px_#22d3ee] flex items-center justify-center">
+                                                          <div className="w-1.5 h-1.5 rounded-full bg-slate-950"></div>
+                                                      </div>
+                                                  </div>
+                                                  <div className="flex-1 flex items-center gap-2 border-t border-dashed border-cyan-500/30">
+                                                      <span className="text-[10px] uppercase font-mono font-bold tracking-wider text-cyan-300 bg-cyan-950/40 px-2 py-0.5 rounded border border-cyan-500/30">
+                                                          Current Spot Price
+                                                      </span>
+                                                      <span className="font-mono text-xs font-semibold text-cyan-200">
+                                                          {parsedData.key_levels.current_price}
+                                                      </span>
+                                                  </div>
+                                              </div>
+                                          )}
 
                                           {/* Pivot Level */}
                                           <div className="relative flex items-center gap-4 group">
                                               <div className="w-12 h-12 rounded-xl bg-yellow-500/10 border border-yellow-500/30 flex items-center justify-center shrink-0 z-10 shadow-[0_0_15px_rgba(234,179,8,0.1)] group-hover:bg-yellow-500/20 group-hover:border-yellow-500/50 transition-all">
                                                   <Target className="w-5 h-5 text-yellow-400" />
                                               </div>
-                                              <div className="flex-1 flex flex-col">
+                                              <div className="flex-1 flex flex-col min-w-0">
                                                   <div className="flex justify-between items-baseline">
                                                       <span className="text-[10px] font-bold text-yellow-400 uppercase tracking-widest mb-0.5">Pivot Point</span>
-                                                      <span className="text-[10px] text-yellow-400/50 font-mono">PP</span>
+                                                      <span className="text-[10px] text-yellow-400/60 font-mono">PP (Equilibrium)</span>
                                                   </div>
                                                   <div className="p-2.5 bg-slate-900/50 border border-white/5 rounded-lg flex justify-between items-center group-hover:border-yellow-500/30 transition-colors">
-                                                      <span className="font-mono font-bold text-white text-lg tracking-tight">{parsedData.key_levels.pivot_point}</span>
-                                                      <div className="w-2 h-2 rounded-full bg-yellow-500"></div>
+                                                      <span className="font-mono font-bold text-white text-sm md:text-base tracking-tight truncate">{parsedData.key_levels.pivot_point}</span>
+                                                      <div className="w-2 h-2 rounded-full bg-yellow-500 shrink-0 ml-2"></div>
                                                   </div>
                                               </div>
                                           </div>
 
-                                          {/* Support Level */}
+                                          {/* Support 1 Level */}
                                           <div className="relative flex items-center gap-4 group">
                                               <div className="w-12 h-12 rounded-xl bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center shrink-0 z-10 shadow-[0_0_15px_rgba(16,185,129,0.1)] group-hover:bg-emerald-500/20 group-hover:border-emerald-500/50 transition-all">
                                                   <TrendingUp className="w-5 h-5 text-emerald-400" />
                                               </div>
-                                              <div className="flex-1 flex flex-col">
+                                              <div className="flex-1 flex flex-col min-w-0">
                                                   <div className="flex justify-between items-baseline">
                                                       <span className="text-[10px] font-bold text-emerald-400 uppercase tracking-widest mb-0.5">Support</span>
-                                                      <span className="text-[10px] text-emerald-400/50 font-mono">S1</span>
+                                                      <span className="text-[10px] text-emerald-400/60 font-mono">S1</span>
                                                   </div>
                                                   <div className="p-2.5 bg-slate-900/50 border border-white/5 rounded-lg flex justify-between items-center group-hover:border-emerald-500/30 transition-colors">
-                                                      <span className="font-mono font-bold text-white text-lg tracking-tight">{parsedData.key_levels.support}</span>
-                                                      <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></div>
+                                                      <span className="font-mono font-bold text-white text-sm md:text-base tracking-tight truncate">{parsedData.key_levels.support}</span>
+                                                      <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse shrink-0 ml-2"></div>
                                                   </div>
                                               </div>
                                           </div>
+
+                                          {/* Support 2 Level (if present) */}
+                                          {parsedData.key_levels.support_2 && (
+                                              <div className="relative flex items-center gap-4 group">
+                                                  <div className="w-12 h-12 rounded-xl bg-teal-500/10 border border-teal-500/30 flex items-center justify-center shrink-0 z-10 shadow-[0_0_15px_rgba(20,184,166,0.1)] group-hover:bg-teal-500/20 group-hover:border-teal-500/50 transition-all">
+                                                      <TrendingUp className="w-5 h-5 text-teal-400" />
+                                                  </div>
+                                                  <div className="flex-1 flex flex-col min-w-0">
+                                                      <div className="flex justify-between items-baseline">
+                                                          <span className="text-[10px] font-bold text-teal-400 uppercase tracking-widest mb-0.5">Discount Demand</span>
+                                                          <span className="text-[10px] text-teal-400/60 font-mono">S2</span>
+                                                      </div>
+                                                      <div className="p-2.5 bg-slate-900/50 border border-white/5 rounded-lg flex justify-between items-center group-hover:border-teal-500/30 transition-colors">
+                                                          <span className="font-mono font-bold text-slate-100 text-sm md:text-base tracking-tight truncate">{parsedData.key_levels.support_2}</span>
+                                                      </div>
+                                                  </div>
+                                              </div>
+                                          )}
+
+                                          {/* Invalidation Level (if present) */}
+                                          {parsedData.key_levels.invalidation_level && (
+                                              <div className="relative flex items-center gap-4 mt-1 group">
+                                                  <div className="w-12 h-12 rounded-xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-center shrink-0 z-10 shadow-[0_0_15px_rgba(245,158,11,0.1)] group-hover:bg-amber-500/20 group-hover:border-amber-500/50 transition-all">
+                                                      <ShieldAlert className="w-5 h-5 text-amber-400" />
+                                                  </div>
+                                                  <div className="flex-1 flex flex-col min-w-0">
+                                                      <div className="flex justify-between items-baseline">
+                                                          <span className="text-[10px] font-bold text-amber-400 uppercase tracking-widest mb-0.5">Thesis Invalidation</span>
+                                                          <span className="text-[10px] text-amber-400/70 font-mono font-semibold">Risk Limit</span>
+                                                      </div>
+                                                      <div className="p-2.5 bg-amber-950/25 border border-amber-500/25 rounded-lg flex justify-between items-center group-hover:border-amber-500/40 transition-colors">
+                                                          <span className="font-mono font-bold text-amber-200 text-xs md:text-sm tracking-tight truncate">{parsedData.key_levels.invalidation_level}</span>
+                                                      </div>
+                                                  </div>
+                                              </div>
+                                          )}
                                       </div>
                                   );
                               })()}

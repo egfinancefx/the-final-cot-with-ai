@@ -106,7 +106,7 @@ const KPICard: React.FC<KPICardProps> = ({ title, value, change, subtext, icon, 
         
         {icon && (
             <div className={`p-2.5 rounded-xl border ${style.iconBg} ${style.iconText} ${style.border} shadow-sm backdrop-blur-md transition-transform duration-300 group-hover:scale-110 group-hover:rotate-3`}>
-                {React.cloneElement(icon as React.ReactElement, { className: 'w-5 h-5' })}
+                {React.cloneElement(icon as React.ReactElement<any>, { className: 'w-5 h-5' })}
             </div>
         )}
       </div>
