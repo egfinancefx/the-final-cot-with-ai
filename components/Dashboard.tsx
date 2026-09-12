@@ -147,6 +147,7 @@ const Dashboard: React.FC<DashboardProps> = ({ summaryData, historyData, history
   // AI State
   const [isAIModalOpen, setIsAIModalOpen] = useState(false);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
+  const [isAiOfflineMode, setIsAiOfflineMode] = useState(false);
   const [aiAnalysis, setAiAnalysis] = useState<string | null>(null);
   const [isCompareModalOpen, setIsCompareModalOpen] = useState(false);
   const [isHeatmapOpen, setIsHeatmapOpen] = useState(false);
@@ -419,22 +420,21 @@ const Dashboard: React.FC<DashboardProps> = ({ summaryData, historyData, history
 
         if (selectedItem) {
             const quoteContext = liveQuote && liveQuote.price ? `
-            REAL-TIME LIVE SPOT MARKET DATA (MANDATORY TECHNICAL ANCHOR):
+            REAL-TIME MARKET DATA (ANCHOR):
             - Current Spot Price: $${liveQuote.price} ${liveQuote.currency || "USD"}
-            - Day Range: Low $${liveQuote.low} - High $${liveQuote.high}
             - Previous Close: $${liveQuote.prevClose}
-            - Intraday Momentum: ${liveQuote.changePercent > 0 ? '+' : ''}${liveQuote.changePercent}%
-
-            CRITICAL DIRECTIVES FOR REALISTIC KEY PRICE LEVELS:
-            - The actual live market price is strictly $${liveQuote.price}. ALL key price levels MUST be realistic, specific NUMERICAL prices centered directly around $${liveQuote.price}.
-            - DO NOT output generic descriptions without concrete prices. State the exact numerical price first, followed by institutional technical context (e.g. Order Block, Liquidity Pool, VWAP).
+            
+            CRITICAL DIRECTIVES FOR DAILY TIMEFRAME KEY PRICE LEVELS:
+            - The user strictly operates on the **DAILY TIMEFRAME**. 
+            - You MUST use the Google Search tool to find highly accurate **Daily Timeframe Support and Resistance** levels for ${selectedItem.Commodity} from reputable sources like Investing.com or TradingView.
+            - DO NOT invent numbers. If you cannot find accurate Daily levels via search, calculate them strictly based on Daily structural logic, but prioritize SEARCH.
             - "current_price": "$${liveQuote.price}"
-            - "resistance": Realistic near-term ceiling price ABOVE $${liveQuote.price} (R1 - e.g. Buy-side Liquidity Pool / Previous Session High)
-            - "resistance_2": Higher structural resistance price (R2 - e.g. Major Supply Zone / Weekly High)
-            - "pivot_point": Equilibrium balance price near $${liveQuote.price} (PP - e.g. Weekly Volume-Weighted Pivot)
-            - "support": Realistic near-term floor price BELOW $${liveQuote.price} (S1 - e.g. Bullish Order Block / Previous Session Low)
-            - "support_2": Deeper discount demand price (S2 - e.g. Macro Institutional Demand / Liquidity Void)
-            - "invalidation_level": The exact price where a daily close invalidates the institutional COT thesis.
+            - "resistance": "Exact numerical price - Daily Resistance 1 (e.g., from Investing.com)"
+            - "resistance_2": "Exact higher numerical price - Daily Resistance 2"
+            - "pivot_point": "Exact numerical price - Daily Pivot or Liquidity Level"
+            - "support": "Exact numerical price - Daily Support 1"
+            - "support_2": "Exact lower numerical price - Daily Support 2"
+            - "invalidation_level": "The exact daily close price that invalidates your thesis." 
             ` : `
             CRITICAL DIRECTIVES FOR REALISTIC KEY PRICE LEVELS:
             - You MUST provide realistic, concrete numerical price levels (not generic descriptions) reflecting current real-world market prices for ${selectedItem.Commodity}.
@@ -476,13 +476,13 @@ const Dashboard: React.FC<DashboardProps> = ({ summaryData, historyData, history
               "institutional_bias": "Brief analysis of institutional positioning changes (Accumulation/Distribution).",
               "global_context": {
                 "news_highlights": [
-                    "Highlight 1: Recent Geopolitical/Economic development since data release",
-                    "Highlight 2: Major political or market event impacting sentiment",
-                    "Highlight 3: Another significant factor"
+                    "MACRO/GEO 1: Specific, hard-hitting Geopolitical or Central Bank news from the last 48 hours.",
+                    "MACRO/GEO 2: Major economic data or global trade/political shift.",
+                    "MACRO/GEO 3: Another pure macroeconomic driver affecting institutional risk appetite."
                 ],
-                "weekly_impact": "Concise conclusion on how these RECENT events + COT data will drive the asset's price this week.",
-                "market_sentiment_score": 50, // 0 (Extreme Fear) to 100 (Extreme Greed)
-                "key_risks": ["Risk 1", "Risk 2"]
+                "weekly_impact": "Deep analytical conclusion on how these specific macro/geopolitical events either validate or contradict the COT institutional positioning.",
+                "market_sentiment_score": "Number 0-100. 0=Extreme Risk-Off (Safe Havens bid), 100=Extreme Risk-On. Base this purely on macro/geopolitical fears vs. greed.",
+                "key_risks": ["Black Swan / Macro Risk 1", "Geopolitical / Economic Risk 2"]
               },
               "playbook": [
                 {
@@ -525,13 +525,13 @@ const Dashboard: React.FC<DashboardProps> = ({ summaryData, historyData, history
               "institutional_bias": "Overall institutional flow analysis (Risk-On/Risk-Off flows).",
               "global_context": {
                 "news_highlights": [
-                    "Highlight 1: Recent Geopolitical/Economic development",
-                    "Highlight 2: Major political or market event",
-                    "Highlight 3: Another significant factor"
+                    "MACRO/GEO 1: Specific, hard-hitting Geopolitical or Central Bank news from the last 48 hours.",
+                    "MACRO/GEO 2: Major economic data or global trade/political shift.",
+                    "MACRO/GEO 3: Another pure macroeconomic driver affecting institutional risk appetite."
                 ],
-                "weekly_impact": "How these RECENT factors will shape global market trends this week.",
-                "market_sentiment_score": 50, // 0 (Extreme Fear) to 100 (Extreme Greed)
-                "key_risks": ["Risk 1", "Risk 2"]
+                "weekly_impact": "Deep analytical conclusion on how these specific macro/geopolitical events shape global Risk-On/Risk-Off flows.",
+                "market_sentiment_score": "Number 0-100. 0=Extreme Risk-Off (Safe Havens bid), 100=Extreme Risk-On.",
+                "key_risks": ["Black Swan / Macro Risk 1", "Geopolitical / Economic Risk 2"]
               },
               "playbook": [
                 {
@@ -552,10 +552,11 @@ const Dashboard: React.FC<DashboardProps> = ({ summaryData, historyData, history
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
-                model: 'gemini-3.1-flash-lite',
+                model: 'gemini-3.1-flash',
                 prompt,
+                tools: [{ googleSearch: {} }],
                 responseMimeType: "application/json",
-                systemInstruction: "You are a friendly, experienced trading mentor. You explain things simply and clearly. You are not a robot; you are a helpful guide. Always ground your advice in the data and news provided. Be decisive but responsible. Return ONLY valid JSON."
+                systemInstruction: "You are a friendly, experienced trading mentor. You explain things simply and clearly. You are not a robot; you are a helpful guide. Always ground your advice in the data and news provided. You have access to Google Search; ALWAYS search for TODAY'S DAILY TIMEFRAME technical support and resistance levels from sites like Investing.com or TradingView. The user trades STRICTLY on the DAILY timeframe. Be decisive but responsible. Return ONLY valid JSON."
             })
         });
 
@@ -565,10 +566,12 @@ const Dashboard: React.FC<DashboardProps> = ({ summaryData, historyData, history
         }
 
         setAiAnalysis(resData.text);
+        setIsAiOfflineMode(false);
 
     } catch (error: any) {
         console.warn("AI Generation encountered an issue, generating automated COT quantitative analysis:", error?.message || error);
         // Fallback to intelligent quantitative analysis so user always receives structured data without JSON parse errors
+        setIsAiOfflineMode(true);
         const fallbackText = generateLocalFallbackAnalysis(
             selectedItem ? selectedItem.Commodity : "Market Overview",
             selectedItem,
@@ -1256,7 +1259,8 @@ const Dashboard: React.FC<DashboardProps> = ({ summaryData, historyData, history
       )}
 
       {/* AI Analysis Overlay */}
-      <AIAnalysisOverlay 
+      <AIAnalysisOverlay
+        isAiOfflineMode={isAiOfflineMode} 
         isOpen={isAIModalOpen} 
         onClose={() => setIsAIModalOpen(false)}
         isLoading={isAnalyzing}

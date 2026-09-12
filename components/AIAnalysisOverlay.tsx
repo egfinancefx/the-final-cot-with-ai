@@ -6,6 +6,7 @@ import { SummaryRow } from '../types';
 import { formatCurrency } from '../utils';
 
 interface AIAnalysisOverlayProps {
+  isAiOfflineMode?: boolean;
   isOpen: boolean;
   onClose: () => void;
   isLoading: boolean;
