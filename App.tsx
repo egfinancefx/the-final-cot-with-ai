@@ -127,12 +127,12 @@ const App: React.FC = () => {
         <header className={`w-full border-b backdrop-blur-xl h-14 transition-colors duration-500 ${getHeaderStyles()}`}>
             <div className="max-w-[1920px] mx-auto px-4 sm:px-6 lg:px-8 h-full flex items-center justify-between">
             <div className="flex items-center gap-3">
-                <div className={`p-1.5 rounded-lg shadow-lg ring-1 ring-white/10 ${themeMode === 'light' ? 'bg-blue-600 text-white' : 'bg-gradient-to-br from-blue-600 to-cyan-600'}`}>
+                <div className={`p-1.5 rounded-lg shadow-lg ring-1 ring-white/10 ${themeMode === 'light' ? 'bg-blue-600 text-white' : 'bg-gradient-to-br from-blue-600 to-blue-400'}`}>
                     <BarChart3 className="w-5 h-5" />
                 </div>
                 <div className="flex flex-col justify-center">
-                    <h1 className={`text-xl font-heading font-bold tracking-tight leading-none ${themeMode === 'light' ? 'text-slate-900' : 'text-white'}`}>
-                    EG-Finance <span className="text-cyan-400 font-extrabold">Fx</span> <span className={themeMode === 'light' ? 'text-blue-600 font-medium' : 'text-blue-300 font-medium'}>COT Data</span>
+                    <h1 className={`text-xl font-heading font-medium tracking-tight leading-none ${themeMode === 'light' ? 'text-slate-900' : 'text-white'}`}>
+                    EG-Finance <span className="text-white font-semibold">Fx</span> <span className={themeMode === 'light' ? 'text-blue-600 font-medium' : 'text-blue-300 font-medium'}>COT Data</span>
                     </h1>
                 </div>
             </div>
@@ -160,8 +160,8 @@ const App: React.FC = () => {
 
                 {latestDate && (
                     <div className={`hidden sm:flex flex-col items-end mr-2 ${themeMode === 'light' ? 'text-slate-600' : 'text-slate-300'}`}>
-                        <span className="text-[10px] uppercase font-bold opacity-60 leading-none">Data Date</span>
-                        <span className="text-xs font-mono font-bold leading-none mt-0.5">{latestDate}</span>
+                        <span className="text-[10px] uppercase font-medium opacity-60 leading-none">Data Date</span>
+                        <span className="text-xs font-mono font-medium leading-none mt-0.5">{latestDate}</span>
                     </div>
                 )}
 
@@ -173,7 +173,7 @@ const App: React.FC = () => {
                 <button 
                 onClick={fetchData} 
                 disabled={isLoading}
-                className={`flex items-center gap-2 px-3 py-1.5 border rounded-lg text-xs font-bold uppercase tracking-wider transition-all disabled:opacity-50 
+                className={`flex items-center gap-2 px-3 py-1.5 border rounded-lg text-xs font-medium uppercase tracking-wider transition-all disabled:opacity-50 
                     ${themeMode === 'light' 
                         ? 'bg-white hover:bg-slate-50 border-slate-200 text-blue-600' 
                         : 'bg-blue-600/10 hover:bg-blue-600/20 border-blue-500/30 text-blue-400'}`}
@@ -184,7 +184,7 @@ const App: React.FC = () => {
 
                 <button 
                 onClick={handleLogout}
-                className={`flex items-center gap-2 px-3 py-1.5 border rounded-lg text-xs font-bold uppercase tracking-wider transition-all 
+                className={`flex items-center gap-2 px-3 py-1.5 border rounded-lg text-xs font-medium uppercase tracking-wider transition-all 
                     ${themeMode === 'light' 
                         ? 'bg-white hover:bg-red-50 border-red-200 text-red-600' 
                         : 'bg-red-500/10 hover:bg-red-500/20 border-red-500/30 text-red-400'}`}
@@ -211,7 +211,7 @@ const App: React.FC = () => {
           <div className="flex flex-col items-center justify-center flex-1 h-full">
             <div className="bg-red-500/10 border border-red-500/20 p-6 rounded-2xl flex flex-col items-center max-w-md text-center">
               <AlertCircle className="w-10 h-10 text-red-400 mb-3" />
-              <h3 className={`${themeMode === 'light' ? 'text-slate-900' : 'text-white'} font-bold mb-2`}>Sync Error</h3>
+              <h3 className={`${themeMode === 'light' ? 'text-slate-900' : 'text-white'} font-medium mb-2`}>Sync Error</h3>
               <p className="text-slate-400 text-sm mb-4">{error}</p>
               <button 
                 onClick={fetchData}

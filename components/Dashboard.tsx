@@ -69,7 +69,7 @@ const AssetSelector: React.FC<{
     <div className="relative" ref={dropdownRef}>
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-bold border transition-all ${
+        className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium border transition-all ${
           themeMode === 'light'
             ? 'bg-white border-slate-200 text-slate-800 hover:bg-slate-50'
             : 'bg-slate-900 border-white/10 text-white hover:bg-slate-800'
@@ -90,7 +90,7 @@ const AssetSelector: React.FC<{
             
             return (
               <div key={group.name} className="mb-2">
-                <div className={`px-3 py-1.5 text-xs font-bold uppercase tracking-wider ${
+                <div className={`px-3 py-1.5 text-xs font-medium uppercase tracking-wider ${
                   themeMode === 'light' ? 'text-slate-400' : 'text-slate-500'
                 }`}>
                   {group.name}
@@ -337,7 +337,7 @@ const Dashboard: React.FC<DashboardProps> = ({ summaryData, historyData, history
             pieChartFill: '#3b82f6',
             pieChartBg: '#cbd5e1',
             activeButtonBg: 'bg-blue-600 text-white',
-            aiButton: 'from-blue-100 to-cyan-100 text-blue-700 border-blue-200'
+            aiButton: 'from-blue-100 to-blue-100 text-blue-700 border-blue-200'
         };
     } 
     // Default (Ocean)
@@ -359,7 +359,7 @@ const Dashboard: React.FC<DashboardProps> = ({ summaryData, historyData, history
         pieChartFill: '#3b82f6',
         pieChartBg: '#64748b',
         activeButtonBg: 'bg-blue-600 text-white shadow-blue-900/40',
-        aiButton: 'from-cyan-600/20 to-blue-600/20 text-cyan-500 border-cyan-500/30'
+        aiButton: 'from-blue-600/20 to-blue-600/20 text-white border-white/30'
     };
   }, [themeMode]);
 
@@ -617,12 +617,12 @@ const Dashboard: React.FC<DashboardProps> = ({ summaryData, historyData, history
                 </div>
             </button>
             <div className="flex flex-col">
-                <h2 className={`text-xl font-bold flex items-center gap-3 tracking-tight font-heading leading-none ${themeStyles.textMain}`}>
+                <h2 className={`text-xl font-medium flex items-center gap-3 tracking-tight font-heading leading-none ${themeStyles.textMain}`}>
                     <Activity className={`w-5 h-5 ${selectedCommodity ? iconColor : themeStyles.textSub}`} />
                     {selectedCommodity ? selectedCommodity : "Market Overview"}
                 </h2>
                 {selectedItem && (
-                    <span className={`text-[10px] font-bold uppercase tracking-widest mt-1 ${themeStyles.textSub}`}>Futures & Options</span>
+                    <span className={`text-[10px] font-medium uppercase tracking-widest mt-1 ${themeStyles.textSub}`}>Futures & Options</span>
                 )}
             </div>
         </div>
@@ -643,7 +643,7 @@ const Dashboard: React.FC<DashboardProps> = ({ summaryData, historyData, history
                     <div className={`absolute inset-[1.5px] rounded-[10px] z-0 ${themeMode === 'light' ? 'bg-white' : 'bg-slate-900'}`}></div>
                     
                     {/* Content */}
-                    <div className={`relative z-10 flex items-center justify-center gap-1.5 sm:gap-2 w-full px-1.5 text-xs sm:text-[13px] font-bold ${themeMode === 'light' ? 'text-emerald-600' : 'text-emerald-400'}`}>
+                    <div className={`relative z-10 flex items-center justify-center gap-1.5 sm:gap-2 w-full px-1.5 text-xs sm:text-[13px] font-medium ${themeMode === 'light' ? 'text-emerald-600' : 'text-emerald-400'}`}>
                         <MapIcon className="w-4 h-4 shrink-0 group-hover:animate-pulse" />
                         <span className="truncate">Heatmap</span>
                     </div>
@@ -662,7 +662,7 @@ const Dashboard: React.FC<DashboardProps> = ({ summaryData, historyData, history
                     <div className={`absolute inset-[1.5px] rounded-[10px] z-0 ${themeMode === 'light' ? 'bg-white' : 'bg-slate-900'}`}></div>
                     
                     {/* Content */}
-                    <div className={`relative z-10 flex items-center justify-center gap-1.5 sm:gap-2 w-full px-1.5 text-xs sm:text-[13px] font-bold ${themeMode === 'light' ? 'text-indigo-600' : 'text-indigo-400'}`}>
+                    <div className={`relative z-10 flex items-center justify-center gap-1.5 sm:gap-2 w-full px-1.5 text-xs sm:text-[13px] font-medium ${themeMode === 'light' ? 'text-indigo-600' : 'text-indigo-400'}`}>
                         <Scale className="w-4 h-4 shrink-0 group-hover:animate-pulse" />
                         <span className="truncate">Compare</span>
                     </div>
@@ -681,7 +681,7 @@ const Dashboard: React.FC<DashboardProps> = ({ summaryData, historyData, history
                     <div className={`absolute inset-[1.5px] rounded-[10px] z-0 ${themeMode === 'light' ? 'bg-white' : 'bg-slate-900'}`}></div>
                     
                     {/* Content */}
-                    <div className={`relative z-10 flex items-center justify-center gap-1.5 sm:gap-2 w-full px-1.5 text-xs sm:text-[13px] font-bold ${themeMode === 'light' ? 'text-blue-600' : 'text-cyan-400'}`}>
+                    <div className={`relative z-10 flex items-center justify-center gap-1.5 sm:gap-2 w-full px-1.5 text-xs sm:text-[13px] font-medium ${themeMode === 'light' ? 'text-blue-600' : 'text-white'}`}>
                         <Sparkles className="w-4 h-4 shrink-0 group-hover:animate-pulse" />
                         <span className="truncate">AI Insight</span>
                     </div>
@@ -700,7 +700,7 @@ const Dashboard: React.FC<DashboardProps> = ({ summaryData, historyData, history
                     <div className={`absolute inset-[1.5px] rounded-[10px] z-0 ${themeMode === 'light' ? 'bg-white' : 'bg-slate-900'}`}></div>
                     
                     {/* Content */}
-                    <div className={`relative z-10 flex items-center justify-center gap-1.5 sm:gap-2 w-full px-1.5 text-xs sm:text-[13px] font-bold ${themeMode === 'light' ? 'text-cyan-700' : 'text-cyan-400'}`}>
+                    <div className={`relative z-10 flex items-center justify-center gap-1.5 sm:gap-2 w-full px-1.5 text-xs sm:text-[13px] font-medium ${themeMode === 'light' ? 'text-blue-700' : 'text-white'}`}>
                         <GraduationCap className="w-4 h-4 shrink-0 group-hover:scale-110 transition-transform" />
                         <span className="truncate">Guide</span>
                     </div>
@@ -741,7 +741,7 @@ const Dashboard: React.FC<DashboardProps> = ({ summaryData, historyData, history
 
                         return (
                             <div key={group.name} className="mt-2 mb-1">
-                                <div className={`px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider opacity-80 bg-black/10 mx-1 rounded-md mb-1 text-blue-400`}>
+                                <div className={`px-3 py-1.5 text-[10px] font-medium uppercase tracking-wider opacity-80 bg-black/10 mx-1 rounded-md mb-1 text-blue-400`}>
                                     {group.name}
                                 </div>
                                 {groupAssets.map(assetName => {
@@ -777,7 +777,7 @@ const Dashboard: React.FC<DashboardProps> = ({ summaryData, historyData, history
                     <div className={`w-full h-full [backface-visibility:hidden] p-5 rounded-3xl border shadow-xl flex flex-col transition-colors duration-500 ${themeStyles.chartBg}`}>
                         <div className="flex justify-between items-start mb-5">
                             <div>
-                                <h2 className={`text-2xl font-bold tracking-tight font-heading ${themeStyles.textMain}`}>
+                                <h2 className={`text-2xl font-medium tracking-tight font-heading ${themeStyles.textMain}`}>
                                     {selectedCommodity}
                                 </h2>
                                 <p className={`text-sm mt-1 ${themeStyles.textSub}`}>Market Overview</p>
@@ -797,10 +797,10 @@ const Dashboard: React.FC<DashboardProps> = ({ summaryData, historyData, history
                                 <InfoTooltip text="الفرق بين صفقات الشراء (Long) والبيع (Short). يعكس الاتجاه العام لصناع السوق." themeMode={themeMode} />
                             </div>
                             <div className="flex items-baseline gap-3 flex-wrap">
-                                <span className={`text-4xl font-mono font-bold tracking-tighter ${themeStyles.textMain}`}>
+                                <span className={`text-4xl font-mono font-medium tracking-tighter ${themeStyles.textMain}`}>
                                     {formatCurrency(selectedItem["Net Positions"])}
                                 </span>
-                                <span className={`text-sm font-bold px-2.5 py-1 rounded-lg flex items-center gap-1 ${
+                                <span className={`text-sm font-medium px-2.5 py-1 rounded-lg flex items-center gap-1 ${
                                     selectedItem["Net Change"] > 0 
                                         ? 'bg-emerald-500/10 text-emerald-500' 
                                         : selectedItem["Net Change"] < 0 
@@ -819,7 +819,7 @@ const Dashboard: React.FC<DashboardProps> = ({ summaryData, historyData, history
                                 const longRatio = selectedItem["Long Positions"] / total;
                                 if (longRatio > 0.8) {
                                     return (
-                                        <div className="mt-3 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-500/20 text-emerald-500 text-xs font-bold border border-emerald-500/30 animate-pulse">
+                                        <div className="mt-3 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-500/20 text-emerald-500 text-xs font-medium border border-emerald-500/30 animate-pulse">
                                             <AlertTriangle className="w-4 h-4" />
                                             Extreme Bullish (Overbought Warning)
                                         </div>
@@ -827,7 +827,7 @@ const Dashboard: React.FC<DashboardProps> = ({ summaryData, historyData, history
                                 }
                                 if (longRatio < 0.2) {
                                     return (
-                                        <div className="mt-3 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-rose-500/20 text-rose-500 text-xs font-bold border border-rose-500/30 animate-pulse">
+                                        <div className="mt-3 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-rose-500/20 text-rose-500 text-xs font-medium border border-rose-500/30 animate-pulse">
                                             <AlertTriangle className="w-4 h-4" />
                                             Extreme Bearish (Oversold Warning)
                                         </div>
@@ -839,7 +839,7 @@ const Dashboard: React.FC<DashboardProps> = ({ summaryData, historyData, history
 
                         {/* Sentiment Bar */}
                         <div className="mb-5">
-                            <div className="flex justify-between text-sm font-bold mb-3">
+                            <div className="flex justify-between text-sm font-medium mb-3">
                                 <div className="flex items-center gap-1.5 text-blue-500">
                                     <TrendingUp className="w-4 h-4" />
                                     <span>Long {((selectedItem["Long Positions"] / (selectedItem["Long Positions"] + selectedItem["Short Positions"])) * 100).toFixed(1)}%</span>
@@ -863,7 +863,7 @@ const Dashboard: React.FC<DashboardProps> = ({ summaryData, historyData, history
 
                         {/* This Week's Positions */}
                         <div className="space-y-3 mt-2">
-                            <p className={`text-xs font-bold uppercase tracking-wider mb-3 ${themeStyles.textSub}`}>This Week's Positions</p>
+                            <p className={`text-xs font-medium uppercase tracking-wider mb-3 ${themeStyles.textSub}`}>This Week's Positions</p>
                             <div className={`flex justify-between items-center p-3.5 rounded-2xl border transition-colors ${themeMode === 'light' ? 'bg-slate-50 border-slate-100' : 'bg-slate-900/50 border-white/5'}`}>
                                 <div className="flex items-center gap-2">
                                     <TrendingUp className="w-4 h-4 text-blue-500" />
@@ -871,8 +871,8 @@ const Dashboard: React.FC<DashboardProps> = ({ summaryData, historyData, history
                                     <InfoTooltip text="إجمالي عقود الشراء المفتوحة لصناع السوق." themeMode={themeMode} />
                                 </div>
                                 <div className="flex items-center gap-3">
-                                    <span className="font-mono font-bold text-blue-500">{formatCurrency(selectedItem["Long Positions"])}</span>
-                                    <span className={`text-xs font-bold px-1.5 py-0.5 rounded-md ${selectedItem["Long Change"] > 0 ? 'bg-blue-500/10 text-blue-500' : 'bg-slate-500/10 text-slate-500'}`}>
+                                    <span className="font-mono font-medium text-blue-500">{formatCurrency(selectedItem["Long Positions"])}</span>
+                                    <span className={`text-xs font-medium px-1.5 py-0.5 rounded-md ${selectedItem["Long Change"] > 0 ? 'bg-blue-500/10 text-blue-500' : 'bg-slate-500/10 text-slate-500'}`}>
                                         {selectedItem["Long Change"] > 0 ? '+' : ''}{formatCurrency(selectedItem["Long Change"])}
                                     </span>
                                 </div>
@@ -884,8 +884,8 @@ const Dashboard: React.FC<DashboardProps> = ({ summaryData, historyData, history
                                     <InfoTooltip text="إجمالي عقود البيع المفتوحة لصناع السوق." themeMode={themeMode} />
                                 </div>
                                 <div className="flex items-center gap-3">
-                                    <span className={`font-mono font-bold ${themeMode === 'light' ? 'text-slate-700' : 'text-white'}`}>{formatCurrency(selectedItem["Short Positions"])}</span>
-                                    <span className={`text-xs font-bold px-1.5 py-0.5 rounded-md ${selectedItem["Short Change"] > 0 ? (themeMode === 'light' ? 'bg-slate-200 text-slate-700' : 'bg-white/20 text-white') : 'bg-slate-500/10 text-slate-500'}`}>
+                                    <span className={`font-mono font-medium ${themeMode === 'light' ? 'text-slate-700' : 'text-white'}`}>{formatCurrency(selectedItem["Short Positions"])}</span>
+                                    <span className={`text-xs font-medium px-1.5 py-0.5 rounded-md ${selectedItem["Short Change"] > 0 ? (themeMode === 'light' ? 'bg-slate-200 text-slate-700' : 'bg-white/20 text-white') : 'bg-slate-500/10 text-slate-500'}`}>
                                         {selectedItem["Short Change"] > 0 ? '+' : ''}{formatCurrency(selectedItem["Short Change"])}
                                     </span>
                                 </div>
@@ -896,7 +896,7 @@ const Dashboard: React.FC<DashboardProps> = ({ summaryData, historyData, history
                         <div className="mt-6 flex-1 flex flex-col">
                             <div className="flex items-center gap-2 mb-3">
                                 <Edit3 className={`w-4 h-4 ${themeStyles.textSub}`} />
-                                <p className={`text-xs font-bold uppercase tracking-wider ${themeStyles.textSub}`}>My Trading Notes</p>
+                                <p className={`text-xs font-medium uppercase tracking-wider ${themeStyles.textSub}`}>My Trading Notes</p>
                             </div>
                             <textarea
                                 value={notes[selectedCommodity] || ''}
@@ -905,7 +905,7 @@ const Dashboard: React.FC<DashboardProps> = ({ summaryData, historyData, history
                                 className={`w-full flex-1 min-h-[100px] p-3 rounded-xl text-sm resize-none focus:outline-none focus:ring-2 transition-all ${
                                     themeMode === 'light' 
                                         ? 'bg-slate-50 border border-slate-200 text-slate-700 placeholder-slate-400 focus:ring-blue-500/50' 
-                                        : 'bg-slate-900/50 border border-white/5 text-slate-300 placeholder-slate-600 focus:ring-cyan-500/50'
+                                        : 'bg-slate-900/50 border border-white/5 text-slate-300 placeholder-slate-600 focus:ring-white/50'
                                 }`}
                             />
                         </div>
@@ -914,7 +914,7 @@ const Dashboard: React.FC<DashboardProps> = ({ summaryData, historyData, history
                     {/* Back Face - TradingView Chart */}
                     <div className={`absolute inset-0 w-full h-full [backface-visibility:hidden] [transform:rotateX(180deg)] p-4 rounded-3xl border shadow-xl flex flex-col transition-colors duration-500 ${themeStyles.chartBg}`}>
                         <div className="flex justify-between items-center mb-4 px-2">
-                            <h3 className={`text-lg font-bold tracking-tight font-heading ${themeStyles.textMain}`}>
+                            <h3 className={`text-lg font-medium tracking-tight font-heading ${themeStyles.textMain}`}>
                                 Live Chart
                             </h3>
                             <button 
@@ -938,7 +938,7 @@ const Dashboard: React.FC<DashboardProps> = ({ summaryData, historyData, history
                 <div className={`w-full flex-1 rounded-3xl border shadow-xl relative overflow-hidden flex flex-col transition-colors duration-500 animate-fade-in delay-100 ${themeStyles.chartBg}`}>
                     <div className={`flex flex-wrap items-center justify-between p-5 border-b relative z-20 ${themeMode === 'light' ? 'bg-slate-50 border-slate-200' : 'bg-slate-950/30 border-white/5'}`}>
                         <div>
-                            <h3 className={`text-lg font-bold tracking-tight font-heading flex items-center gap-2 ${themeStyles.textMain}`}>
+                            <h3 className={`text-lg font-medium tracking-tight font-heading flex items-center gap-2 ${themeStyles.textMain}`}>
                                 Historical Net Position
                                 <span className={`px-2 py-0.5 rounded text-[10px] border ${themeMode === 'light' ? 'bg-blue-50 text-blue-600 border-blue-200' : 'bg-blue-500/20 text-blue-300 border-blue-500/20'}`}>6 Weeks</span>
                             </h3>
@@ -957,18 +957,18 @@ const Dashboard: React.FC<DashboardProps> = ({ summaryData, historyData, history
                             />
                             <div className={`flex items-center gap-4 p-2 px-4 rounded-xl border hidden xl:flex ${themeMode === 'light' ? 'bg-white border-slate-200' : 'bg-slate-900/50 border-white/5'}`}>
                                 <div className="flex flex-col items-end">
-                                    <span className={`text-[10px] font-bold uppercase tracking-wider ${themeStyles.textSub}`}>High</span>
-                                    <span className={`text-sm font-mono font-bold ${themeMode === 'light' ? 'text-slate-700' : 'text-slate-200'}`}>{formatCurrency(chartStats.max)}</span>
+                                    <span className={`text-[10px] font-medium uppercase tracking-wider ${themeStyles.textSub}`}>High</span>
+                                    <span className={`text-sm font-mono font-medium ${themeMode === 'light' ? 'text-slate-700' : 'text-slate-200'}`}>{formatCurrency(chartStats.max)}</span>
                                 </div>
                                 <div className="w-px h-6 bg-current opacity-10"></div>
                                 <div className="flex flex-col items-end">
-                                    <span className={`text-[10px] font-bold uppercase tracking-wider ${themeStyles.textSub}`}>Avg</span>
-                                    <span className={`text-sm font-mono font-bold text-blue-500`}>{formatCurrency(chartStats.avg)}</span>
+                                    <span className={`text-[10px] font-medium uppercase tracking-wider ${themeStyles.textSub}`}>Avg</span>
+                                    <span className={`text-sm font-mono font-medium text-blue-500`}>{formatCurrency(chartStats.avg)}</span>
                                 </div>
                                 <div className="w-px h-6 bg-current opacity-10"></div>
                                 <div className="flex flex-col items-end">
-                                    <span className={`text-[10px] font-bold uppercase tracking-wider ${themeStyles.textSub}`}>Low</span>
-                                    <span className={`text-sm font-mono font-bold ${themeMode === 'light' ? 'text-slate-500' : 'text-slate-400'}`}>{formatCurrency(chartStats.min)}</span>
+                                    <span className={`text-[10px] font-medium uppercase tracking-wider ${themeStyles.textSub}`}>Low</span>
+                                    <span className={`text-sm font-mono font-medium ${themeMode === 'light' ? 'text-slate-500' : 'text-slate-400'}`}>{formatCurrency(chartStats.min)}</span>
                                 </div>
                             </div>
                         </div>
@@ -1102,7 +1102,7 @@ const Dashboard: React.FC<DashboardProps> = ({ summaryData, historyData, history
                         <ChevronDown className="w-5 h-5" />
                     </div>
                     <div>
-                        <h3 className={`text-base font-bold tracking-tight font-heading ${themeStyles.textMain}`}>Market Scanner</h3>
+                        <h3 className={`text-base font-medium tracking-tight font-heading ${themeStyles.textMain}`}>Market Scanner</h3>
                         <p className={`text-xs ${themeStyles.textSub}`}>Real-time institutional positioning</p>
                     </div>
                 </div>
@@ -1127,7 +1127,7 @@ const Dashboard: React.FC<DashboardProps> = ({ summaryData, historyData, history
             {isMarketScannerOpen && (
                 <div className="overflow-auto flex-1 custom-scrollbar">
                 <table className={`w-full text-xs text-left ${themeStyles.textSub} border-collapse`}>
-                    <thead className={`text-[11px] font-bold uppercase sticky top-0 z-10 shadow-lg backdrop-blur-md ${themeStyles.tableHeader}`}>
+                    <thead className={`text-[11px] font-medium uppercase sticky top-0 z-10 shadow-lg backdrop-blur-md ${themeStyles.tableHeader}`}>
                     <tr>
                         {[
                             { key: 'star', label: '', align: 'center', noSort: true },
@@ -1167,12 +1167,12 @@ const Dashboard: React.FC<DashboardProps> = ({ summaryData, historyData, history
                         : [];
                         
                         // Colors for table values - Blue/White Theme
-                        const posColor = themeMode === 'light' ? "text-blue-600" : "text-cyan-400";
+                        const posColor = themeMode === 'light' ? "text-blue-600" : "text-white";
                         const negColor = themeMode === 'light' ? "text-slate-600" : "text-white"; 
                         const mutedColor = themeMode === 'light' ? "text-slate-400" : "text-slate-500";
                         
                         // Sparkline Colors - Blue/Cyan theme
-                        const sparkColor = themeMode === 'light' ? '#2563eb' : '#22d3ee'; // Blue-600 or Cyan-400
+                        const sparkColor = themeMode === 'light' ? '#2563eb' : '#ffffff'; // Blue-600 or Cyan-400
 
                         return (
                         <tr 
@@ -1188,20 +1188,20 @@ const Dashboard: React.FC<DashboardProps> = ({ summaryData, historyData, history
                                     <Star className={`w-4 h-4 ${favorites.includes(row.Commodity) ? 'fill-current' : ''}`} />
                                 </button>
                             </td>
-                            <td className={`px-6 py-4 font-bold tracking-tight transition-colors ${themeStyles.textMain}`}>
+                            <td className={`px-6 py-4 font-medium tracking-tight transition-colors ${themeStyles.textMain}`}>
                                 <div className="flex items-center gap-3">
-                                    <div className={`w-2 h-2 rounded-full ${row["Net Change"] > 0 ? 'bg-cyan-400 shadow-[0_0_8px_rgba(34,211,238,0.5)]' : 'bg-slate-400'}`}></div>
+                                    <div className={`w-2 h-2 rounded-full ${row["Net Change"] > 0 ? 'bg-white shadow-[0_0_8px_rgba(34,211,238,0.5)]' : 'bg-slate-400'}`}></div>
                                     <span className="text-sm">{row.Commodity}</span>
                                 </div>
                             </td>
                             
-                            <td className={`px-6 py-4 text-right font-mono font-bold text-sm ${row["Net Positions"] > 0 ? (themeMode === 'light' ? 'text-blue-600' : 'text-blue-400') : mutedColor}`}>
+                            <td className={`px-6 py-4 text-right font-mono font-medium text-sm ${row["Net Positions"] > 0 ? (themeMode === 'light' ? 'text-blue-600' : 'text-blue-400') : mutedColor}`}>
                                 {formatCurrency(row["Net Positions"])}
                             </td>
 
                             <td className="px-6 py-4">
                                 <div className="flex flex-col gap-1 w-24 mx-auto">
-                                    <div className="flex justify-between text-[10px] font-bold uppercase opacity-70">
+                                    <div className="flex justify-between text-[10px] font-medium uppercase opacity-70">
                                         <span className="text-blue-400">L</span>
                                         <span className="text-slate-400">S</span>
                                     </div>
@@ -1222,9 +1222,9 @@ const Dashboard: React.FC<DashboardProps> = ({ summaryData, historyData, history
                             </td>
 
                             <td className="px-6 py-4 text-right">
-                                <div className={`inline-flex items-center justify-end gap-1 font-bold px-2 py-0.5 rounded-md border ${
+                                <div className={`inline-flex items-center justify-end gap-1 font-medium px-2 py-0.5 rounded-md border ${
                                     row["Net Change"] > 0 
-                                        ? (themeMode === 'light' ? 'bg-blue-50 text-blue-700 border-blue-200' : 'bg-cyan-500/10 text-cyan-400 border-cyan-500/20') 
+                                        ? (themeMode === 'light' ? 'bg-blue-50 text-blue-700 border-blue-200' : 'bg-white/10 text-white border-white/20') 
                                         : row["Net Change"] < 0 
                                             ? (themeMode === 'light' ? 'bg-slate-100 text-slate-700 border-slate-200' : 'bg-white/5 text-white border-white/10') 
                                             : (themeMode === 'light' ? 'bg-slate-50 text-slate-600 border-slate-200' : 'bg-slate-800 text-slate-400 border-white/5')

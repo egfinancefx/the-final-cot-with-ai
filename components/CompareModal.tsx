@@ -70,7 +70,7 @@ const CompareModal: React.FC<CompareModalProps> = ({ isOpen, onClose, onCompare,
               <Scale className="w-6 h-6" />
             </div>
             <div>
-              <h2 className={`text-xl font-bold font-heading ${themeStyles.textMain}`}>Advanced Comparison</h2>
+              <h2 className={`text-xl font-medium font-heading ${themeStyles.textMain}`}>Advanced Comparison</h2>
               <p className={`text-sm ${themeStyles.textSub}`}>Select 2 to 3 assets to compare</p>
             </div>
           </div>
@@ -87,7 +87,7 @@ const CompareModal: React.FC<CompareModalProps> = ({ isOpen, onClose, onCompare,
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {ASSET_GROUPS.map(group => (
               <div key={group.name} className="flex flex-col gap-2">
-                <h3 className={`text-xs font-bold uppercase tracking-wider px-2 py-1 rounded ${themeStyles.groupHeader}`}>
+                <h3 className={`text-xs font-medium uppercase tracking-wider px-2 py-1 rounded ${themeStyles.groupHeader}`}>
                   {group.name}
                 </h3>
                 <div className="flex flex-col gap-2">
@@ -134,7 +134,7 @@ const CompareModal: React.FC<CompareModalProps> = ({ isOpen, onClose, onCompare,
           <div className="flex items-center gap-3">
             <button
               onClick={onClose}
-              className={`px-4 py-2 rounded-xl text-sm font-bold transition-colors ${
+              className={`px-4 py-2 rounded-xl text-sm font-medium transition-colors ${
                 themeMode === 'light' ? 'text-slate-600 hover:bg-slate-200' : 'text-slate-300 hover:bg-white/10'
               }`}
             >
@@ -143,7 +143,7 @@ const CompareModal: React.FC<CompareModalProps> = ({ isOpen, onClose, onCompare,
             <button
               onClick={handleCompare}
               disabled={selectedAssets.length < 2}
-              className={`flex items-center gap-2 px-6 py-2 rounded-xl text-sm font-bold transition-all ${
+              className={`flex items-center gap-2 px-6 py-2 rounded-xl text-sm font-medium transition-all ${
                 selectedAssets.length >= 2
                   ? 'bg-blue-600 hover:bg-blue-700 text-white shadow-lg shadow-blue-500/25'
                   : 'bg-slate-300 text-slate-500 cursor-not-allowed dark:bg-slate-800 dark:text-slate-500'

@@ -208,7 +208,7 @@ ${contextDataStr}`;
             : 'bg-slate-900 group-hover:bg-slate-800'
         }`}></div>
 
-        <MessageCircle className={`relative z-10 w-6 h-6 ${isLight ? 'text-white' : 'text-cyan-400'} group-hover:animate-bounce`} />
+        <MessageCircle className={`relative z-10 w-6 h-6 ${isLight ? 'text-white' : 'text-white'} group-hover:animate-bounce`} />
       </button>
 
       {/* Chat Window */}
@@ -226,11 +226,11 @@ ${contextDataStr}`;
           isLight ? 'bg-slate-50 border-slate-200' : 'bg-slate-800 border-slate-700'
         }`}>
           <div className="flex items-center gap-2">
-            <div className={`p-1.5 rounded-lg ${isLight ? 'bg-blue-100 text-blue-600' : 'bg-blue-900/50 text-cyan-400'}`}>
+            <div className={`p-1.5 rounded-lg ${isLight ? 'bg-blue-100 text-blue-600' : 'bg-blue-900/50 text-white'}`}>
               <Brain className="w-5 h-5" />
             </div>
             <div>
-              <h3 className={`font-bold text-sm ${isLight ? 'text-slate-900' : 'text-white'}`}>EG-Finance Fx</h3>
+              <h3 className={`font-medium text-sm ${isLight ? 'text-slate-900' : 'text-white'}`}>EG-Finance Fx</h3>
             </div>
           </div>
           <button 
@@ -254,17 +254,17 @@ ${contextDataStr}`;
             <div key={idx} className={`flex gap-3 max-w-[85%] ${msg.role === 'user' ? 'ml-auto flex-row-reverse' : 'mr-auto'}`}>
               <div className={`shrink-0 w-8 h-8 rounded-full flex items-center justify-center ${
                 msg.role === 'user' 
-                  ? (isLight ? 'bg-blue-600 text-white' : 'bg-cyan-600 text-white')
-                  : (isLight ? 'bg-slate-200 text-slate-600' : 'bg-slate-800 text-cyan-400')
+                  ? (isLight ? 'bg-blue-600 text-white' : 'bg-blue-500 text-white')
+                  : (isLight ? 'bg-slate-200 text-slate-600' : 'bg-slate-800 text-white')
               }`}>
                 {msg.role === 'user' ? <User className="w-4 h-4" /> : <Brain className="w-4 h-4" />}
               </div>
               <div className={`p-3 rounded-2xl text-sm ${
                 msg.role === 'user'
-                  ? (isLight ? 'bg-blue-600 text-white rounded-tr-sm' : 'bg-cyan-600 text-white rounded-tr-sm')
+                  ? (isLight ? 'bg-blue-600 text-white rounded-tr-sm' : 'bg-blue-500 text-white rounded-tr-sm')
                   : (isLight ? 'bg-slate-100 text-slate-800 rounded-tl-sm' : 'bg-slate-800 text-slate-200 rounded-tl-sm')
               }`} dir="auto">
-                <div className="markdown-body prose prose-sm max-w-none dark:prose-invert [&>p]:mb-2 [&>p:last-child]:mb-0 [&>ul]:list-disc [&>ul]:pl-4 [&>ul]:mb-2 [&>ol]:list-decimal [&>ol]:pl-4 [&>ol]:mb-2 [&>h1]:font-bold [&>h1]:text-lg [&>h2]:font-bold [&>h2]:text-base [&>h3]:font-bold [&>strong]:font-bold">
+                <div className="markdown-body prose prose-sm max-w-none dark:prose-invert [&>p]:mb-2 [&>p:last-child]:mb-0 [&>ul]:list-disc [&>ul]:pl-4 [&>ul]:mb-2 [&>ol]:list-decimal [&>ol]:pl-4 [&>ol]:mb-2 [&>h1]:font-medium [&>h1]:text-lg [&>h2]:font-medium [&>h2]:text-base [&>h3]:font-medium [&>strong]:font-medium">
                   <ReactMarkdown>{msg.text}</ReactMarkdown>
                 </div>
               </div>
@@ -279,7 +279,7 @@ ${contextDataStr}`;
                   className={`text-right px-4 py-2.5 rounded-2xl rounded-tr-sm text-sm transition-all border ${
                     isLight 
                       ? 'bg-white border-blue-200 text-blue-700 hover:bg-blue-50' 
-                      : 'bg-slate-800/50 border-cyan-800/50 text-cyan-400 hover:bg-cyan-900/30'
+                      : 'bg-slate-800/50 border-blue-800/50 text-white hover:bg-blue-900/30'
                   }`}
                   dir="rtl"
                 >
@@ -291,7 +291,7 @@ ${contextDataStr}`;
           {isLoading && (
             <div className="flex gap-3 max-w-[85%] mr-auto">
               <div className={`shrink-0 w-8 h-8 rounded-full flex items-center justify-center ${
-                isLight ? 'bg-slate-200 text-slate-600' : 'bg-slate-800 text-cyan-400'
+                isLight ? 'bg-slate-200 text-slate-600' : 'bg-slate-800 text-white'
               }`}>
                 <Brain className="w-4 h-4" />
               </div>
@@ -316,7 +316,7 @@ ${contextDataStr}`;
               className={`w-full pl-4 pr-12 py-3 rounded-xl resize-none focus:outline-none focus:ring-2 transition-all ${
                 isLight 
                   ? 'bg-slate-100 text-slate-900 placeholder-slate-500 focus:ring-blue-500/50' 
-                  : 'bg-slate-900 text-white placeholder-slate-500 focus:ring-cyan-500/50 border border-slate-700'
+                  : 'bg-slate-900 text-white placeholder-slate-500 focus:ring-white/50 border border-slate-700'
               }`}
               rows={1}
               style={{ minHeight: '48px', maxHeight: '120px' }}
@@ -327,7 +327,7 @@ ${contextDataStr}`;
               className={`absolute right-2 bottom-2 p-1.5 rounded-lg transition-colors disabled:opacity-50 ${
                 isLight 
                   ? 'bg-blue-600 text-white hover:bg-blue-700' 
-                  : 'bg-cyan-600 text-white hover:bg-cyan-500'
+                  : 'bg-blue-500 text-white hover:bg-white'
               }`}
             >
               <Send className="w-4 h-4" />

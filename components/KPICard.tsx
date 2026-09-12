@@ -31,7 +31,7 @@ const KPICard: React.FC<KPICardProps> = ({ title, value, change, subtext, icon, 
         },
         success: { 
             bg: "bg-slate-900", border: "border-blue-500/40", text: "text-white", 
-            iconBg: "bg-blue-500/25", iconText: "text-cyan-300", sub: "text-blue-200/70",
+            iconBg: "bg-blue-500/25", iconText: "text-blue-200", sub: "text-blue-200/70",
             chartStroke: "#38bdf8", chartFill: "#0284c7", glow: "bg-blue-500/25" 
         },
         danger: { 
@@ -40,9 +40,9 @@ const KPICard: React.FC<KPICardProps> = ({ title, value, change, subtext, icon, 
             chartStroke: "#f8fafc", chartFill: "#cbd5e1", glow: "bg-white/15" 
         },
         info: { 
-            bg: "bg-slate-900", border: "border-cyan-500/30", text: "text-white", 
-            iconBg: "bg-cyan-500/20", iconText: "text-cyan-400", sub: "text-cyan-200/60",
-            chartStroke: "#22d3ee", chartFill: "#06b6d4", glow: "bg-cyan-500/20" 
+            bg: "bg-slate-900", border: "border-white/30", text: "text-white", 
+            iconBg: "bg-white/20", iconText: "text-white", sub: "text-blue-100/60",
+            chartStroke: "#22d3ee", chartFill: "#06b6d4", glow: "bg-white/20" 
         },
         neutral: { bg: "bg-slate-900", border: "border-slate-700", text: "text-slate-200", iconBg: "bg-slate-700/50", iconText: "text-slate-400", sub: "text-slate-500", chartStroke: "#94a3b8", chartFill: "#64748b", glow: "bg-slate-500/10" }
       },
@@ -63,9 +63,9 @@ const KPICard: React.FC<KPICardProps> = ({ title, value, change, subtext, icon, 
             chartStroke: "#64748b", chartFill: "#94a3b8", glow: "bg-slate-400/10" 
         },
         info: { 
-            bg: "bg-white", border: "border-cyan-200", text: "text-slate-900", 
-            iconBg: "bg-cyan-100", iconText: "text-cyan-600", sub: "text-slate-500",
-            chartStroke: "#0891b2", chartFill: "#06b6d4", glow: "bg-cyan-400/10" 
+            bg: "bg-white", border: "border-blue-200", text: "text-slate-900", 
+            iconBg: "bg-blue-100", iconText: "text-blue-600", sub: "text-slate-500",
+            chartStroke: "#0891b2", chartFill: "#06b6d4", glow: "bg-white/10" 
         },
         neutral: { bg: "bg-slate-50", border: "border-slate-200", text: "text-slate-700", iconBg: "bg-slate-200", iconText: "text-slate-600", sub: "text-slate-400", chartStroke: "#64748b", chartFill: "#94a3b8", glow: "bg-slate-400/5" }
       }
@@ -85,7 +85,7 @@ const KPICard: React.FC<KPICardProps> = ({ title, value, change, subtext, icon, 
         return 'bg-slate-100 text-slate-600 border-slate-200';
     }
     // Dark themes (Ocean): Blue for positive, White for negative
-    if (isPositive) return 'bg-blue-500/15 text-cyan-300 border-blue-500/30 group-hover:bg-blue-500/25';
+    if (isPositive) return 'bg-blue-500/15 text-blue-200 border-blue-500/30 group-hover:bg-blue-500/25';
     if (isNegative) return 'bg-white/10 text-white border-white/30 group-hover:bg-white/20';
     return 'bg-slate-800/40 text-slate-400 border-slate-700';
   };
@@ -99,9 +99,9 @@ const KPICard: React.FC<KPICardProps> = ({ title, value, change, subtext, icon, 
       <div className="flex justify-between items-start z-10">
         <div className="flex flex-col">
            <div className="flex items-center gap-2 mb-1">
-             <span className={`text-[10px] font-bold uppercase tracking-widest ${style.sub} opacity-90`}>{title}</span>
+             <span className={`text-[10px] font-medium uppercase tracking-widest ${style.sub} opacity-90`}>{title}</span>
            </div>
-           <h3 className={`text-3xl font-black tracking-tighter font-heading ${style.text} drop-shadow-sm`}>{value}</h3>
+           <h3 className={`text-3xl font-semibold tracking-tighter font-heading ${style.text} drop-shadow-sm`}>{value}</h3>
         </div>
         
         {icon && (
@@ -146,7 +146,7 @@ const KPICard: React.FC<KPICardProps> = ({ title, value, change, subtext, icon, 
           <span className={`text-[11px] font-medium tracking-wide ${style.sub}`}>{subtext}</span>
 
           {(change !== undefined) && (
-             <div className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg border text-xs font-bold font-mono shadow-sm backdrop-blur-md transition-all duration-300 group-hover:shadow-md ${getPillStyle()}`}>
+             <div className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg border text-xs font-medium font-mono shadow-sm backdrop-blur-md transition-all duration-300 group-hover:shadow-md ${getPillStyle()}`}>
                 {isPositive ? <ArrowUp className="w-3.5 h-3.5" /> : isNegative ? <ArrowDown className="w-3.5 h-3.5" /> : <Minus className="w-3.5 h-3.5" />}
                 <span>{Math.abs(change).toLocaleString()}</span>
              </div>

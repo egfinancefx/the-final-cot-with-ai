@@ -299,7 +299,7 @@ const AIAnalysisOverlay: React.FC<AIAnalysisOverlayProps> = ({ isOpen, onClose, 
                   <div className="p-3.5 bg-amber-500/10 border border-amber-500/20 rounded-2xl">
                       <AlertTriangle className="w-8 h-8 text-amber-400" />
                   </div>
-                  <h3 className="text-xl font-bold text-white">Market Analysis</h3>
+                  <h3 className="text-xl font-medium text-white">Market Analysis</h3>
                   <p className="text-slate-300 text-sm max-w-lg leading-relaxed whitespace-pre-wrap font-sans">{analysis || "No analysis available."}</p>
               </div>
           );
@@ -329,10 +329,10 @@ const AIAnalysisOverlay: React.FC<AIAnalysisOverlayProps> = ({ isOpen, onClose, 
                               <div className={`p-2 rounded-lg ${isBullish ? 'bg-emerald-500/10' : isBearish ? 'bg-rose-500/10' : 'bg-blue-500/10'}`}>
                                 <Activity className={`w-5 h-5 ${isBullish ? 'text-emerald-400' : isBearish ? 'text-rose-400' : 'text-blue-400'}`} />
                               </div>
-                              <span className="text-xs font-bold uppercase tracking-widest text-slate-400">Market Sentiment</span>
+                              <span className="text-xs font-medium uppercase tracking-widest text-slate-400">Market Sentiment</span>
                           </div>
-                          <h2 className={`text-4xl font-black tracking-tight mb-3 bg-clip-text text-transparent bg-gradient-to-r 
-                              ${isBullish ? 'from-emerald-400 to-teal-300' : isBearish ? 'from-rose-400 to-orange-300' : 'from-blue-400 to-indigo-300'}`}>
+                          <h2 className={`text-4xl font-semibold tracking-tight mb-3 bg-clip-text text-transparent bg-gradient-to-r 
+                              ${isBullish ? 'from-emerald-400 to-teal-300' : isBearish ? 'from-rose-400 to-blue-300' : 'from-blue-400 to-indigo-300'}`}>
                               {parsedData.sentiment.label}
                           </h2>
                           <p className="text-slate-300 text-sm leading-relaxed font-medium opacity-90">
@@ -345,12 +345,12 @@ const AIAnalysisOverlay: React.FC<AIAnalysisOverlayProps> = ({ isOpen, onClose, 
                           <div className="mt-8 pt-6 border-t border-white/5 relative z-10">
                               <div className="flex justify-between items-end">
                                   <div>
-                                      <div className="text-[10px] uppercase tracking-wider text-slate-500 mb-1 font-bold">Net Positions</div>
-                                      <div className="font-mono font-bold text-xl text-white tracking-tight">{formatCurrency(data["Net Positions"])}</div>
+                                      <div className="text-[10px] uppercase tracking-wider text-slate-500 mb-1 font-medium">Net Positions</div>
+                                      <div className="font-mono font-medium text-xl text-white tracking-tight">{formatCurrency(data["Net Positions"])}</div>
                                   </div>
                                   <div className={`text-right ${isRTL ? 'text-left' : ''}`}>
-                                      <div className="text-[10px] uppercase tracking-wider text-slate-500 mb-1 font-bold">Weekly Change</div>
-                                      <div className={`font-mono font-bold text-lg flex items-center gap-1 ${data["Net Change"] > 0 ? 'text-emerald-400' : 'text-rose-400'} ${isRTL ? 'flex-row-reverse' : 'justify-end'}`}>
+                                      <div className="text-[10px] uppercase tracking-wider text-slate-500 mb-1 font-medium">Weekly Change</div>
+                                      <div className={`font-mono font-medium text-lg flex items-center gap-1 ${data["Net Change"] > 0 ? 'text-emerald-400' : 'text-rose-400'} ${isRTL ? 'flex-row-reverse' : 'justify-end'}`}>
                                           {data["Net Change"] > 0 ? <TrendingUp className="w-4 h-4" /> : <TrendingDown className="w-4 h-4" />}
                                           {formatCurrency(data["Net Change"])}
                                       </div>
@@ -362,26 +362,26 @@ const AIAnalysisOverlay: React.FC<AIAnalysisOverlayProps> = ({ isOpen, onClose, 
 
                   {/* Mentor Strategy Card */}
                   <div className="lg:col-span-2 bg-slate-900/40 border border-white/5 rounded-3xl p-8 relative overflow-hidden backdrop-blur-sm group hover:border-white/10 transition-all duration-500">
-                      <div className={`absolute top-0 w-1.5 h-full bg-gradient-to-b from-blue-500 via-cyan-400 to-blue-600 ${isRTL ? 'right-0' : 'left-0'}`}></div>
+                      <div className={`absolute top-0 w-1.5 h-full bg-gradient-to-b from-blue-500 via-white to-blue-600 ${isRTL ? 'right-0' : 'left-0'}`}></div>
                       
                       <div className="flex items-start gap-5 mb-8">
-                          <div className="p-3.5 bg-gradient-to-br from-blue-600 to-cyan-600 rounded-2xl shadow-lg shadow-blue-500/20 shrink-0 ring-1 ring-white/10">
+                          <div className="p-3.5 bg-gradient-to-br from-blue-600 to-blue-500 rounded-2xl shadow-lg shadow-blue-500/20 shrink-0 ring-1 ring-white/10">
                               <Brain className="w-6 h-6 text-white" />
                           </div>
                           <div>
-                              <h3 className="text-2xl font-bold text-white mb-2 font-heading tracking-tight">Mentor's Perspective</h3>
+                              <h3 className="text-2xl font-medium text-white mb-2 font-heading tracking-tight">Mentor's Perspective</h3>
                               <p className="text-slate-400 text-sm leading-relaxed max-w-2xl">{parsedData.perspective}</p>
                           </div>
                       </div>
 
-                      <div className="bg-gradient-to-r from-blue-500/10 to-cyan-500/5 rounded-2xl p-6 border border-blue-500/10 relative overflow-hidden group-hover:border-blue-500/20 transition-colors">
+                      <div className="bg-gradient-to-r from-blue-500/10 to-blue-400/5 rounded-2xl p-6 border border-blue-500/10 relative overflow-hidden group-hover:border-blue-500/20 transition-colors">
                           <div className="absolute top-0 right-0 p-3 opacity-10">
                               <Target className="w-24 h-24 text-blue-400 -rotate-12" />
                           </div>
                           <div className="relative z-10">
-                            <div className="flex items-center gap-2 mb-3 text-cyan-400">
+                            <div className="flex items-center gap-2 mb-3 text-white">
                                 <Sparkles className="w-4 h-4" />
-                                <span className="text-xs font-bold uppercase tracking-wider">If I Were You</span>
+                                <span className="text-xs font-medium uppercase tracking-wider">If I Were You</span>
                             </div>
                             <p className="text-blue-50 text-lg font-medium leading-relaxed italic">
                                 "{parsedData.actionable_advice}"
@@ -402,17 +402,17 @@ const AIAnalysisOverlay: React.FC<AIAnalysisOverlayProps> = ({ isOpen, onClose, 
                                         <Scale className="w-4 h-4" />
                                       </div>
                                       <div>
-                                          <span className="text-xs font-bold uppercase tracking-widest block">Key Price Levels</span>
+                                          <span className="text-xs font-medium uppercase tracking-widest block">Key Price Levels</span>
                                           <span className="text-[10px] text-slate-400 font-normal">ICT Order Flow & Technical Anchors</span>
                                       </div>
                                   </div>
                                   {parsedData.key_levels.current_price && (
-                                      <div className="flex items-center gap-2 px-3 py-1 bg-cyan-500/10 border border-cyan-500/30 rounded-full">
+                                      <div className="flex items-center gap-2 px-3 py-1 bg-white/10 border border-white/30 rounded-full">
                                           <span className="relative flex h-2 w-2">
-                                            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-cyan-400 opacity-75"></span>
-                                            <span className="relative inline-flex rounded-full h-2 w-2 bg-cyan-500"></span>
+                                            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-white opacity-75"></span>
+                                            <span className="relative inline-flex rounded-full h-2 w-2 bg-white"></span>
                                           </span>
-                                          <span className="text-[11px] font-mono font-bold text-cyan-300">
+                                          <span className="text-[11px] font-mono font-medium text-blue-200">
                                               Spot: {parsedData.key_levels.current_price}
                                           </span>
                                       </div>
@@ -434,11 +434,11 @@ const AIAnalysisOverlay: React.FC<AIAnalysisOverlayProps> = ({ isOpen, onClose, 
                                                   </div>
                                                   <div className="flex-1 flex flex-col min-w-0">
                                                       <div className="flex justify-between items-baseline">
-                                                          <span className="text-[10px] font-bold text-purple-400 uppercase tracking-widest mb-0.5">Macro Supply</span>
+                                                          <span className="text-[10px] font-medium text-purple-400 uppercase tracking-widest mb-0.5">Macro Supply</span>
                                                           <span className="text-[10px] text-purple-400/60 font-mono">R2</span>
                                                       </div>
                                                       <div className="p-2.5 bg-slate-900/50 border border-white/5 rounded-lg flex justify-between items-center group-hover:border-purple-500/30 transition-colors">
-                                                          <span className="font-mono font-bold text-slate-100 text-sm md:text-base tracking-tight truncate">{parsedData.key_levels.resistance_2}</span>
+                                                          <span className="font-mono font-medium text-slate-100 text-sm md:text-base tracking-tight truncate">{parsedData.key_levels.resistance_2}</span>
                                                       </div>
                                                   </div>
                                               </div>
@@ -451,11 +451,11 @@ const AIAnalysisOverlay: React.FC<AIAnalysisOverlayProps> = ({ isOpen, onClose, 
                                               </div>
                                               <div className="flex-1 flex flex-col min-w-0">
                                                   <div className="flex justify-between items-baseline">
-                                                      <span className="text-[10px] font-bold text-rose-400 uppercase tracking-widest mb-0.5">Resistance</span>
+                                                      <span className="text-[10px] font-medium text-rose-400 uppercase tracking-widest mb-0.5">Resistance</span>
                                                       <span className="text-[10px] text-rose-400/60 font-mono">R1</span>
                                                   </div>
                                                   <div className="p-2.5 bg-slate-900/50 border border-white/5 rounded-lg flex justify-between items-center group-hover:border-rose-500/30 transition-colors">
-                                                      <span className="font-mono font-bold text-white text-sm md:text-base tracking-tight truncate">{parsedData.key_levels.resistance}</span>
+                                                      <span className="font-mono font-medium text-white text-sm md:text-base tracking-tight truncate">{parsedData.key_levels.resistance}</span>
                                                       <div className="w-2 h-2 rounded-full bg-rose-500 animate-pulse shrink-0 ml-2"></div>
                                                   </div>
                                               </div>
@@ -465,15 +465,15 @@ const AIAnalysisOverlay: React.FC<AIAnalysisOverlayProps> = ({ isOpen, onClose, 
                                           {parsedData.key_levels.current_price && (
                                               <div className="relative flex items-center gap-4 py-0.5 z-10">
                                                   <div className="w-12 flex justify-center shrink-0">
-                                                      <div className="w-3.5 h-3.5 rounded-full bg-cyan-400 shadow-[0_0_12px_#22d3ee] flex items-center justify-center">
+                                                      <div className="w-3.5 h-3.5 rounded-full bg-white shadow-[0_0_12px_#22d3ee] flex items-center justify-center">
                                                           <div className="w-1.5 h-1.5 rounded-full bg-slate-950"></div>
                                                       </div>
                                                   </div>
-                                                  <div className="flex-1 flex items-center gap-2 border-t border-dashed border-cyan-500/30">
-                                                      <span className="text-[10px] uppercase font-mono font-bold tracking-wider text-cyan-300 bg-cyan-950/40 px-2 py-0.5 rounded border border-cyan-500/30">
+                                                  <div className="flex-1 flex items-center gap-2 border-t border-dashed border-white/30">
+                                                      <span className="text-[10px] uppercase font-mono font-medium tracking-wider text-blue-200 bg-blue-950/40 px-2 py-0.5 rounded border border-white/30">
                                                           Current Spot Price
                                                       </span>
-                                                      <span className="font-mono text-xs font-semibold text-cyan-200">
+                                                      <span className="font-mono text-xs font-semibold text-blue-100">
                                                           {parsedData.key_levels.current_price}
                                                       </span>
                                                   </div>
@@ -487,11 +487,11 @@ const AIAnalysisOverlay: React.FC<AIAnalysisOverlayProps> = ({ isOpen, onClose, 
                                               </div>
                                               <div className="flex-1 flex flex-col min-w-0">
                                                   <div className="flex justify-between items-baseline">
-                                                      <span className="text-[10px] font-bold text-yellow-400 uppercase tracking-widest mb-0.5">Pivot Point</span>
+                                                      <span className="text-[10px] font-medium text-yellow-400 uppercase tracking-widest mb-0.5">Pivot Point</span>
                                                       <span className="text-[10px] text-yellow-400/60 font-mono">PP (Equilibrium)</span>
                                                   </div>
                                                   <div className="p-2.5 bg-slate-900/50 border border-white/5 rounded-lg flex justify-between items-center group-hover:border-yellow-500/30 transition-colors">
-                                                      <span className="font-mono font-bold text-white text-sm md:text-base tracking-tight truncate">{parsedData.key_levels.pivot_point}</span>
+                                                      <span className="font-mono font-medium text-white text-sm md:text-base tracking-tight truncate">{parsedData.key_levels.pivot_point}</span>
                                                       <div className="w-2 h-2 rounded-full bg-yellow-500 shrink-0 ml-2"></div>
                                                   </div>
                                               </div>
@@ -504,11 +504,11 @@ const AIAnalysisOverlay: React.FC<AIAnalysisOverlayProps> = ({ isOpen, onClose, 
                                               </div>
                                               <div className="flex-1 flex flex-col min-w-0">
                                                   <div className="flex justify-between items-baseline">
-                                                      <span className="text-[10px] font-bold text-emerald-400 uppercase tracking-widest mb-0.5">Support</span>
+                                                      <span className="text-[10px] font-medium text-emerald-400 uppercase tracking-widest mb-0.5">Support</span>
                                                       <span className="text-[10px] text-emerald-400/60 font-mono">S1</span>
                                                   </div>
                                                   <div className="p-2.5 bg-slate-900/50 border border-white/5 rounded-lg flex justify-between items-center group-hover:border-emerald-500/30 transition-colors">
-                                                      <span className="font-mono font-bold text-white text-sm md:text-base tracking-tight truncate">{parsedData.key_levels.support}</span>
+                                                      <span className="font-mono font-medium text-white text-sm md:text-base tracking-tight truncate">{parsedData.key_levels.support}</span>
                                                       <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse shrink-0 ml-2"></div>
                                                   </div>
                                               </div>
@@ -522,11 +522,11 @@ const AIAnalysisOverlay: React.FC<AIAnalysisOverlayProps> = ({ isOpen, onClose, 
                                                   </div>
                                                   <div className="flex-1 flex flex-col min-w-0">
                                                       <div className="flex justify-between items-baseline">
-                                                          <span className="text-[10px] font-bold text-teal-400 uppercase tracking-widest mb-0.5">Discount Demand</span>
+                                                          <span className="text-[10px] font-medium text-teal-400 uppercase tracking-widest mb-0.5">Discount Demand</span>
                                                           <span className="text-[10px] text-teal-400/60 font-mono">S2</span>
                                                       </div>
                                                       <div className="p-2.5 bg-slate-900/50 border border-white/5 rounded-lg flex justify-between items-center group-hover:border-teal-500/30 transition-colors">
-                                                          <span className="font-mono font-bold text-slate-100 text-sm md:text-base tracking-tight truncate">{parsedData.key_levels.support_2}</span>
+                                                          <span className="font-mono font-medium text-slate-100 text-sm md:text-base tracking-tight truncate">{parsedData.key_levels.support_2}</span>
                                                       </div>
                                                   </div>
                                               </div>
@@ -540,11 +540,11 @@ const AIAnalysisOverlay: React.FC<AIAnalysisOverlayProps> = ({ isOpen, onClose, 
                                                   </div>
                                                   <div className="flex-1 flex flex-col min-w-0">
                                                       <div className="flex justify-between items-baseline">
-                                                          <span className="text-[10px] font-bold text-amber-400 uppercase tracking-widest mb-0.5">Thesis Invalidation</span>
+                                                          <span className="text-[10px] font-medium text-amber-400 uppercase tracking-widest mb-0.5">Thesis Invalidation</span>
                                                           <span className="text-[10px] text-amber-400/70 font-mono font-semibold">Risk Limit</span>
                                                       </div>
                                                       <div className="p-2.5 bg-amber-950/25 border border-amber-500/25 rounded-lg flex justify-between items-center group-hover:border-amber-500/40 transition-colors">
-                                                          <span className="font-mono font-bold text-amber-200 text-xs md:text-sm tracking-tight truncate">{parsedData.key_levels.invalidation_level}</span>
+                                                          <span className="font-mono font-medium text-amber-200 text-xs md:text-sm tracking-tight truncate">{parsedData.key_levels.invalidation_level}</span>
                                                       </div>
                                                   </div>
                                               </div>
@@ -558,13 +558,13 @@ const AIAnalysisOverlay: React.FC<AIAnalysisOverlayProps> = ({ isOpen, onClose, 
                       {parsedData.institutional_bias && (
                           <div className="bg-slate-800/30 border border-white/5 rounded-2xl p-6 flex flex-col relative overflow-hidden group">
                               {/* Background Graphic */}
-                              <div className="absolute -right-6 -bottom-6 w-32 h-32 bg-orange-500/10 rounded-full blur-2xl pointer-events-none group-hover:bg-orange-500/20 transition-colors duration-500"></div>
+                              <div className="absolute -right-6 -bottom-6 w-32 h-32 bg-white/10 rounded-full blur-2xl pointer-events-none group-hover:bg-white/20 transition-colors duration-500"></div>
 
-                              <div className="flex items-center gap-3 mb-5 text-orange-400 relative z-10">
-                                  <div className="p-2 bg-orange-500/10 rounded-lg">
+                              <div className="flex items-center gap-3 mb-5 text-white relative z-10">
+                                  <div className="p-2 bg-white/10 rounded-lg">
                                     <Activity className="w-4 h-4" />
                                   </div>
-                                  <span className="text-xs font-bold uppercase tracking-widest">Institutional Flow</span>
+                                  <span className="text-xs font-medium uppercase tracking-widest">Institutional Flow</span>
                               </div>
                               
                               <div className="flex-1 relative z-10 flex flex-col">
@@ -576,7 +576,7 @@ const AIAnalysisOverlay: React.FC<AIAnalysisOverlayProps> = ({ isOpen, onClose, 
                                 
                                 {/* Visual Flow Indicator */}
                                 <div>
-                                    <div className="flex justify-between mb-2 text-[10px] font-bold uppercase text-slate-500">
+                                    <div className="flex justify-between mb-2 text-[10px] font-medium uppercase text-slate-500">
                                         <span>Net Short</span>
                                         <span>Neutral</span>
                                         <span>Net Long</span>
@@ -584,7 +584,7 @@ const AIAnalysisOverlay: React.FC<AIAnalysisOverlayProps> = ({ isOpen, onClose, 
                                     <div className="h-2 bg-slate-700/50 rounded-full overflow-hidden flex relative">
                                         {/* Animated Bar */}
                                         <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent w-full -translate-x-full animate-[shimmer_2s_infinite]"></div>
-                                        <div className="h-full bg-gradient-to-r from-orange-500/50 to-orange-400 w-2/3 rounded-full"></div>
+                                        <div className="h-full bg-gradient-to-r from-blue-500/50 to-white w-2/3 rounded-full"></div>
                                     </div>
                                 </div>
                               </div>
@@ -603,7 +603,7 @@ const AIAnalysisOverlay: React.FC<AIAnalysisOverlayProps> = ({ isOpen, onClose, 
                             <div className="p-2 bg-indigo-500/10 rounded-lg">
                                 <Globe className="w-4 h-4" />
                             </div>
-                            <span className="text-xs font-bold uppercase tracking-widest">Global Context & Highlights</span>
+                            <span className="text-xs font-medium uppercase tracking-widest">Global Context & Highlights</span>
                         </div>
 
                         {parsedData.global_context ? (
@@ -615,8 +615,8 @@ const AIAnalysisOverlay: React.FC<AIAnalysisOverlayProps> = ({ isOpen, onClose, 
                                         {parsedData.global_context.market_sentiment_score !== undefined && (
                                             <div className="bg-slate-900/50 rounded-xl p-4 border border-white/5">
                                                 <div className="flex justify-between items-end mb-2">
-                                                    <span className="text-[10px] font-bold uppercase text-slate-500">Fear & Greed</span>
-                                                    <span className={`text-xl font-bold ${parsedData.global_context.market_sentiment_score > 50 ? 'text-emerald-400' : 'text-rose-400'}`}>
+                                                    <span className="text-[10px] font-medium uppercase text-slate-500">Fear & Greed</span>
+                                                    <span className={`text-xl font-medium ${parsedData.global_context.market_sentiment_score > 50 ? 'text-emerald-400' : 'text-rose-400'}`}>
                                                         {parsedData.global_context.market_sentiment_score}
                                                     </span>
                                                 </div>
@@ -634,11 +634,11 @@ const AIAnalysisOverlay: React.FC<AIAnalysisOverlayProps> = ({ isOpen, onClose, 
                                             <div className="bg-slate-900/50 rounded-xl p-4 border border-white/5">
                                                 <div className="flex items-center gap-2 mb-2 text-rose-400">
                                                     <ShieldAlert className="w-3 h-3" />
-                                                    <span className="text-[10px] font-bold uppercase">Key Risks</span>
+                                                    <span className="text-[10px] font-medium uppercase">Key Risks</span>
                                                 </div>
                                                 <div className="flex flex-wrap gap-2">
                                                     {parsedData.global_context.key_risks.map((risk, idx) => (
-                                                        <span key={idx} className="text-[10px] font-bold px-2 py-1 rounded bg-rose-500/10 text-rose-300 border border-rose-500/20">
+                                                        <span key={idx} className="text-[10px] font-medium px-2 py-1 rounded bg-rose-500/10 text-rose-300 border border-rose-500/20">
                                                             {risk}
                                                         </span>
                                                     ))}
@@ -668,7 +668,7 @@ const AIAnalysisOverlay: React.FC<AIAnalysisOverlayProps> = ({ isOpen, onClose, 
                                             <TrendingUp className="w-4 h-4 text-indigo-400" />
                                         </div>
                                         <div>
-                                            <span className="text-[10px] font-bold text-indigo-300 uppercase tracking-wider block mb-1">Weekly Impact Forecast</span>
+                                            <span className="text-[10px] font-medium text-indigo-300 uppercase tracking-wider block mb-1">Weekly Impact Forecast</span>
                                             <p className="text-slate-200 text-sm font-medium leading-relaxed">
                                                 {parsedData.global_context.weekly_impact}
                                             </p>
@@ -691,7 +691,7 @@ const AIAnalysisOverlay: React.FC<AIAnalysisOverlayProps> = ({ isOpen, onClose, 
                       <div className="p-2 bg-yellow-500/10 rounded-lg">
                         <Zap className="w-5 h-5 text-yellow-400" />
                       </div>
-                      <h3 className="text-2xl font-bold text-white tracking-tight">Trader's Playbook</h3>
+                      <h3 className="text-2xl font-medium text-white tracking-tight">Trader's Playbook</h3>
                   </div>
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
@@ -701,34 +701,34 @@ const AIAnalysisOverlay: React.FC<AIAnalysisOverlayProps> = ({ isOpen, onClose, 
                               <div className="p-5 bg-white/5 border-b border-white/5 flex justify-between items-start group-hover:bg-white/10 transition-colors">
                                   <div>
                                       <div className="flex items-center gap-2 mb-2">
-                                          <div className="px-2 py-0.5 rounded bg-blue-500/20 text-blue-400 text-[10px] font-bold uppercase tracking-wider border border-blue-500/20">
+                                          <div className="px-2 py-0.5 rounded bg-blue-500/20 text-blue-400 text-[10px] font-medium uppercase tracking-wider border border-blue-500/20">
                                             {item.date}
                                           </div>
                                       </div>
-                                      <h4 className="text-white font-bold text-lg leading-tight">{item.event}</h4>
+                                      <h4 className="text-white font-medium text-lg leading-tight">{item.event}</h4>
                                   </div>
                                   <div className={`text-right ${isRTL ? 'text-left' : ''}`}>
-                                      <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider block mb-1">Forecast</span>
-                                      <span className="text-sm font-mono font-bold text-slate-200 bg-slate-800 px-2 py-1 rounded border border-white/5">{item.forecast}</span>
+                                      <span className="text-[10px] font-medium text-slate-500 uppercase tracking-wider block mb-1">Forecast</span>
+                                      <span className="text-sm font-mono font-medium text-slate-200 bg-slate-800 px-2 py-1 rounded border border-white/5">{item.forecast}</span>
                                   </div>
                               </div>
 
                               {/* Action Plan */}
                               <div className="p-5 space-y-5">
                                   <div>
-                                      <div className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-2">The Plan</div>
+                                      <div className="text-[10px] font-medium text-slate-500 uppercase tracking-widest mb-2">The Plan</div>
                                       <p className="text-slate-200 text-sm font-medium leading-relaxed">{item.plan}</p>
                                   </div>
                                   
                                   <div className="grid grid-cols-2 gap-4 p-4 bg-slate-800/50 rounded-xl border border-white/5">
                                       <div>
-                                          <div className="text-[10px] font-bold text-blue-400 uppercase mb-1.5 flex items-center gap-1">
+                                          <div className="text-[10px] font-medium text-blue-400 uppercase mb-1.5 flex items-center gap-1">
                                             <Info className="w-3 h-3" /> Why?
                                           </div>
                                           <p className="text-xs text-slate-400 font-medium leading-relaxed">{item.why}</p>
                                       </div>
                                       <div>
-                                          <div className="text-[10px] font-bold text-emerald-400 uppercase mb-1.5 flex items-center gap-1">
+                                          <div className="text-[10px] font-medium text-emerald-400 uppercase mb-1.5 flex items-center gap-1">
                                             <Target className="w-3 h-3" /> When to Act
                                           </div>
                                           <p className="text-xs text-slate-400 font-medium leading-relaxed">{item.when_to_act}</p>
@@ -741,7 +741,7 @@ const AIAnalysisOverlay: React.FC<AIAnalysisOverlayProps> = ({ isOpen, onClose, 
                                           {getImpactIcon(item.impact_if_deviates)}
                                       </div>
                                       <div className="flex-1">
-                                        <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider block mb-0.5">Risk Factor</span>
+                                        <span className="text-[10px] font-medium text-slate-500 uppercase tracking-wider block mb-0.5">Risk Factor</span>
                                         <p className="text-xs text-slate-300 font-medium">
                                             {item.impact_if_deviates}
                                         </p>
@@ -769,7 +769,7 @@ const AIAnalysisOverlay: React.FC<AIAnalysisOverlayProps> = ({ isOpen, onClose, 
         {/* Background Glows & Noise */}
         <div className="absolute inset-0 pointer-events-none overflow-hidden">
             <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-blue-600/20 rounded-full blur-[120px] -mr-20 -mt-20 animate-pulse duration-[4s]"></div>
-            <div className="absolute bottom-0 left-0 w-[400px] h-[400px] bg-cyan-600/10 rounded-full blur-[100px] -ml-16 -mb-16"></div>
+            <div className="absolute bottom-0 left-0 w-[400px] h-[400px] bg-blue-500/10 rounded-full blur-[100px] -ml-16 -mb-16"></div>
             <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-20 mix-blend-soft-light"></div>
         </div>
 
@@ -777,13 +777,13 @@ const AIAnalysisOverlay: React.FC<AIAnalysisOverlayProps> = ({ isOpen, onClose, 
         <div className="flex items-center justify-between p-6 border-b border-white/5 bg-slate-900/40 relative z-20 shrink-0 backdrop-blur-md">
           <div className="flex items-center gap-5">
             <div className="relative group">
-                <div className="absolute inset-0 bg-gradient-to-r from-blue-600 to-cyan-500 rounded-2xl blur opacity-40 group-hover:opacity-60 transition-opacity duration-500"></div>
+                <div className="absolute inset-0 bg-gradient-to-r from-blue-600 to-blue-400 rounded-2xl blur opacity-40 group-hover:opacity-60 transition-opacity duration-500"></div>
                 <div className="relative p-3.5 bg-gradient-to-br from-slate-800 to-slate-900 rounded-2xl shadow-xl ring-1 ring-white/10 group-hover:scale-105 transition-transform duration-300">
                     <Bot className="w-8 h-8 text-blue-400 group-hover:text-white transition-colors" />
                 </div>
             </div>
             <div>
-                <h3 className="text-2xl font-bold text-white font-heading tracking-tight leading-none mb-1">AI Market Mentor</h3>
+                <h3 className="text-2xl font-medium text-white font-heading tracking-tight leading-none mb-1">AI Market Mentor</h3>
                 <div className="flex items-center gap-2">
                     <span className="flex w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
                     <p className="text-xs text-slate-400 font-medium tracking-wide uppercase">Live Analysis</p>
@@ -822,8 +822,8 @@ const AIAnalysisOverlay: React.FC<AIAnalysisOverlayProps> = ({ isOpen, onClose, 
             </div>
 
             <div className="hidden sm:flex items-center gap-2 px-4 py-2 bg-slate-800/50 rounded-xl border border-white/5 text-xs text-slate-400">
-                <Target className="w-3.5 h-3.5 text-cyan-400" />
-                <span>Target: <span className="text-white font-bold tracking-wide">{title}</span></span>
+                <Target className="w-3.5 h-3.5 text-white" />
+                <span>Target: <span className="text-white font-medium tracking-wide">{title}</span></span>
             </div>
 
             {/* Voice Button */}
@@ -861,12 +861,12 @@ const AIAnalysisOverlay: React.FC<AIAnalysisOverlayProps> = ({ isOpen, onClose, 
                         </div>
                     </div>
                     <div className="text-center space-y-4 max-w-sm mx-auto">
-                        <h4 className="text-white font-bold text-2xl animate-pulse tracking-tight">
+                        <h4 className="text-white font-medium text-2xl animate-pulse tracking-tight">
                             {isTranslating ? `Translating to ${currentLang}...` : "Synthesizing Market Data..."}
                         </h4>
                         <div className="flex flex-col gap-2 items-center">
                              <div className="h-1.5 w-48 bg-slate-800 rounded-full overflow-hidden">
-                                 <div className="h-full bg-gradient-to-r from-blue-500 to-cyan-400 animate-progress w-full origin-left"></div>
+                                 <div className="h-full bg-gradient-to-r from-blue-500 to-white animate-progress w-full origin-left"></div>
                              </div>
                              <p className="text-slate-500 text-sm font-mono mt-2">
                                  Analyzing institutional flows & news...
@@ -889,14 +889,14 @@ const AIAnalysisOverlay: React.FC<AIAnalysisOverlayProps> = ({ isOpen, onClose, 
                 <div className="flex gap-4 w-full sm:w-auto justify-end">
                     <button 
                         onClick={handleCopy}
-                        className="flex items-center gap-2 px-6 py-3 bg-slate-800/50 hover:bg-slate-700/50 text-slate-300 hover:text-white rounded-xl text-sm font-bold transition-all border border-white/5 hover:border-white/10 active:scale-95"
+                        className="flex items-center gap-2 px-6 py-3 bg-slate-800/50 hover:bg-slate-700/50 text-slate-300 hover:text-white rounded-xl text-sm font-medium transition-all border border-white/5 hover:border-white/10 active:scale-95"
                     >
                         {copied ? <Check className="w-4 h-4 text-emerald-400" /> : <Copy className="w-4 h-4" />}
                         {copied ? "Copied" : "Copy Analysis"}
                     </button>
                     <button 
                         onClick={onClose}
-                        className="px-8 py-3 bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-500 hover:to-blue-400 text-white rounded-xl text-sm font-bold transition-all shadow-lg shadow-blue-500/25 active:scale-95 ring-1 ring-white/10"
+                        className="px-8 py-3 bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-500 hover:to-blue-400 text-white rounded-xl text-sm font-medium transition-all shadow-lg shadow-blue-500/25 active:scale-95 ring-1 ring-white/10"
                     >
                         Done
                     </button>

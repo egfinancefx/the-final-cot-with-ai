@@ -4,6 +4,8 @@ import { ResponsiveContainer, AreaChart, Area, YAxis, Tooltip, ReferenceLine, Ca
 import { curveMonotoneX } from "@visx/curve";
 import { HistoryRow, SummaryRow, ThemeMode } from '../types';
 import { formatCurrency } from '../utils';
+import { Gauge } from './ui/Gauge';
+
 import { 
   ArrowUpRight, 
   ArrowDownRight, 
@@ -58,7 +60,7 @@ const AssetTrendCard: React.FC<AssetTrendCardProps> = ({
     let colorClass = "";
 
     if (themeMode === 'light') {
-       if (n.includes('bitcoin') || n.includes('crypto')) colorClass = "text-orange-500";
+       if (n.includes('bitcoin') || n.includes('crypto')) colorClass = "text-white";
        else if (n.includes('gold')) colorClass = "text-yellow-600";
        else if (n.includes('oil') || n.includes('gas')) colorClass = "text-slate-700";
        else if (n.includes('euro') || n.includes('pound')) colorClass = "text-blue-600";
@@ -66,7 +68,7 @@ const AssetTrendCard: React.FC<AssetTrendCardProps> = ({
     } 
     else {
        // Ocean (Default) - Cool Blues/Cyans + Semantic
-       if (n.includes('bitcoin')) colorClass = "text-orange-500";
+       if (n.includes('bitcoin')) colorClass = "text-white";
        else if (n.includes('gold')) colorClass = "text-yellow-400";
        else if (n.includes('oil')) colorClass = "text-slate-400";
        else colorClass = "text-blue-400";
@@ -130,6 +132,8 @@ const AssetTrendCard: React.FC<AssetTrendCardProps> = ({
   const longChange = summaryRow["Long Change"];
   const shortPos = summaryRow["Short Positions"];
   const shortChange = summaryRow["Short Change"];
+  const totalPos = longPos + shortPos;
+  const longRatio = totalPos > 0 ? (longPos / totalPos) * 100 : 50;
   
   const isNetPositive = netPos > 0;
   const isChangePositive = netChange > 0;
@@ -212,18 +216,31 @@ const AssetTrendCard: React.FC<AssetTrendCardProps> = ({
                         {getAssetIcon(title)}
                     </div>
                     <div className="flex flex-col min-w-0">
-                        <h3 className={`font-bold text-lg leading-none tracking-tight font-heading truncate pr-2 transition-colors ${getTextColor('primary')}`}>{title}</h3>
-                        <span className={`text-[11px] font-bold uppercase tracking-wider mt-1.5 ${getTextColor('sub')}`}>Futures</span>
+                        <h3 className={`font-medium text-lg leading-none tracking-tight font-heading truncate pr-2 transition-colors ${getTextColor('primary')}`}>{title}</h3>
+                        <span className={`text-[11px] font-medium uppercase tracking-wider mt-1.5 ${getTextColor('sub')}`}>Futures</span>
                     </div>
                 </div>
                 
                 <div className="flex items-center gap-2 mt-1 pl-1">
-                     <span className={`text-xs font-bold flex items-center px-2.5 py-1 rounded-md border backdrop-blur-md ${getPillStyle(isChangePositive)}`}>
+                     <span className={`text-xs font-medium flex items-center px-2.5 py-1 rounded-md border backdrop-blur-md ${getPillStyle(isChangePositive)}`}>
                         {isChangePositive ? <ArrowUpRight className="w-3.5 h-3.5 mr-1"/> : <ArrowDownRight className="w-3.5 h-3.5 mr-1"/>}
                         {formatCurrency(Math.abs(netChange))}
                     </span>
-                    <span className={`text-[10px] font-bold uppercase tracking-wide ${getTextColor('secondary')}`}>Net Chg</span>
+                    <span className={`text-[10px] font-medium uppercase tracking-wide ${getTextColor('secondary')}`}>Net Chg</span>
                 </div>
+            </div>
+            
+            {/* Right Column: Gauge Animation */}
+            <div className="shrink-0 flex items-center justify-center -mt-2 -mr-2">
+                <Gauge 
+                    value={longRatio} 
+                    centerValue={netPos}
+                    size={80}
+                    activeFill={themeMode === 'light' ? '#2563eb' : '#3b82f6'}
+                    inactiveFill={themeMode === 'light' ? 'rgba(37, 99, 235, 0.15)' : 'rgba(59, 130, 246, 0.2)'}
+                    valueClassName={themeMode === 'light' ? 'text-blue-700' : 'text-blue-400'}
+                    animationDelayMs={index * 140 + 850}
+                />
             </div>
         </div>
       </div>
@@ -257,7 +274,7 @@ const AssetTrendCard: React.FC<AssetTrendCardProps> = ({
               fill={`url(#${chartId})`}
               fillOpacity={0.3}
               isAnimationActive={true}
-              animationDuration={1600}
+              animationDuration={800}
               animationEasing="ease-in-out"
               animationBegin={index * 140}
               dot={false}
@@ -271,7 +288,7 @@ const AssetTrendCard: React.FC<AssetTrendCardProps> = ({
               strokeWidth={isHovered ? 3 : 2}
               fill="none"
               isAnimationActive={true}
-              animationDuration={1800}
+              animationDuration={1000}
               animationEasing="ease-in-out"
               animationBegin={index * 140 + 150}
               dot={false}
@@ -292,13 +309,13 @@ const AssetTrendCard: React.FC<AssetTrendCardProps> = ({
                                 <div className="flex flex-col gap-1.5">
                                     <div className="flex justify-between items-center gap-4">
                                         <span className="opacity-70">Net Pos</span>
-                                        <span className={`font-mono font-bold ${data.value > 0 ? (themeMode === 'light' ? 'text-blue-600' : 'text-blue-400') : (themeMode === 'light' ? 'text-rose-600' : 'text-rose-400')}`}>
+                                        <span className={`font-mono font-medium ${data.value > 0 ? (themeMode === 'light' ? 'text-blue-600' : 'text-blue-400') : (themeMode === 'light' ? 'text-rose-600' : 'text-rose-400')}`}>
                                             {formatCurrency(data.value)}
                                         </span>
                                     </div>
                                     <div className="flex justify-between items-center gap-4">
                                         <span className="opacity-60">Weekly Chg</span>
-                                        <span className={`font-mono font-bold flex items-center ${isPositiveChange ? (themeMode === 'light' ? 'text-emerald-600' : 'text-emerald-400') : data.change < 0 ? (themeMode === 'light' ? 'text-rose-600' : 'text-rose-400') : 'opacity-50'}`}>
+                                        <span className={`font-mono font-medium flex items-center ${isPositiveChange ? (themeMode === 'light' ? 'text-emerald-600' : 'text-emerald-400') : data.change < 0 ? (themeMode === 'light' ? 'text-rose-600' : 'text-rose-400') : 'opacity-50'}`}>
                                             {isPositiveChange ? '+' : ''}{formatCurrency(data.change)}
                                         </span>
                                     </div>
@@ -321,26 +338,26 @@ const AssetTrendCard: React.FC<AssetTrendCardProps> = ({
           <div className={`p-4 flex flex-col items-center border-r transition-colors 
             ${themeMode === 'light' ? 'border-slate-200 hover:bg-white' : 
               'border-blue-500/5 hover:bg-blue-900/10'}`}>
-              <span className={`text-[10px] uppercase font-bold tracking-wide mb-1 opacity-60`}>Longs</span>
+              <span className={`text-[10px] uppercase font-medium tracking-wide mb-1 opacity-60`}>Longs</span>
               
-              <div className={`flex items-center gap-1 text-xl font-bold font-mono ${longChange > 0 ? (themeMode === 'light' ? 'text-blue-600' : 'text-blue-400') : (themeMode === 'light' ? 'text-rose-600' : 'text-rose-400')}`}>
+              <div className={`flex items-center gap-1 text-xl font-medium font-mono ${longChange > 0 ? (themeMode === 'light' ? 'text-blue-600' : 'text-blue-400') : (themeMode === 'light' ? 'text-rose-600' : 'text-rose-400')}`}>
                   {longChange > 0 ? <ArrowUpRight className="w-5 h-5" /> : longChange < 0 ? <ArrowDownRight className="w-5 h-5" /> : <Minus className="w-5 h-5" />}
                   <span>{formatCurrency(Math.abs(longChange))}</span>
               </div>
               
-              <span className={`text-[10px] font-bold font-mono mt-0.5 opacity-40`}>
+              <span className={`text-[10px] font-medium font-mono mt-0.5 opacity-40`}>
                   Pos: {formatCurrency(longPos)}
               </span>
           </div>
           <div className={`p-4 flex flex-col items-center transition-colors ${themeMode === 'light' ? 'hover:bg-white' : 'hover:bg-slate-800/50'}`}>
-              <span className={`text-[10px] uppercase font-bold tracking-wide mb-1 opacity-60`}>Shorts</span>
+              <span className={`text-[10px] uppercase font-medium tracking-wide mb-1 opacity-60`}>Shorts</span>
               
-              <div className={`flex items-center gap-1 text-xl font-bold font-mono ${shortChange > 0 ? (themeMode === 'light' ? 'text-blue-600' : 'text-blue-400') : (themeMode === 'light' ? 'text-rose-600' : 'text-rose-400')}`}>
+              <div className={`flex items-center gap-1 text-xl font-medium font-mono ${shortChange > 0 ? (themeMode === 'light' ? 'text-blue-600' : 'text-blue-400') : (themeMode === 'light' ? 'text-rose-600' : 'text-rose-400')}`}>
                   {shortChange > 0 ? <ArrowUpRight className="w-5 h-5" /> : shortChange < 0 ? <ArrowDownRight className="w-5 h-5" /> : <Minus className="w-5 h-5" />}
                   <span>{formatCurrency(Math.abs(shortChange))}</span>
               </div>
 
-              <span className={`text-[10px] font-bold font-mono mt-0.5 opacity-40`}>
+              <span className={`text-[10px] font-medium font-mono mt-0.5 opacity-40`}>
                   Pos: {formatCurrency(shortPos)}
               </span>
           </div>

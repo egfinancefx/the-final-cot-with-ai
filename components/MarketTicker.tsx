@@ -50,7 +50,7 @@ const MarketTicker: React.FC<MarketTickerProps> = ({ data, themeMode }) => {
           
           return (
             <div key={`${item.Commodity}-${index}`} className="flex items-center px-4 gap-3 shrink-0">
-              <span className={`text-xs font-bold uppercase tracking-wider font-heading ${styles.highlight}`}>
+              <span className={`text-xs font-medium uppercase tracking-wider font-heading ${styles.highlight}`}>
                 {item.Commodity}
               </span>
               
@@ -59,7 +59,7 @@ const MarketTicker: React.FC<MarketTickerProps> = ({ data, themeMode }) => {
                     {formatCurrency(item["Net Positions"])}
                  </span>
                  
-                 <div className={`flex items-center text-[10px] font-bold ${isPositive ? styles.positive : isNegative ? styles.negative : styles.neutral}`}>
+                 <div className={`flex items-center text-[10px] font-medium ${isPositive ? styles.positive : isNegative ? styles.negative : styles.neutral}`}>
                     {isPositive ? <ArrowUp className="w-3 h-3" /> : isNegative ? <ArrowDown className="w-3 h-3" /> : <Minus className="w-3 h-3" />}
                     <span>{formatCurrency(Math.abs(change))}</span>
                  </div>

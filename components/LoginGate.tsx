@@ -75,7 +75,7 @@ const LoginGate: React.FC<LoginGateProps> = ({ onLogin }) => {
       {/* Animated Background Elements */}
       <div className="absolute inset-0 pointer-events-none overflow-hidden">
         <div className={`absolute top-[-10%] left-[-10%] w-[50vw] h-[50vw] rounded-full bg-blue-600/20 blur-[120px] mix-blend-screen transition-transform duration-[10s] ease-in-out ${mounted ? 'translate-x-10 translate-y-10 scale-110' : ''}`}></div>
-        <div className={`absolute bottom-[-10%] right-[-10%] w-[60vw] h-[60vw] rounded-full bg-cyan-600/15 blur-[130px] mix-blend-screen transition-transform duration-[15s] ease-in-out ${mounted ? '-translate-x-20 -translate-y-10 scale-125' : ''}`}></div>
+        <div className={`absolute bottom-[-10%] right-[-10%] w-[60vw] h-[60vw] rounded-full bg-blue-500/15 blur-[130px] mix-blend-screen transition-transform duration-[15s] ease-in-out ${mounted ? '-translate-x-20 -translate-y-10 scale-125' : ''}`}></div>
         <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-20 mix-blend-soft-light"></div>
       </div>
 
@@ -83,24 +83,24 @@ const LoginGate: React.FC<LoginGateProps> = ({ onLogin }) => {
       <div className="relative w-full max-w-md z-10">
         
         {/* Decorative elements behind card */}
-        <div className="absolute -inset-1 bg-gradient-to-r from-blue-600 to-cyan-500 rounded-[2rem] blur opacity-20 animate-pulse" style={{ animationDuration: '4s' }}></div>
+        <div className="absolute -inset-1 bg-gradient-to-r from-blue-600 to-blue-400 rounded-[2rem] blur opacity-20 animate-pulse" style={{ animationDuration: '4s' }}></div>
 
         <div className="relative bg-slate-900/60 backdrop-blur-2xl border border-white/10 rounded-3xl shadow-[0_0_40px_rgba(0,0,0,0.5)] overflow-hidden animate-in fade-in zoom-in-95 duration-700">
           
           {/* Header Section */}
           <div className="p-8 pb-6 text-center relative">
-            <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-blue-500 via-cyan-400 to-blue-500"></div>
+            <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-blue-500 via-white to-blue-500"></div>
             
             {/* Animated Logo */}
             <div className="relative inline-flex group mb-6 mt-2">
               <div className="absolute inset-[-4px] bg-[conic-gradient(from_90deg_at_50%_50%,#0000_0%,#3b82f6_50%,#0000_100%)] animate-[spin_3s_linear_infinite] rounded-2xl opacity-70 group-hover:opacity-100 transition-opacity duration-500"></div>
               <div className="relative p-4 rounded-2xl bg-slate-900 border border-white/10 shadow-xl">
-                <BarChart3 className="w-8 h-8 text-cyan-400 group-hover:scale-110 transition-transform duration-500" />
+                <BarChart3 className="w-8 h-8 text-white group-hover:scale-110 transition-transform duration-500" />
               </div>
             </div>
             
-            <h1 className="text-3xl font-heading font-black tracking-tight text-white mb-2 flex items-center justify-center gap-2">
-              EG-Finance <span className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-blue-500">Fx</span>
+            <h1 className="text-3xl font-heading font-semibold tracking-tight text-white mb-2 flex items-center justify-center gap-2">
+              EG-Finance <span className="text-transparent bg-clip-text bg-gradient-to-r from-white to-blue-500">Fx</span>
             </h1>
             <p className="text-slate-400 text-sm font-medium flex items-center justify-center gap-1.5">
               <Sparkles className="w-3.5 h-3.5 text-yellow-500/70" />
@@ -112,11 +112,11 @@ const LoginGate: React.FC<LoginGateProps> = ({ onLogin }) => {
           <div className="p-8 pt-2">
             <form onSubmit={handleSubmit} className="space-y-6">
               <div className="space-y-1.5">
-                <label htmlFor="email" className="block text-xs font-bold text-slate-400 uppercase tracking-wider ml-1">
+                <label htmlFor="email" className="block text-xs font-medium text-slate-400 uppercase tracking-wider ml-1">
                   Student Email
                 </label>
                 <div className="relative group">
-                  <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-slate-500 group-focus-within:text-cyan-400 transition-colors duration-300">
+                  <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-slate-500 group-focus-within:text-white transition-colors duration-300">
                     <Mail className="w-5 h-5" />
                   </div>
                   <input
@@ -125,12 +125,12 @@ const LoginGate: React.FC<LoginGateProps> = ({ onLogin }) => {
                     required
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    className="block w-full pl-12 pr-4 py-3.5 border border-white/10 rounded-xl bg-slate-950/50 text-white placeholder-slate-600 focus:outline-none focus:ring-2 focus:ring-cyan-500/50 focus:border-cyan-500/50 transition-all shadow-inner"
+                    className="block w-full pl-12 pr-4 py-3.5 border border-white/10 rounded-xl bg-slate-950/50 text-white placeholder-slate-600 focus:outline-none focus:ring-2 focus:ring-white/50 focus:border-white/50 transition-all shadow-inner"
                     placeholder="Enter your authorized email..."
                     disabled={isLoading}
                   />
                   {/* Subtle bottom glow on focus */}
-                  <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-0 h-[2px] bg-cyan-400 group-focus-within:w-full transition-all duration-500 rounded-full opacity-50"></div>
+                  <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-0 h-[2px] bg-white group-focus-within:w-full transition-all duration-500 rounded-full opacity-50"></div>
                 </div>
               </div>
 
@@ -147,19 +147,19 @@ const LoginGate: React.FC<LoginGateProps> = ({ onLogin }) => {
                 className="relative w-full group overflow-hidden rounded-xl p-[1px] disabled:opacity-50 disabled:cursor-not-allowed active:scale-[0.98] transition-all duration-200"
               >
                 {/* Button Animated Border */}
-                <span className="absolute inset-0 bg-gradient-to-r from-blue-600 via-cyan-400 to-blue-600 bg-[length:200%_auto] animate-[pulse_2s_linear_infinite] opacity-80 group-hover:opacity-100 transition-opacity"></span>
+                <span className="absolute inset-0 bg-gradient-to-r from-blue-600 via-white to-blue-600 bg-[length:200%_auto] animate-[pulse_2s_linear_infinite] opacity-80 group-hover:opacity-100 transition-opacity"></span>
                 
                 {/* Button Inner */}
                 <div className="relative flex items-center justify-center gap-2 py-3.5 px-4 bg-slate-900 rounded-[11px] transition-all duration-300 group-hover:bg-slate-800/80">
                   {isLoading ? (
                     <>
-                      <Loader2 className="w-5 h-5 text-cyan-400 animate-spin" />
-                      <span className="font-bold text-white tracking-wide">Verifying...</span>
+                      <Loader2 className="w-5 h-5 text-white animate-spin" />
+                      <span className="font-medium text-white tracking-wide">Verifying...</span>
                     </>
                   ) : (
                     <>
-                      <span className="font-bold text-white tracking-wide">Access Dashboard</span>
-                      <ArrowRight className="w-4 h-4 text-cyan-400 group-hover:translate-x-1 transition-transform duration-300" />
+                      <span className="font-medium text-white tracking-wide">Access Dashboard</span>
+                      <ArrowRight className="w-4 h-4 text-white group-hover:translate-x-1 transition-transform duration-300" />
                     </>
                   )}
                 </div>

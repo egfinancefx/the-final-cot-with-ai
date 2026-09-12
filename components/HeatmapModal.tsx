@@ -238,7 +238,7 @@ const HeatmapModal: React.FC<HeatmapModalProps> = ({
         isLight ? 'bg-blue-400/10' : 'bg-blue-600/15'
       }`}></div>
       <div className={`absolute bottom-1/4 right-1/4 w-96 h-96 rounded-full blur-[140px] pointer-events-none transition-all duration-700 ${
-        isLight ? 'bg-cyan-400/10' : 'bg-cyan-500/15'
+        isLight ? 'bg-white/10' : 'bg-white/15'
       }`}></div>
 
       <div 
@@ -251,7 +251,7 @@ const HeatmapModal: React.FC<HeatmapModalProps> = ({
         onClick={(e) => e.stopPropagation()}
       >
         {/* TOP GLOW BAR (Ocean Blue & Cyan Brand Gradient) */}
-        <div className="h-1.5 w-full bg-gradient-to-r from-blue-600 via-cyan-400 to-blue-500"></div>
+        <div className="h-1.5 w-full bg-gradient-to-r from-blue-600 via-white to-blue-500"></div>
 
         {/* 1. HEADER SECTION */}
         <div className={`p-4 sm:p-6 border-b shrink-0 ${
@@ -263,25 +263,25 @@ const HeatmapModal: React.FC<HeatmapModalProps> = ({
               <div className="relative">
                 <div className={`w-12 h-12 rounded-2xl flex items-center justify-center text-white shadow-lg ${
                   isLight 
-                    ? 'bg-gradient-to-br from-blue-600 to-cyan-600 shadow-blue-500/25' 
-                    : 'bg-gradient-to-br from-blue-600 to-cyan-500 shadow-blue-500/30'
+                    ? 'bg-gradient-to-br from-blue-600 to-blue-500 shadow-blue-500/25' 
+                    : 'bg-gradient-to-br from-blue-600 to-blue-400 shadow-blue-500/30'
                 }`}>
                   <Flame className="w-6 h-6 animate-pulse" />
                 </div>
-                <div className="absolute -bottom-1 -left-1 w-4 h-4 rounded-full bg-cyan-400 border-2 border-slate-900 flex items-center justify-center">
+                <div className="absolute -bottom-1 -left-1 w-4 h-4 rounded-full bg-white border-2 border-slate-900 flex items-center justify-center">
                   <div className="w-1.5 h-1.5 rounded-full bg-slate-950 animate-ping"></div>
                 </div>
               </div>
 
               <div>
                 <div className="flex items-center gap-2.5">
-                  <h2 className={`text-xl sm:text-2xl font-black tracking-tight ${isLight ? 'text-slate-900' : 'text-white'}`}>
+                  <h2 className={`text-xl sm:text-2xl font-semibold tracking-tight ${isLight ? 'text-slate-900' : 'text-white'}`}>
                     خريطة الحرارة ومراكز السيولة
                   </h2>
-                  <span className={`hidden sm:inline-block px-2.5 py-0.5 text-[11px] font-bold rounded-full uppercase tracking-wider border ${
+                  <span className={`hidden sm:inline-block px-2.5 py-0.5 text-[11px] font-medium rounded-full uppercase tracking-wider border ${
                     isLight 
                       ? 'bg-blue-50 text-blue-600 border-blue-200' 
-                      : 'bg-blue-500/10 text-cyan-400 border-blue-500/30'
+                      : 'bg-blue-500/10 text-white border-blue-500/30'
                   }`}>
                     Live Institutional Heatmap
                   </span>
@@ -299,12 +299,12 @@ const HeatmapModal: React.FC<HeatmapModalProps> = ({
                 isLight ? 'bg-white border-slate-200' : 'bg-slate-800/80 border-blue-900/40'
               }`}>
                 <div className="flex flex-col text-right">
-                  <span className={`text-[10px] font-bold uppercase tracking-wider ${isLight ? 'text-slate-500' : 'text-blue-200/60'}`}>
+                  <span className={`text-[10px] font-medium uppercase tracking-wider ${isLight ? 'text-slate-500' : 'text-blue-200/60'}`}>
                     المزاج العام للسوق
                   </span>
-                  <span className={`text-xs font-black flex items-center gap-1 ${
+                  <span className={`text-xs font-semibold flex items-center gap-1 ${
                     macroStats.bullishPct >= 50 
-                      ? isLight ? 'text-blue-600' : 'text-cyan-400' 
+                      ? isLight ? 'text-blue-600' : 'text-white' 
                       : isLight ? 'text-slate-700' : 'text-white'
                   }`}>
                     <TrendingUp className="w-3.5 h-3.5" />
@@ -316,7 +316,7 @@ const HeatmapModal: React.FC<HeatmapModalProps> = ({
                 <div className="w-24 sm:w-28 flex flex-col gap-1">
                   <div className={`h-2 w-full rounded-full overflow-hidden flex p-0.5 ${isLight ? 'bg-slate-200' : 'bg-slate-950/60'}`}>
                     <div 
-                      className="h-full rounded-full bg-gradient-to-r from-blue-600 to-cyan-400 transition-all duration-500" 
+                      className="h-full rounded-full bg-gradient-to-r from-blue-600 to-white transition-all duration-500" 
                       style={{ width: `${macroStats.bullishPct}%` }}
                     ></div>
                     <div 
@@ -326,8 +326,8 @@ const HeatmapModal: React.FC<HeatmapModalProps> = ({
                       style={{ width: `${100 - macroStats.bullishPct}%` }}
                     ></div>
                   </div>
-                  <div className="flex justify-between text-[9px] font-mono font-bold">
-                    <span className={isLight ? 'text-blue-600' : 'text-cyan-400'}>{macroStats.bullishCount} شراء</span>
+                  <div className="flex justify-between text-[9px] font-mono font-medium">
+                    <span className={isLight ? 'text-blue-600' : 'text-white'}>{macroStats.bullishCount} شراء</span>
                     <span className={isLight ? 'text-slate-600' : 'text-white'}>{macroStats.bearishCount} بيع</span>
                   </div>
                 </div>
@@ -339,7 +339,7 @@ const HeatmapModal: React.FC<HeatmapModalProps> = ({
               }`}>
                 <button
                   onClick={() => setViewMode('cards')}
-                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition-all ${
+                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-medium transition-all ${
                     viewMode === 'cards'
                       ? 'bg-blue-600 text-white shadow-md shadow-blue-600/30'
                       : isLight ? 'text-slate-600 hover:text-slate-900' : 'text-blue-200/70 hover:text-white'
@@ -351,7 +351,7 @@ const HeatmapModal: React.FC<HeatmapModalProps> = ({
                 </button>
                 <button
                   onClick={() => setViewMode('treemap')}
-                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition-all ${
+                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-medium transition-all ${
                     viewMode === 'treemap'
                       ? 'bg-blue-600 text-white shadow-md shadow-blue-600/30'
                       : isLight ? 'text-slate-600 hover:text-slate-900' : 'text-blue-200/70 hover:text-white'
@@ -388,7 +388,7 @@ const HeatmapModal: React.FC<HeatmapModalProps> = ({
                 <button
                   key={cat.id}
                   onClick={() => setSelectedCategory(cat.id)}
-                  className={`px-3 py-1.5 rounded-xl text-xs font-bold whitespace-nowrap transition-all flex items-center gap-1.5 border ${
+                  className={`px-3 py-1.5 rounded-xl text-xs font-medium whitespace-nowrap transition-all flex items-center gap-1.5 border ${
                     selectedCategory === cat.id
                       ? isLight
                         ? 'bg-blue-600 text-white border-blue-600 shadow-sm'
@@ -401,7 +401,7 @@ const HeatmapModal: React.FC<HeatmapModalProps> = ({
                   <span>{cat.labelAr}</span>
                   <span className={`text-[10px] px-1.5 py-0.2 rounded-full font-mono ${
                     selectedCategory === cat.id
-                      ? isLight ? 'bg-white/20 text-white' : 'bg-blue-900/40 text-cyan-200 font-bold'
+                      ? isLight ? 'bg-white/20 text-white' : 'bg-blue-900/40 text-blue-100 font-medium'
                       : isLight ? 'bg-slate-100 text-slate-500' : 'bg-slate-900/80 text-blue-300'
                   }`}>
                     {cat.count}
@@ -443,7 +443,7 @@ const HeatmapModal: React.FC<HeatmapModalProps> = ({
               }`}>
                 <button
                   onClick={() => setSelectedSentiment('all')}
-                  className={`px-2.5 py-1 rounded-lg text-[11px] font-bold transition-all ${
+                  className={`px-2.5 py-1 rounded-lg text-[11px] font-medium transition-all ${
                     selectedSentiment === 'all'
                       ? isLight ? 'bg-slate-800 text-white' : 'bg-blue-600 text-white shadow-sm'
                       : isLight ? 'text-slate-500 hover:text-slate-800' : 'text-blue-200/70 hover:text-white'
@@ -453,20 +453,20 @@ const HeatmapModal: React.FC<HeatmapModalProps> = ({
                 </button>
                 <button
                   onClick={() => setSelectedSentiment('bullish')}
-                  className={`px-2.5 py-1 rounded-lg text-[11px] font-bold flex items-center gap-1 transition-all ${
+                  className={`px-2.5 py-1 rounded-lg text-[11px] font-medium flex items-center gap-1 transition-all ${
                     selectedSentiment === 'bullish'
-                      ? isLight ? 'bg-blue-600 text-white shadow-sm font-black' : 'bg-blue-600 text-white shadow-sm font-black'
-                      : isLight ? 'text-blue-600 hover:text-blue-800' : 'text-cyan-400 hover:text-cyan-300'
+                      ? isLight ? 'bg-blue-600 text-white shadow-sm font-semibold' : 'bg-blue-600 text-white shadow-sm font-semibold'
+                      : isLight ? 'text-blue-600 hover:text-blue-800' : 'text-white hover:text-blue-200'
                   }`}
                 >
-                  <span className={`w-1.5 h-1.5 rounded-full ${isLight ? 'bg-blue-600' : 'bg-cyan-400'}`}></span>
+                  <span className={`w-1.5 h-1.5 rounded-full ${isLight ? 'bg-blue-600' : 'bg-white'}`}></span>
                   شراء
                 </button>
                 <button
                   onClick={() => setSelectedSentiment('bearish')}
-                  className={`px-2.5 py-1 rounded-lg text-[11px] font-bold flex items-center gap-1 transition-all ${
+                  className={`px-2.5 py-1 rounded-lg text-[11px] font-medium flex items-center gap-1 transition-all ${
                     selectedSentiment === 'bearish'
-                      ? isLight ? 'bg-slate-700 text-white shadow-sm font-black' : 'bg-white text-slate-950 shadow-sm font-black'
+                      ? isLight ? 'bg-slate-700 text-white shadow-sm font-semibold' : 'bg-white text-slate-950 shadow-sm font-semibold'
                       : isLight ? 'text-slate-600 hover:text-slate-900' : 'text-slate-200 hover:text-white'
                   }`}
                 >
@@ -475,10 +475,10 @@ const HeatmapModal: React.FC<HeatmapModalProps> = ({
                 </button>
                 <button
                   onClick={() => setSelectedSentiment('extreme')}
-                  className={`px-2.5 py-1 rounded-lg text-[11px] font-bold flex items-center gap-1 transition-all ${
+                  className={`px-2.5 py-1 rounded-lg text-[11px] font-medium flex items-center gap-1 transition-all ${
                     selectedSentiment === 'extreme'
-                      ? isLight ? 'bg-blue-900 text-white shadow-sm font-black' : 'bg-cyan-400 text-slate-950 shadow-sm font-black'
-                      : isLight ? 'text-blue-700 hover:text-blue-900' : 'text-cyan-300 hover:text-cyan-200'
+                      ? isLight ? 'bg-blue-900 text-white shadow-sm font-semibold' : 'bg-white text-slate-950 shadow-sm font-semibold'
+                      : isLight ? 'text-blue-700 hover:text-blue-900' : 'text-blue-200 hover:text-blue-100'
                   }`}
                   title="تمركزات تفوق 75%"
                 >
@@ -492,7 +492,7 @@ const HeatmapModal: React.FC<HeatmapModalProps> = ({
                 <select
                   value={sortBy}
                   onChange={(e) => setSortBy(e.target.value as SortOption)}
-                  className={`text-xs py-1.5 px-3 rounded-xl border appearance-none pr-7 pl-3 cursor-pointer font-bold focus:outline-none ${
+                  className={`text-xs py-1.5 px-3 rounded-xl border appearance-none pr-7 pl-3 cursor-pointer font-medium focus:outline-none ${
                     isLight 
                       ? 'bg-white border-slate-200 text-slate-700' 
                       : 'bg-slate-800/90 border-blue-900/40 text-blue-100'
@@ -518,14 +518,14 @@ const HeatmapModal: React.FC<HeatmapModalProps> = ({
         }`}>
           {filteredAndSortedData.length === 0 ? (
             <div className="h-64 flex flex-col items-center justify-center text-center p-8">
-              <AlertTriangle className="w-10 h-10 text-cyan-500 mb-3" />
-              <h3 className="text-lg font-bold">لا توجد أصول مطابقة للبحث أو الفلتر</h3>
+              <AlertTriangle className="w-10 h-10 text-white mb-3" />
+              <h3 className="text-lg font-medium">لا توجد أصول مطابقة للبحث أو الفلتر</h3>
               <p className={`text-xs mt-1 max-w-sm ${isLight ? 'text-slate-500' : 'text-blue-200/60'}`}>
                 جرب تغيير خيارات التصفية أو مسح عبارة البحث لإظهار جميع الأصول المؤسسية.
               </p>
               <button
                 onClick={() => { setSearchQuery(''); setSelectedCategory('All'); setSelectedSentiment('all'); }}
-                className="mt-4 px-4 py-2 rounded-xl text-xs font-bold bg-blue-600 text-white shadow-md shadow-blue-600/30"
+                className="mt-4 px-4 py-2 rounded-xl text-xs font-medium bg-blue-600 text-white shadow-md shadow-blue-600/30"
               >
                 إعادة ضبط الفلاتر
               </button>
@@ -550,8 +550,8 @@ const HeatmapModal: React.FC<HeatmapModalProps> = ({
                 if (isBullish) {
                   cardThemeClass = isLight 
                     ? 'bg-white border-blue-200 hover:border-blue-500 hover:shadow-lg hover:shadow-blue-500/10 text-slate-900' 
-                    : 'bg-[#0b1b36]/90 border-blue-500/35 hover:border-cyan-400 hover:shadow-[0_0_25px_-5px_rgba(59,130,246,0.35)] text-blue-50';
-                  borderGlow = 'from-blue-600 to-cyan-400';
+                    : 'bg-[#0b1b36]/90 border-blue-500/35 hover:border-white hover:shadow-[0_0_25px_-5px_rgba(59,130,246,0.35)] text-blue-50';
+                  borderGlow = 'from-blue-600 to-white';
                 } else if (isBearish) {
                   cardThemeClass = isLight 
                     ? 'bg-white border-slate-300 hover:border-slate-500 hover:shadow-lg hover:shadow-slate-500/10 text-slate-900' 
@@ -560,8 +560,8 @@ const HeatmapModal: React.FC<HeatmapModalProps> = ({
                 } else {
                   cardThemeClass = isLight 
                     ? 'bg-white border-slate-200 hover:border-blue-400 hover:shadow-lg hover:shadow-blue-500/10 text-slate-900' 
-                    : 'bg-slate-900/90 border-blue-900/40 hover:border-cyan-500/50 hover:shadow-[0_0_25px_-5px_rgba(6,182,212,0.2)] text-blue-50';
-                  borderGlow = 'from-blue-600 to-cyan-400';
+                    : 'bg-slate-900/90 border-blue-900/40 hover:border-white/50 hover:shadow-[0_0_25px_-5px_rgba(6,182,212,0.2)] text-blue-50';
+                  borderGlow = 'from-blue-600 to-white';
                 }
 
                 return (
@@ -582,21 +582,21 @@ const HeatmapModal: React.FC<HeatmapModalProps> = ({
 
                     {/* Ambient Glow spot on hover */}
                     <div className={`absolute -top-12 -left-12 w-28 h-28 rounded-full blur-2xl opacity-0 group-hover:opacity-40 transition-opacity duration-300 ${
-                      isBullish ? 'bg-cyan-500' : isBearish ? (isLight ? 'bg-slate-400' : 'bg-white') : 'bg-blue-500'
+                      isBullish ? 'bg-white' : isBearish ? (isLight ? 'bg-slate-400' : 'bg-white') : 'bg-blue-500'
                     }`}></div>
 
                     {/* 1. Card Header */}
                     <div className="relative z-10 flex items-start justify-between gap-2">
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2 flex-wrap mb-1">
-                          <span className={`font-mono text-xs font-black tracking-wider px-2 py-0.5 rounded-md border uppercase ${
+                          <span className={`font-mono text-xs font-semibold tracking-wider px-2 py-0.5 rounded-md border uppercase ${
                             isLight 
                               ? 'bg-slate-100 border-slate-200 text-slate-800' 
-                              : 'bg-blue-950/80 border-blue-800/50 text-cyan-300'
+                              : 'bg-blue-950/80 border-blue-800/50 text-blue-200'
                           }`}>
                             {asset.symbol}
                           </span>
-                          <span className={`text-[10px] font-bold px-2 py-0.5 rounded-md border ${
+                          <span className={`text-[10px] font-medium px-2 py-0.5 rounded-md border ${
                             isLight 
                               ? 'bg-slate-50 border-slate-200 text-slate-500' 
                               : 'bg-slate-800/80 border-blue-900/30 text-blue-200/70'
@@ -604,7 +604,7 @@ const HeatmapModal: React.FC<HeatmapModalProps> = ({
                             {asset.category}
                           </span>
                         </div>
-                        <h3 className={`font-bold text-base sm:text-lg tracking-tight truncate ${isLight ? 'text-slate-900' : 'text-white'}`} title={asset.Commodity}>
+                        <h3 className={`font-medium text-base sm:text-lg tracking-tight truncate ${isLight ? 'text-slate-900' : 'text-white'}`} title={asset.Commodity}>
                           {asset.Commodity}
                         </h3>
                       </div>
@@ -612,10 +612,10 @@ const HeatmapModal: React.FC<HeatmapModalProps> = ({
                       {/* Overcrowded Indicator */}
                       {isExtreme && (
                         <div 
-                          className={`flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider border animate-pulse shadow-sm ${
+                          className={`flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold uppercase tracking-wider border animate-pulse shadow-sm ${
                             isLight
                               ? 'bg-blue-100 text-blue-800 border-blue-300'
-                              : 'bg-cyan-500/20 text-cyan-300 border-cyan-400/40'
+                              : 'bg-white/20 text-blue-200 border-white/40'
                           }`}
                           title="تمركز تاريخي حاد قد ينذر بانعكاس أو انفجار سعري"
                         >
@@ -627,9 +627,9 @@ const HeatmapModal: React.FC<HeatmapModalProps> = ({
 
                     {/* 2. Sentiment Status Pill */}
                     <div className="relative z-10 my-3 flex items-center justify-between">
-                      <div className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-xl text-xs font-bold border ${
+                      <div className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-xl text-xs font-medium border ${
                         isBullish 
-                          ? isLight ? 'bg-blue-50 text-blue-700 border-blue-200' : 'bg-blue-500/20 text-cyan-300 border-blue-500/40' 
+                          ? isLight ? 'bg-blue-50 text-blue-700 border-blue-200' : 'bg-blue-500/20 text-blue-200 border-blue-500/40' 
                           : isBearish 
                             ? isLight ? 'bg-slate-100 text-slate-700 border-slate-300' : 'bg-white/10 text-white border-white/30' 
                             : isLight ? 'bg-slate-50 text-slate-600 border-slate-200' : 'bg-blue-900/25 text-blue-300 border-blue-800/30'
@@ -644,15 +644,15 @@ const HeatmapModal: React.FC<HeatmapModalProps> = ({
                         <span>{asset.statusLabelAr}</span>
                       </div>
 
-                      <span className={`text-[11px] font-mono font-bold ${isLight ? 'text-slate-500' : 'text-blue-200/60'}`}>
+                      <span className={`text-[11px] font-mono font-medium ${isLight ? 'text-slate-500' : 'text-blue-200/60'}`}>
                         {asset.statusLabelEn}
                       </span>
                     </div>
 
                     {/* 3. Sentiment Power Meter (Dual Bar) */}
                     <div className="relative z-10 space-y-1.5">
-                      <div className="flex justify-between items-center text-xs font-mono font-bold">
-                        <span className={`flex items-center gap-1 ${isLight ? 'text-blue-600' : 'text-cyan-400'}`}>
+                      <div className="flex justify-between items-center text-xs font-mono font-medium">
+                        <span className={`flex items-center gap-1 ${isLight ? 'text-blue-600' : 'text-white'}`}>
                           <span>{longPct}%</span>
                           <span className="text-[10px] opacity-75">شراء</span>
                         </span>
@@ -667,7 +667,7 @@ const HeatmapModal: React.FC<HeatmapModalProps> = ({
                         isLight ? 'bg-slate-200 border-slate-300' : 'bg-slate-950/70 border-blue-900/40'
                       }`}>
                         <div 
-                          className="h-full rounded-r-full bg-gradient-to-r from-blue-600 to-cyan-400 shadow-sm transition-all duration-500"
+                          className="h-full rounded-r-full bg-gradient-to-r from-blue-600 to-white shadow-sm transition-all duration-500"
                           style={{ width: `${longPct}%` }}
                         ></div>
                         <div 
@@ -686,12 +686,12 @@ const HeatmapModal: React.FC<HeatmapModalProps> = ({
                       isLight ? 'border-slate-200' : 'border-blue-900/30'
                     }`}>
                       <div>
-                        <div className={`text-[10px] font-bold ${isLight ? 'text-slate-500' : 'text-blue-200/60'}`}>
+                        <div className={`text-[10px] font-medium ${isLight ? 'text-slate-500' : 'text-blue-200/60'}`}>
                           صافي التمركز
                         </div>
-                        <div className={`font-mono text-xs font-black tracking-tight ${
+                        <div className={`font-mono text-xs font-semibold tracking-tight ${
                           netContracts > 0 
-                            ? isLight ? 'text-blue-600' : 'text-cyan-400' 
+                            ? isLight ? 'text-blue-600' : 'text-white' 
                             : netContracts < 0 
                               ? isLight ? 'text-slate-700' : 'text-white' 
                               : isLight ? 'text-slate-700' : 'text-blue-200'
@@ -701,12 +701,12 @@ const HeatmapModal: React.FC<HeatmapModalProps> = ({
                       </div>
 
                       <div>
-                        <div className={`text-[10px] font-bold ${isLight ? 'text-slate-500' : 'text-blue-200/60'}`}>
+                        <div className={`text-[10px] font-medium ${isLight ? 'text-slate-500' : 'text-blue-200/60'}`}>
                           التغير الأسبوعي
                         </div>
-                        <div className={`font-mono text-xs font-black tracking-tight flex items-center justify-end gap-1 ${
+                        <div className={`font-mono text-xs font-semibold tracking-tight flex items-center justify-end gap-1 ${
                           weeklyDelta > 0 
-                            ? isLight ? 'text-blue-600' : 'text-cyan-400' 
+                            ? isLight ? 'text-blue-600' : 'text-white' 
                             : weeklyDelta < 0 
                               ? isLight ? 'text-slate-700' : 'text-white' 
                               : isLight ? 'text-slate-500' : 'text-blue-300'
@@ -718,7 +718,7 @@ const HeatmapModal: React.FC<HeatmapModalProps> = ({
                     </div>
 
                     {/* 5. Hover Action Trigger */}
-                    <div className={`relative z-10 mt-3 pt-2 flex items-center justify-between text-xs font-bold transition-colors ${
+                    <div className={`relative z-10 mt-3 pt-2 flex items-center justify-between text-xs font-medium transition-colors ${
                       isLight ? 'text-slate-500 group-hover:text-slate-900' : 'text-blue-200/60 group-hover:text-white'
                     }`}>
                       <span className="text-[11px] group-hover:text-blue-500 flex items-center gap-1 transition-colors">
@@ -750,7 +750,7 @@ const HeatmapModal: React.FC<HeatmapModalProps> = ({
                 if (isBullish) {
                   bgTreemap = isLight
                     ? 'bg-blue-50/80 border-blue-300 text-blue-950 hover:border-blue-500 hover:shadow-md'
-                    : 'bg-[#0b1b36] border-blue-500/40 text-blue-100 hover:border-cyan-400 hover:bg-[#0f244a]';
+                    : 'bg-[#0b1b36] border-blue-500/40 text-blue-100 hover:border-white hover:bg-[#0f244a]';
                 } else if (isBearish) {
                   bgTreemap = isLight
                     ? 'bg-slate-100 border-slate-300 text-slate-900 hover:border-slate-500 hover:shadow-md'
@@ -775,12 +775,12 @@ const HeatmapModal: React.FC<HeatmapModalProps> = ({
                   >
                     <div className="flex justify-between items-start gap-2">
                       <div>
-                        <div className="font-mono text-xs font-black uppercase opacity-80">{asset.symbol}</div>
-                        <div className="font-bold text-sm truncate max-w-[180px]">{asset.Commodity}</div>
+                        <div className="font-mono text-xs font-semibold uppercase opacity-80">{asset.symbol}</div>
+                        <div className="font-medium text-sm truncate max-w-[180px]">{asset.Commodity}</div>
                       </div>
-                      <div className={`px-2 py-0.5 rounded-md text-[10px] font-black ${
+                      <div className={`px-2 py-0.5 rounded-md text-[10px] font-semibold ${
                         isBullish 
-                          ? isLight ? 'bg-blue-100 text-blue-700' : 'bg-blue-500/30 text-cyan-300' 
+                          ? isLight ? 'bg-blue-100 text-blue-700' : 'bg-blue-500/30 text-blue-200' 
                           : isBearish 
                             ? isLight ? 'bg-slate-200 text-slate-700' : 'bg-white/20 text-white' 
                             : isLight ? 'bg-slate-200 text-slate-700' : 'bg-blue-900/40 text-blue-200'
@@ -791,14 +791,14 @@ const HeatmapModal: React.FC<HeatmapModalProps> = ({
 
                     <div className="space-y-1.5">
                       <div className={`h-1.5 w-full rounded-full overflow-hidden flex ${isLight ? 'bg-slate-200' : 'bg-black/40'}`}>
-                        <div className={`h-full ${isLight ? 'bg-blue-600' : 'bg-cyan-400'}`} style={{ width: `${longPct}%` }}></div>
+                        <div className={`h-full ${isLight ? 'bg-blue-600' : 'bg-white'}`} style={{ width: `${longPct}%` }}></div>
                         <div className={`h-full ${isLight ? 'bg-slate-500' : 'bg-white'}`} style={{ width: `${shortPct}%` }}></div>
                       </div>
                       <div className="flex justify-between items-center text-[11px] font-mono">
                         <span className="opacity-75">الصافي:</span>
-                        <span className={`font-bold ${
+                        <span className={`font-medium ${
                           asset["Net Positions"] > 0 
-                            ? isLight ? 'text-blue-600' : 'text-cyan-400' 
+                            ? isLight ? 'text-blue-600' : 'text-white' 
                             : asset["Net Positions"] < 0 
                               ? isLight ? 'text-slate-700' : 'text-white' 
                               : ''
@@ -819,24 +819,24 @@ const HeatmapModal: React.FC<HeatmapModalProps> = ({
           isLight ? 'bg-slate-50 border-slate-200 text-slate-600' : 'bg-slate-900/95 border-blue-900/40 text-blue-200/70'
         }`}>
           <div className="flex items-center gap-4 flex-wrap">
-            <span className={`font-bold text-[11px] ${isLight ? 'text-slate-500' : 'text-blue-300/60'}`}>
+            <span className={`font-medium text-[11px] ${isLight ? 'text-slate-500' : 'text-blue-300/60'}`}>
               دليل درجات الألوان:
             </span>
             <div className="flex items-center gap-1.5">
-              <span className={`w-2.5 h-2.5 rounded-full ${isLight ? 'bg-blue-600' : 'bg-cyan-400 shadow-sm shadow-cyan-400/50'}`}></span>
-              <span className={`font-bold text-[11px] ${isLight ? 'text-blue-600' : 'text-cyan-300'}`}>
+              <span className={`w-2.5 h-2.5 rounded-full ${isLight ? 'bg-blue-600' : 'bg-white shadow-sm shadow-white/50'}`}></span>
+              <span className={`font-medium text-[11px] ${isLight ? 'text-blue-600' : 'text-blue-200'}`}>
                 شراء مؤسسي مهيمن ({isLight ? 'أزرق' : 'أزرق سماوي'})
               </span>
             </div>
             <div className="flex items-center gap-1.5">
               <span className={`w-2.5 h-2.5 rounded-full ${isLight ? 'bg-slate-600' : 'bg-white shadow-sm shadow-white/50'}`}></span>
-              <span className={`font-bold text-[11px] ${isLight ? 'text-slate-700' : 'text-white'}`}>
+              <span className={`font-medium text-[11px] ${isLight ? 'text-slate-700' : 'text-white'}`}>
                 بيع مؤسسي مهيمن ({isLight ? 'رصاصي' : 'أبيض'})
               </span>
             </div>
             <div className="flex items-center gap-1.5">
               <span className={`w-2.5 h-2.5 rounded-full ${isLight ? 'bg-blue-900' : 'bg-blue-400 animate-pulse'}`}></span>
-              <span className={`font-bold text-[11px] ${isLight ? 'text-blue-900' : 'text-blue-300'}`}>
+              <span className={`font-medium text-[11px] ${isLight ? 'text-blue-900' : 'text-blue-300'}`}>
                 تمركز تاريخي متطرف (≥ 75%)
               </span>
             </div>

@@ -27,9 +27,6 @@ interface CompareViewProps {
   onBack: () => void;
 }
 
-// Distinct modern color palette (Strictly NO green or red!)
-// Asset 0: Vibrant Blue | Asset 1: Bright Cyan | Asset 2: Indigo
-const ASSET_COLORS = ['#3b82f6', '#06b6d4', '#818cf8'];
 
 // Flow archetype classifier
 interface FlowClassification {
@@ -128,7 +125,7 @@ const CompareView: React.FC<CompareViewProps> = ({
     panelBg: isLight ? 'bg-white border-slate-200 shadow-sm' : 'bg-[#0c172e] border-blue-500/25 shadow-xl',
     border: isLight ? 'border-slate-200' : 'border-blue-500/20',
     textMain: isLight ? 'text-slate-900' : 'text-white',
-    textSub: isLight ? 'text-slate-500' : 'text-blue-200/70',
+    textSub: isLight ? 'text-slate-500' : 'text-slate-300',
     headerGlow: isLight ? 'from-blue-50 to-indigo-50/40' : 'from-blue-950/40 via-slate-900/60 to-transparent',
   };
 
@@ -140,6 +137,8 @@ const CompareView: React.FC<CompareViewProps> = ({
   };
 
   // Comprehensive processed metrics for each asset
+    const ASSET_COLORS = isLight ? ['#2563eb', '#64748b', '#ea580c'] : ['#3b82f6', '#ffffff', '#f97316'];
+
   const processedAssets = useMemo(() => {
     return assets.map((asset, index) => {
       const summaryRow = summaryData.find((s) => s.Commodity === asset);
@@ -384,10 +383,10 @@ const CompareView: React.FC<CompareViewProps> = ({
           <div className="flex items-center gap-3">
             <button
               onClick={onBack}
-              className={`flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-bold transition-all ${
+              className={`flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-medium transition-all ${
                 isLight
                   ? 'bg-white border border-slate-200 text-slate-700 hover:bg-slate-100 shadow-sm'
-                  : 'bg-blue-900/30 border border-blue-500/30 text-cyan-300 hover:bg-blue-800/40 shadow-sm'
+                  : 'bg-blue-900/30 border border-blue-500/30 text-white hover:bg-blue-800/40 shadow-sm'
               }`}
             >
               <ArrowLeft className="w-4 h-4" />
@@ -396,7 +395,7 @@ const CompareView: React.FC<CompareViewProps> = ({
             <div>
               <div className="flex items-center gap-2">
                 <Scale className="w-5 h-5 text-blue-500" />
-                <h1 className={`text-xl sm:text-2xl font-black ${themeStyles.textMain}`}>
+                <h1 className={`text-xl sm:text-2xl font-semibold ${themeStyles.textMain}`}>
                   التحليل المؤسسي المقارن المتقدم
                 </h1>
               </div>
@@ -411,7 +410,7 @@ const CompareView: React.FC<CompareViewProps> = ({
             {processedAssets.map((item) => (
               <div
                 key={item.asset}
-                className={`flex items-center gap-2 px-3 py-1.5 rounded-xl border text-xs font-bold shadow-sm ${
+                className={`flex items-center gap-2 px-3 py-1.5 rounded-xl border text-xs font-medium shadow-sm ${
                   isLight
                     ? 'bg-white border-slate-200 text-slate-800'
                     : 'bg-slate-900/90 border-blue-500/30 text-white'
@@ -420,7 +419,7 @@ const CompareView: React.FC<CompareViewProps> = ({
                 <div className="w-2.5 h-2.5 rounded-full shadow-sm" style={{ backgroundColor: item.color }} />
                 <span>{item.asset}</span>
                 <span className={`text-[11px] font-mono px-1.5 py-0.5 rounded ${
-                  isLight ? 'bg-slate-100 text-slate-600' : 'bg-slate-800 text-blue-200'
+                  isLight ? 'bg-slate-100 text-slate-600' : 'bg-slate-800 text-white'
                 }`}>
                   {item.symbol}
                 </span>
@@ -431,11 +430,11 @@ const CompareView: React.FC<CompareViewProps> = ({
       </div>
 
       <div className="p-4 sm:p-6 space-y-8 max-w-[1600px] mx-auto w-full">
-        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8, delay: 0.1, ease: [0.16, 1, 0.3, 1] }}>
+        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4, delay: 0.05, ease: [0.16, 1, 0.3, 1] }}>
         {/* TradingView Charts Grid (Preserved exactly as requested) */}
         <div className="space-y-3">
           <div className="flex items-center justify-between">
-            <h3 className={`text-sm font-bold flex items-center gap-2 ${themeStyles.textMain}`}>
+            <h3 className={`text-sm font-medium flex items-center gap-2 ${themeStyles.textMain}`}>
               <Activity className="w-4 h-4 text-blue-500" />
               الرسوم البيانية الحية (TradingView Live Price Charts)
             </h3>
@@ -461,11 +460,11 @@ const CompareView: React.FC<CompareViewProps> = ({
                       className="w-3 h-3 rounded-full"
                       style={{ backgroundColor: ASSET_COLORS[index % ASSET_COLORS.length] }}
                     />
-                    <h4 className={`font-bold text-sm ${themeStyles.textMain}`}>{asset}</h4>
+                    <h4 className={`font-medium text-sm ${themeStyles.textMain}`}>{asset}</h4>
                   </div>
                   <span
                     className={`text-xs font-mono px-2 py-0.5 rounded ${
-                      isLight ? 'bg-slate-100 text-slate-700 font-bold' : 'bg-slate-800 text-cyan-300 font-bold'
+                      isLight ? 'bg-slate-100 text-slate-700 font-medium' : 'bg-slate-800 text-white font-medium'
                     }`}
                   >
                     {TV_SYMBOL_MAP[asset] || asset}
@@ -483,13 +482,13 @@ const CompareView: React.FC<CompareViewProps> = ({
         </div>
 
         </motion.div>
-        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8, delay: 0.2, ease: [0.16, 1, 0.3, 1] }}>
+        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4, delay: 0.1, ease: [0.16, 1, 0.3, 1] }}>
         {/* 3. Advanced Comparison Charts Section */}
         <div className={`rounded-3xl border p-5 sm:p-7 shadow-xl ${themeStyles.panelBg}`}>
           {/* Chart Header with Mode Toggle */}
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6 border-b pb-4 border-blue-500/15">
             <div>
-              <h3 className={`text-base sm:text-lg font-black flex items-center gap-2 ${themeStyles.textMain}`}>
+              <h3 className={`text-base sm:text-lg font-semibold flex items-center gap-2 ${themeStyles.textMain}`}>
                 <BarChart3 className="w-5 h-5 text-blue-500" />
                 استوديو الرسوم البيانية المقارنة المتقدمة (Comparative Analytical Studio)
               </h3>
@@ -502,56 +501,56 @@ const CompareView: React.FC<CompareViewProps> = ({
             <div className={`flex items-center p-1 rounded-2xl border ${isLight ? 'bg-slate-100 border-slate-200' : 'bg-slate-900 border-blue-500/30'}`}>
               <button
                 onClick={() => setChartView('radar')}
-                className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all ${
+                className={`px-3 py-1.5 rounded-xl text-xs font-medium transition-all ${
                   chartView === 'radar'
                     ? isLight
-                      ? 'bg-white text-blue-700 shadow-sm font-black'
-                      : 'bg-blue-600 text-white shadow-sm font-black'
+                      ? 'bg-white text-blue-700 shadow-sm font-semibold'
+                      : 'bg-blue-600 text-white shadow-sm font-semibold'
                     : isLight
                     ? 'text-slate-600 hover:text-slate-900'
-                    : 'text-blue-200/70 hover:text-white'
+                    : 'text-slate-300 hover:text-white'
                 }`}
               >
                 الرادار الهيكلي
               </button>
               <button
                 onClick={() => setChartView('normalized')}
-                className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all ${
+                className={`px-3 py-1.5 rounded-xl text-xs font-medium transition-all ${
                   chartView === 'normalized'
                     ? isLight
-                      ? 'bg-white text-blue-700 shadow-sm font-black'
-                      : 'bg-blue-600 text-white shadow-sm font-black'
+                      ? 'bg-white text-blue-700 shadow-sm font-semibold'
+                      : 'bg-blue-600 text-white shadow-sm font-semibold'
                     : isLight
                     ? 'text-slate-600 hover:text-slate-900'
-                    : 'text-blue-200/70 hover:text-white'
+                    : 'text-slate-300 hover:text-white'
                 }`}
               >
                 مؤشر القوة المعياري (-100% إلى +100%)
               </button>
               <button
                 onClick={() => setChartView('historical')}
-                className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all ${
+                className={`px-3 py-1.5 rounded-xl text-xs font-medium transition-all ${
                   chartView === 'historical'
                     ? isLight
-                      ? 'bg-white text-blue-700 shadow-sm font-black'
-                      : 'bg-blue-600 text-white shadow-sm font-black'
+                      ? 'bg-white text-blue-700 shadow-sm font-semibold'
+                      : 'bg-blue-600 text-white shadow-sm font-semibold'
                     : isLight
                     ? 'text-slate-600 hover:text-slate-900'
-                    : 'text-blue-200/70 hover:text-white'
+                    : 'text-slate-300 hover:text-white'
                 }`}
               >
                 صافي العقود التاريخية
               </button>
               <button
                 onClick={() => setChartView('delta')}
-                className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all ${
+                className={`px-3 py-1.5 rounded-xl text-xs font-medium transition-all ${
                   chartView === 'delta'
                     ? isLight
-                      ? 'bg-white text-blue-700 shadow-sm font-black'
-                      : 'bg-blue-600 text-white shadow-sm font-black'
+                      ? 'bg-white text-blue-700 shadow-sm font-semibold'
+                      : 'bg-blue-600 text-white shadow-sm font-semibold'
                     : isLight
                     ? 'text-slate-600 hover:text-slate-900'
-                    : 'text-blue-200/70 hover:text-white'
+                    : 'text-slate-300 hover:text-white'
                 }`}
               >
                 تشريح تدفقات الدخول/الخروج
@@ -568,14 +567,14 @@ const CompareView: React.FC<CompareViewProps> = ({
                 initial={{ opacity: 0, y: 15 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -15 }}
-                transition={{ duration: 0.3, ease: "easeOut" }}
+                transition={{ duration: 0.2, ease: "easeOut" }}
                 className="w-full h-full flex flex-col"
               >
                 <div className={`text-xs mb-2 flex items-center justify-between ${themeStyles.textSub}`}>
                   <span>
                     يقيس نسبة صافي التمركز إلى إجمالي العقود عبر الأسابيع الأخيرة. إشارة الصفر (0%) تفصل بين السيطرة الشرائية والبيعية.
                   </span>
-                  <span className="font-mono text-[11px] font-bold text-blue-500">مقياس موحّد عادل</span>
+                  <span className="text-[11px] font-medium text-blue-500">مقياس موحّد عادل</span>
                 </div>
                 <div className="flex-1 w-full">
                   <ResponsiveContainer width="100%" height="100%">
@@ -610,7 +609,7 @@ const CompareView: React.FC<CompareViewProps> = ({
                                   isLight ? 'bg-white border-slate-200 text-slate-900' : 'bg-slate-900 border-blue-500/30 text-white'
                                 }`}
                               >
-                                <div className="text-xs font-bold mb-2 text-center text-blue-400">{label}</div>
+                                <div className="text-xs font-medium mb-2 text-center text-blue-400">{label}</div>
                                 <div className="space-y-1.5">
                                   {payload.map((entry: any, i: number) => {
                                     const assetIdx = parseInt(entry.dataKey.replace('norm_', ''));
@@ -620,9 +619,9 @@ const CompareView: React.FC<CompareViewProps> = ({
                                       <div key={i} className="flex items-center justify-between gap-4 text-xs">
                                         <div className="flex items-center gap-1.5">
                                           <div className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: entry.color }} />
-                                          <span className="font-bold">{assetObj.asset}:</span>
+                                          <span className="font-medium">{assetObj.asset}:</span>
                                         </div>
-                                        <span className="font-mono font-black">{entry.value}%</span>
+                                        <span className="font-mono font-semibold">{entry.value}%</span>
                                       </div>
                                     );
                                   })}
@@ -651,8 +650,8 @@ const CompareView: React.FC<CompareViewProps> = ({
                           activeDot={{ r: 7 }}
                           name={`norm_${item.index}`}
                           isAnimationActive={true}
-                          animationBegin={300}
-                          animationDuration={1200}
+                          animationBegin={100}
+                          animationDuration={500}
                           animationEasing="ease-out"
                         />
                       ))}
@@ -668,7 +667,7 @@ const CompareView: React.FC<CompareViewProps> = ({
                 initial={{ opacity: 0, y: 15 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -15 }}
-                transition={{ duration: 0.3, ease: "easeOut" }}
+                transition={{ duration: 0.2, ease: "easeOut" }}
                 className="w-full h-full flex flex-col"
               >
                 <div className={`text-xs mb-2 ${themeStyles.textSub}`}>
@@ -706,7 +705,7 @@ const CompareView: React.FC<CompareViewProps> = ({
                                   isLight ? 'bg-white border-slate-200 text-slate-900' : 'bg-slate-900 border-blue-500/30 text-white'
                                 }`}
                               >
-                                <div className="text-xs font-bold mb-2 text-center text-blue-400">{label}</div>
+                                <div className="text-xs font-medium mb-2 text-center text-blue-400">{label}</div>
                                 <div className="space-y-1.5">
                                   {payload.map((entry: any, i: number) => {
                                     const assetIdx = parseInt(entry.dataKey.replace('asset_', ''));
@@ -716,9 +715,9 @@ const CompareView: React.FC<CompareViewProps> = ({
                                       <div key={i} className="flex items-center justify-between gap-4 text-xs">
                                         <div className="flex items-center gap-1.5">
                                           <div className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: entry.color }} />
-                                          <span className="font-bold">{assetObj.asset}:</span>
+                                          <span className="font-medium">{assetObj.asset}:</span>
                                         </div>
-                                        <span className="font-mono font-black">{formatCurrency(entry.value)} عقد</span>
+                                        <span className="font-mono font-semibold">{formatCurrency(entry.value)} عقد</span>
                                       </div>
                                     );
                                   })}
@@ -743,8 +742,8 @@ const CompareView: React.FC<CompareViewProps> = ({
                           fill={item.color}
                           radius={[4, 4, 0, 0]}
                           isAnimationActive={true}
-                          animationBegin={300}
-                          animationDuration={1200}
+                          animationBegin={100}
+                          animationDuration={500}
                           animationEasing="ease-out"
                         />
                       ))}
@@ -767,7 +766,7 @@ const CompareView: React.FC<CompareViewProps> = ({
                   خريطة رادارية متقدمة لتفكيك مكامن القوة المؤسسية بين الأصول
                 </div>
                 <div className="flex-1 w-full flex items-center justify-center pt-6">
-                  <RadarChart data={radarData} metrics={radarMetrics} size={340} margin={60}>
+                  <RadarChart data={radarData} metrics={radarMetrics} size={340} margin={60} enterDurationMs={500} staggerScale={0.5}>
                     <RadarGrid showLabels={false} />
                     <RadarAxis />
                     <RadarLabels fontSize={12} offset={24} />
@@ -784,7 +783,7 @@ const CompareView: React.FC<CompareViewProps> = ({
                 initial={{ opacity: 0, y: 15 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -15 }}
-                transition={{ duration: 0.3, ease: "easeOut" }}
+                transition={{ duration: 0.2, ease: "easeOut" }}
                 className="w-full h-full flex flex-col"
               >
                 <div className={`text-xs mb-2 ${themeStyles.textSub}`}>
@@ -822,7 +821,7 @@ const CompareView: React.FC<CompareViewProps> = ({
                                   isLight ? 'bg-white border-slate-200 text-slate-900' : 'bg-slate-900 border-blue-500/30 text-white'
                                 }`}
                               >
-                                <div className="text-xs font-bold mb-2 text-center text-blue-400">{label}</div>
+                                <div className="text-xs font-medium mb-2 text-center text-blue-400">{label}</div>
                                 <div className="space-y-1.5">
                                   {payload.map((entry: any, i: number) => (
                                     <div key={i} className="flex items-center justify-between gap-4 text-xs">
@@ -830,7 +829,7 @@ const CompareView: React.FC<CompareViewProps> = ({
                                         <div className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: entry.color }} />
                                         <span>{entry.name}:</span>
                                       </div>
-                                      <span className="font-mono font-black">{formatCurrency(entry.value)}</span>
+                                      <span className="font-mono font-semibold">{formatCurrency(entry.value)}</span>
                                     </div>
                                   ))}
                                 </div>
@@ -843,8 +842,8 @@ const CompareView: React.FC<CompareViewProps> = ({
                       <Legend iconType="circle" />
                       <Bar dataKey="longChange" name="تغير الشراء (Long Δ)" fill="#3b82f6" radius={[4, 4, 0, 0]}
                         isAnimationActive={true}
-                        animationBegin={300}
-                        animationDuration={1200}
+                        animationBegin={100}
+                        animationDuration={500}
                         animationEasing="ease-out" />
                       <Bar 
                         dataKey="shortChange" 
@@ -852,8 +851,8 @@ const CompareView: React.FC<CompareViewProps> = ({
                         fill={isLight ? '#64748b' : '#f8fafc'} 
                         radius={[4, 4, 0, 0]}
                         isAnimationActive={true}
-                        animationBegin={300}
-                        animationDuration={1200}
+                        animationBegin={100}
+                        animationDuration={500}
                         animationEasing="ease-out" 
                       />
                     </BarChart>
@@ -866,7 +865,7 @@ const CompareView: React.FC<CompareViewProps> = ({
         </div>
 
         </motion.div>
-        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8, delay: 0.3, ease: [0.16, 1, 0.3, 1] }}>
+        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4, delay: 0.15, ease: [0.16, 1, 0.3, 1] }}>
         {/* 1. The Core Institutional Verdict & Actionable Trade Synthesis Panel */}
         {synthesis && (
           <div
@@ -878,17 +877,17 @@ const CompareView: React.FC<CompareViewProps> = ({
           >
             {/* Ambient Background Blur Spot */}
             <div className="absolute -top-16 -left-16 w-56 h-56 bg-blue-500/10 rounded-full blur-3xl pointer-events-none" />
-            <div className="absolute -bottom-16 -right-16 w-56 h-56 bg-cyan-500/10 rounded-full blur-3xl pointer-events-none" />
+            <div className="absolute -bottom-16 -right-16 w-56 h-56 bg-white/10 rounded-full blur-3xl pointer-events-none" />
 
             <div className="relative z-10 space-y-5">
               {/* Header of Synthesis */}
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b pb-4 border-blue-500/20">
                 <div className="flex items-center gap-2.5">
-                  <div className={`p-2 rounded-xl ${isLight ? 'bg-blue-100 text-blue-700' : 'bg-blue-500/20 text-cyan-300'}`}>
+                  <div className={`p-2 rounded-xl ${isLight ? 'bg-blue-100 text-blue-700' : 'bg-blue-500/20 text-white'}`}>
                     <Target className="w-5 h-5" />
                   </div>
                   <div>
-                    <h3 className={`text-base sm:text-lg font-black ${themeStyles.textMain}`}>
+                    <h3 className={`text-base sm:text-lg font-semibold ${themeStyles.textMain}`}>
                       الخلاصة التحليلية وقرار المقارنة المؤسسي (Actionable Intelligence Verdict)
                     </h3>
                     <p className={`text-xs ${themeStyles.textSub}`}>
@@ -898,13 +897,13 @@ const CompareView: React.FC<CompareViewProps> = ({
                 </div>
 
                 <div className="flex items-center gap-2">
-                  <span className={`text-xs font-bold ${themeStyles.textSub}`}>درجة دقة الإشارة:</span>
+                  <span className={`text-xs font-medium ${themeStyles.textSub}`}>درجة دقة الإشارة:</span>
                   <span
-                    className={`px-3 py-1 rounded-xl text-xs font-black tracking-wide border ${
+                    className={`px-3 py-1 rounded-xl text-xs font-semibold tracking-wide border ${
                       synthesis.confidenceLevel === 'high'
                         ? isLight
                           ? 'bg-blue-100 text-blue-800 border-blue-300'
-                          : 'bg-blue-500/25 text-cyan-300 border-blue-500/40 shadow-sm'
+                          : 'bg-blue-500/25 text-white border-blue-500/40 shadow-sm'
                         : isLight
                         ? 'bg-slate-100 text-slate-700 border-slate-300'
                         : 'bg-slate-800 text-slate-200 border-slate-700'
@@ -920,12 +919,12 @@ const CompareView: React.FC<CompareViewProps> = ({
                 <div className="lg:col-span-2 space-y-3">
                   <div className="flex items-center gap-2">
                     <Sparkles className="w-4 h-4 text-blue-500 shrink-0" />
-                    <span className="text-xs font-bold uppercase tracking-wider text-blue-500">
+                    <span className="text-xs font-medium uppercase tracking-wider text-blue-500">
                       التوصية المؤسسية المستخلصة
                     </span>
                   </div>
 
-                  <div className={`text-base sm:text-lg font-black tracking-tight leading-snug ${themeStyles.textMain}`}>
+                  <div className={`text-base sm:text-lg font-semibold tracking-tight leading-snug ${themeStyles.textMain}`}>
                     {synthesis.tradeBias}
                   </div>
 
@@ -939,40 +938,40 @@ const CompareView: React.FC<CompareViewProps> = ({
                   {synthesis.isTwoAssets ? (
                     <>
                       <div className="flex items-center justify-between text-xs">
-                        <span className="font-bold text-blue-500">فارق القوة النسبية:</span>
-                        <span className={`font-mono font-black ${themeStyles.textMain}`}>
+                        <span className="font-medium text-blue-500">فارق القوة النسبية:</span>
+                        <span className={`font-mono font-semibold ${themeStyles.textMain}`}>
                           {Math.abs(synthesis.scoreDiff)} نقطة
                         </span>
                       </div>
                       <div className="flex items-center justify-between text-xs">
-                        <span className="font-bold text-blue-500">فارق صافي العقود الأسبوعي:</span>
-                        <span className={`font-mono font-black ${themeStyles.textMain}`}>
+                        <span className="font-medium text-blue-500">فارق صافي العقود الأسبوعي:</span>
+                        <span className={`font-mono font-semibold ${themeStyles.textMain}`}>
                           {synthesis.weeklyFlowSpread > 0 ? `+${formatCurrency(synthesis.weeklyFlowSpread)}` : formatCurrency(synthesis.weeklyFlowSpread)} عقد
                         </span>
                       </div>
                       <div className="flex items-center justify-between text-xs">
-                        <span className="font-bold text-blue-500">حالة التباين (Divergence):</span>
-                        <span className={`font-black ${synthesis.hasDivergence ? (isLight ? 'text-blue-600' : 'text-cyan-300') : themeStyles.textSub}`}>
+                        <span className="font-medium text-blue-500">حالة التباين (Divergence):</span>
+                        <span className={`font-semibold ${synthesis.hasDivergence ? (isLight ? 'text-blue-600' : 'text-white') : themeStyles.textSub}`}>
                           {synthesis.hasDivergence ? 'تباين صريح في التدفقات' : 'تدفقات متوافقة'}
                         </span>
                       </div>
                     </>
                   ) : (
                     <>
-                      <div className="text-xs font-black mb-1 text-blue-500">ترتيب الأصول حسب القوة المؤسسية:</div>
+                      <div className="text-xs font-semibold mb-1 text-blue-500">ترتيب الأصول حسب القوة المؤسسية:</div>
                       {synthesis.ranked.map((item, rIdx) => (
                         <div key={item.asset} className="flex items-center justify-between text-xs">
                           <div className="flex items-center gap-2">
-                            <span className={`w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-black ${
+                            <span className={`w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-semibold ${
                               rIdx === 0 
                                 ? isLight ? 'bg-blue-600 text-white' : 'bg-blue-500 text-white' 
                                 : isLight ? 'bg-slate-200 text-slate-700' : 'bg-slate-800 text-slate-300'
                             }`}>
                               {rIdx + 1}
                             </span>
-                            <span className={`font-bold ${themeStyles.textMain}`}>{item.asset}</span>
+                            <span className={`font-medium ${themeStyles.textMain}`}>{item.asset}</span>
                           </div>
-                          <span className={`font-mono font-bold ${rIdx === 0 ? (isLight ? 'text-blue-600' : 'text-cyan-300') : themeStyles.textSub}`}>
+                          <span className={`font-mono font-medium ${rIdx === 0 ? (isLight ? 'text-blue-600' : 'text-white') : themeStyles.textSub}`}>
                             {item.convictionScore > 0 ? `+${item.convictionScore}` : item.convictionScore} نقطة
                           </span>
                         </div>
@@ -986,11 +985,11 @@ const CompareView: React.FC<CompareViewProps> = ({
         )}
 
         </motion.div>
-        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8, delay: 0.4, ease: [0.16, 1, 0.3, 1] }}>
+        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4, delay: 0.2, ease: [0.16, 1, 0.3, 1] }}>
         {/* 2. Side-by-Side Deep Institutional Intelligence Cards */}
         <div className="space-y-4">
           <div className="flex items-center justify-between">
-            <h3 className={`text-base font-black flex items-center gap-2 ${themeStyles.textMain}`}>
+            <h3 className={`text-base font-semibold flex items-center gap-2 ${themeStyles.textMain}`}>
               <Layers className="w-5 h-5 text-blue-500" />
               التشريح المؤسسي المتعمق لكل أصل (Institutional Asset Breakdown)
             </h3>
@@ -1017,19 +1016,19 @@ const CompareView: React.FC<CompareViewProps> = ({
                     <div className="flex items-center gap-2.5">
                       <div className="w-3.5 h-3.5 rounded-full shadow-sm" style={{ backgroundColor: item.color }} />
                       <div>
-                        <h4 className={`text-lg font-black ${themeStyles.textMain}`}>{item.asset}</h4>
-                        <span className={`text-xs font-mono font-bold ${isLight ? 'text-blue-700' : 'text-cyan-300'}`}>
+                        <h4 className={`text-lg font-semibold ${themeStyles.textMain}`}>{item.asset}</h4>
+                        <span className={`text-xs font-mono font-medium ${isLight ? 'text-blue-700' : 'text-white'}`}>
                           {item.symbol}
                         </span>
                       </div>
                     </div>
 
                     <div
-                      className={`px-3 py-1 rounded-xl text-xs font-black border ${
+                      className={`px-3 py-1 rounded-xl text-xs font-semibold border ${
                         item.netPos >= 0
                           ? isLight
                             ? 'bg-blue-50 text-blue-700 border-blue-200'
-                            : 'bg-blue-500/20 text-cyan-300 border-blue-500/30'
+                            : 'bg-blue-500/20 text-white border-blue-500/30'
                           : isLight
                           ? 'bg-slate-100 text-slate-700 border-slate-300'
                           : 'bg-white/10 text-white border-white/20'
@@ -1052,13 +1051,13 @@ const CompareView: React.FC<CompareViewProps> = ({
                     }`}
                   >
                     <div className="flex items-center justify-between">
-                      <span className="font-black flex items-center gap-1.5">
+                      <span className="font-semibold flex items-center gap-1.5">
                         <Zap className="w-3.5 h-3.5 text-blue-500" />
                         {item.flow.title}
                       </span>
-                      <span className={`text-[10px] font-black px-2 py-0.5 rounded-full ${
+                      <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full ${
                         item.flow.isBullishLeading 
-                          ? isLight ? 'bg-blue-200 text-blue-900' : 'bg-blue-500/30 text-cyan-300' 
+                          ? isLight ? 'bg-blue-200 text-blue-900' : 'bg-blue-500/30 text-white' 
                           : isLight ? 'bg-slate-300 text-slate-800' : 'bg-white/20 text-white'
                       }`}>
                         {item.flow.badge}
@@ -1072,8 +1071,8 @@ const CompareView: React.FC<CompareViewProps> = ({
                 <div className="py-4 space-y-4">
                   {/* Long vs Short Dual Meter */}
                   <div className="space-y-1.5">
-                    <div className="flex justify-between items-center text-xs font-mono font-bold">
-                      <span className={`flex items-center gap-1 ${isLight ? 'text-blue-600' : 'text-cyan-400'}`}>
+                    <div className="flex justify-between items-center text-xs font-mono font-medium">
+                      <span className={`flex items-center gap-1 ${isLight ? 'text-blue-600' : 'text-white'}`}>
                         <span>{item.longRatio.toFixed(1)}%</span>
                         <span className="text-[10px] opacity-75">شراء</span>
                       </span>
@@ -1086,7 +1085,7 @@ const CompareView: React.FC<CompareViewProps> = ({
                       isLight ? 'bg-slate-200 border-slate-300' : 'bg-slate-950 border-blue-900/40'
                     }`}>
                       <div 
-                        className="h-full rounded-r-full bg-gradient-to-r from-blue-600 to-cyan-400 transition-all duration-500 shadow-sm"
+                        className="h-full rounded-r-full bg-gradient-to-r from-blue-600 to-white transition-all duration-500 shadow-sm"
                         style={{ width: `${item.longRatio}%` }}
                       />
                       <div 
@@ -1101,10 +1100,10 @@ const CompareView: React.FC<CompareViewProps> = ({
                   {/* 4-Cell Key Stats */}
                   <div className="grid grid-cols-2 gap-3">
                     <div className={`p-3 rounded-2xl border ${themeStyles.cardBg}`}>
-                      <div className={`text-[11px] font-bold ${themeStyles.textSub}`}>صافي العقود الحالي</div>
-                      <div className={`text-base font-black font-mono mt-0.5 ${
+                      <div className={`text-[11px] font-medium ${themeStyles.textSub}`}>صافي العقود الحالي</div>
+                      <div className={`text-base font-semibold font-mono mt-0.5 ${
                         item.netPos >= 0 
-                          ? isLight ? 'text-blue-600' : 'text-cyan-400' 
+                          ? isLight ? 'text-blue-600' : 'text-white' 
                           : isLight ? 'text-slate-800' : 'text-white'
                       }`}>
                         {item.netPos > 0 ? `+${formatCurrency(item.netPos)}` : formatCurrency(item.netPos)}
@@ -1112,10 +1111,10 @@ const CompareView: React.FC<CompareViewProps> = ({
                     </div>
 
                     <div className={`p-3 rounded-2xl border ${themeStyles.cardBg}`}>
-                      <div className={`text-[11px] font-bold ${themeStyles.textSub}`}>التغير الأسبوعي الصافي</div>
-                      <div className={`text-base font-black font-mono mt-0.5 ${
+                      <div className={`text-[11px] font-medium ${themeStyles.textSub}`}>التغير الأسبوعي الصافي</div>
+                      <div className={`text-base font-semibold font-mono mt-0.5 ${
                         item.netChange >= 0 
-                          ? isLight ? 'text-blue-600' : 'text-cyan-400' 
+                          ? isLight ? 'text-blue-600' : 'text-white' 
                           : isLight ? 'text-slate-800' : 'text-white'
                       }`}>
                         {item.netChange > 0 ? `+${formatCurrency(item.netChange)}` : formatCurrency(item.netChange)}
@@ -1123,10 +1122,10 @@ const CompareView: React.FC<CompareViewProps> = ({
                     </div>
 
                     <div className={`p-3 rounded-2xl border ${themeStyles.cardBg}`}>
-                      <div className={`text-[11px] font-bold ${themeStyles.textSub}`}>التدفق التراكمي (4 أسابيع)</div>
-                      <div className={`text-base font-black font-mono mt-0.5 ${
+                      <div className={`text-[11px] font-medium ${themeStyles.textSub}`}>التدفق التراكمي (4 أسابيع)</div>
+                      <div className={`text-base font-semibold font-mono mt-0.5 ${
                         item.fourWeekNetDelta >= 0 
-                          ? isLight ? 'text-blue-600' : 'text-cyan-400' 
+                          ? isLight ? 'text-blue-600' : 'text-white' 
                           : isLight ? 'text-slate-800' : 'text-white'
                       }`}>
                         {item.fourWeekNetDelta > 0 ? `+${formatCurrency(item.fourWeekNetDelta)}` : formatCurrency(item.fourWeekNetDelta)}
@@ -1134,9 +1133,9 @@ const CompareView: React.FC<CompareViewProps> = ({
                     </div>
 
                     <div className={`p-3 rounded-2xl border ${themeStyles.cardBg}`}>
-                      <div className={`text-[11px] font-bold ${themeStyles.textSub}`}>مؤشر COT النسبي</div>
-                      <div className={`text-base font-black font-mono mt-0.5 ${
-                        isLight ? 'text-blue-700' : 'text-cyan-300'
+                      <div className={`text-[11px] font-medium ${themeStyles.textSub}`}>مؤشر COT النسبي</div>
+                      <div className={`text-base font-semibold font-mono mt-0.5 ${
+                        isLight ? 'text-blue-700' : 'text-white'
                       }`}>
                         {item.cotIndex.toFixed(0)}%
                         <span className={`text-[10px] font-normal mr-1 ${themeStyles.textSub}`}>(نطاق 6 أسابيع)</span>
@@ -1146,12 +1145,12 @@ const CompareView: React.FC<CompareViewProps> = ({
 
                   {/* Overcrowding Risk Alert */}
                   {(item.isOvercrowdedLong || item.isOvercrowdedShort) && (
-                    <div className={`p-3 rounded-2xl border flex items-center gap-2.5 text-xs font-bold ${
+                    <div className={`p-3 rounded-2xl border flex items-center gap-2.5 text-xs font-medium ${
                       isLight 
                         ? 'bg-blue-100/90 text-blue-900 border-blue-300' 
-                        : 'bg-cyan-950/40 text-cyan-200 border-cyan-400/40 shadow-sm'
+                        : 'bg-blue-950/40 text-blue-100 border-white/40 shadow-sm'
                     }`}>
-                      <AlertTriangle className="w-4 h-4 text-cyan-400 shrink-0 animate-pulse" />
+                      <AlertTriangle className="w-4 h-4 shrink-0 animate-pulse" />
                       <span>
                         {item.isOvercrowdedLong 
                           ? 'تحذير تشبع شرائي حاد: مراكز الشراء عند قمم تاريخية؛ احتمالية ارتداد تصحيحي.' 
@@ -1165,11 +1164,11 @@ const CompareView: React.FC<CompareViewProps> = ({
                 <div className={`pt-3 border-t border-blue-500/15 flex items-center justify-between text-xs ${themeStyles.textSub}`}>
                   <div>
                     <span>إجمالي العقود: </span>
-                    <span className={`font-mono font-bold ${themeStyles.textMain}`}>{formatCurrency(item.totalPositions)}</span>
+                    <span className={`font-mono font-medium ${themeStyles.textMain}`}>{formatCurrency(item.totalPositions)}</span>
                   </div>
                   <div>
                     <span>نسبة الصافي: </span>
-                    <span className={`font-mono font-bold ${item.netRatio >= 0 ? (isLight ? 'text-blue-600' : 'text-cyan-400') : (isLight ? 'text-slate-800' : 'text-white')}`}>
+                    <span className={`font-mono font-medium ${item.netRatio >= 0 ? (isLight ? 'text-blue-600' : 'text-white') : (isLight ? 'text-slate-800' : 'text-white')}`}>
                       {item.netRatio > 0 ? `+${item.netRatio.toFixed(1)}%` : `${item.netRatio.toFixed(1)}%`}
                     </span>
                   </div>
@@ -1180,11 +1179,11 @@ const CompareView: React.FC<CompareViewProps> = ({
         </div>
 
         </motion.div>
-        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8, delay: 0.5, ease: [0.16, 1, 0.3, 1] }}>
+        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4, delay: 0.25, ease: [0.16, 1, 0.3, 1] }}>
         {/* 4. Comprehensive Comparison Matrix Table */}
         <div className={`rounded-3xl border shadow-xl overflow-hidden ${themeStyles.panelBg}`}>
           <div className={`p-5 border-b border-blue-500/15 flex items-center justify-between`}>
-            <h3 className={`text-base font-black flex items-center gap-2 ${themeStyles.textMain}`}>
+            <h3 className={`text-base font-semibold flex items-center gap-2 ${themeStyles.textMain}`}>
               <Activity className="w-5 h-5 text-blue-500" />
               مصفوفة المقارنة والمؤشرات المؤسسية الشاملة (Institutional Comparison Matrix)
             </h3>
@@ -1195,7 +1194,7 @@ const CompareView: React.FC<CompareViewProps> = ({
 
           <div className="overflow-x-auto">
             <table className="w-full text-xs text-right">
-              <thead className={`uppercase font-bold ${isLight ? 'bg-slate-100/80 text-slate-600' : 'bg-slate-900/90 text-blue-200/80'}`}>
+              <thead className={`uppercase font-medium ${isLight ? 'bg-slate-100/80 text-slate-600' : 'bg-slate-900/90 text-white/80'}`}>
                 <tr>
                   <th className="px-5 py-3.5">الأصل / الرمز</th>
                   <th className="px-4 py-3.5 text-center">التحيز المؤسسي</th>
@@ -1214,11 +1213,11 @@ const CompareView: React.FC<CompareViewProps> = ({
                     className={`transition-colors ${isLight ? 'hover:bg-blue-50/50' : 'hover:bg-blue-950/20'}`}
                   >
                     {/* Asset & Symbol */}
-                    <td className="px-5 py-4 font-bold flex items-center gap-2">
+                    <td className="px-5 py-4 font-medium flex items-center gap-2">
                       <div className="w-3 h-3 rounded-full shrink-0" style={{ backgroundColor: item.color }} />
                       <div>
-                        <div className={`font-black ${themeStyles.textMain}`}>{item.asset}</div>
-                        <div className={`text-[11px] font-mono ${isLight ? 'text-blue-700' : 'text-cyan-300'}`}>
+                        <div className={`font-semibold ${themeStyles.textMain}`}>{item.asset}</div>
+                        <div className={`text-[11px] font-mono ${isLight ? 'text-blue-700' : 'text-white'}`}>
                           {item.symbol}
                         </div>
                       </div>
@@ -1227,11 +1226,11 @@ const CompareView: React.FC<CompareViewProps> = ({
                     {/* Sentiment Badge */}
                     <td className="px-4 py-4 text-center">
                       <span
-                        className={`inline-block px-2.5 py-1 rounded-xl text-[11px] font-black border ${
+                        className={`inline-block px-2.5 py-1 rounded-xl text-[11px] font-semibold border ${
                           item.netPos >= 0
                             ? isLight
                               ? 'bg-blue-50 text-blue-700 border-blue-200'
-                              : 'bg-blue-500/20 text-cyan-300 border-blue-500/30'
+                              : 'bg-blue-500/20 text-white border-blue-500/30'
                             : isLight
                             ? 'bg-slate-100 text-slate-700 border-slate-300'
                             : 'bg-white/10 text-white border-white/20'
@@ -1242,13 +1241,13 @@ const CompareView: React.FC<CompareViewProps> = ({
                     </td>
 
                     {/* Net Position */}
-                    <td className="px-4 py-4 text-left font-mono font-black">
+                    <td className="px-4 py-4 text-left font-mono font-semibold">
                       <span
                         className={
                           item.netPos >= 0
                             ? isLight
                               ? 'text-blue-600'
-                              : 'text-cyan-400'
+                              : 'text-white'
                             : isLight
                             ? 'text-slate-800'
                             : 'text-white'
@@ -1259,13 +1258,13 @@ const CompareView: React.FC<CompareViewProps> = ({
                     </td>
 
                     {/* Net Change */}
-                    <td className="px-4 py-4 text-left font-mono font-black">
+                    <td className="px-4 py-4 text-left font-mono font-semibold">
                       <span
                         className={
                           item.netChange >= 0
                             ? isLight
                               ? 'text-blue-600'
-                              : 'text-cyan-400'
+                              : 'text-white'
                             : isLight
                             ? 'text-slate-800'
                             : 'text-white'
@@ -1277,8 +1276,8 @@ const CompareView: React.FC<CompareViewProps> = ({
 
                     {/* Long vs Short */}
                     <td className="px-4 py-4 text-left font-mono">
-                      <div className="flex items-center gap-1.5 font-bold">
-                        <span className={isLight ? 'text-blue-600' : 'text-cyan-400'}>
+                      <div className="flex items-center gap-1.5 font-medium">
+                        <span className={isLight ? 'text-blue-600' : 'text-white'}>
                           {item.longRatio.toFixed(0)}% L
                         </span>
                         <span className="opacity-40">/</span>
@@ -1289,20 +1288,20 @@ const CompareView: React.FC<CompareViewProps> = ({
                     </td>
 
                     {/* COT Index */}
-                    <td className="px-4 py-4 text-left font-mono font-black">
-                      <span className={isLight ? 'text-blue-700' : 'text-cyan-300'}>
+                    <td className="px-4 py-4 text-left font-mono font-semibold">
+                      <span className={isLight ? 'text-blue-700' : 'text-white'}>
                         {item.cotIndex.toFixed(0)}%
                       </span>
                     </td>
 
                     {/* 4-Week Net Flow */}
-                    <td className="px-4 py-4 text-left font-mono font-black">
+                    <td className="px-4 py-4 text-left font-mono font-semibold">
                       <span
                         className={
                           item.fourWeekNetDelta >= 0
                             ? isLight
                               ? 'text-blue-600'
-                              : 'text-cyan-400'
+                              : 'text-white'
                             : isLight
                             ? 'text-slate-800'
                             : 'text-white'
@@ -1315,11 +1314,11 @@ const CompareView: React.FC<CompareViewProps> = ({
                     {/* Flow Quality Tag */}
                     <td className="px-5 py-4 text-center">
                       <span
-                        className={`inline-block px-3 py-1 rounded-xl text-[11px] font-bold ${
+                        className={`inline-block px-3 py-1 rounded-xl text-[11px] font-medium ${
                           item.flow.isBullishLeading
                             ? isLight
                               ? 'bg-blue-100 text-blue-800'
-                              : 'bg-blue-500/25 text-cyan-300'
+                              : 'bg-blue-500/25 text-white'
                             : isLight
                             ? 'bg-slate-200 text-slate-800'
                             : 'bg-white/15 text-white'

@@ -234,17 +234,17 @@ export default function VoiceChatWidget({ themeMode, summaryData, historyData, h
   return (
     <div className="fixed bottom-24 right-6 z-40 flex flex-col items-end gap-3">
         {error && (
-            <div className={`px-3 py-2 rounded-lg shadow-lg text-xs font-bold max-w-xs ${themeMode === 'light' ? 'bg-rose-100 text-rose-600' : 'bg-rose-500/20 text-rose-400'}`}>
+            <div className={`px-3 py-2 rounded-lg shadow-lg text-xs font-medium max-w-xs ${themeMode === 'light' ? 'bg-rose-100 text-rose-600' : 'bg-rose-500/20 text-rose-400'}`}>
                 {error}
             </div>
         )}
         
         {showSettings && !isActive && !isConnecting && (
             <div className={`w-64 p-4 rounded-2xl shadow-2xl border flex flex-col gap-3 ${themeMode === 'light' ? 'bg-white border-slate-200' : 'bg-slate-900 border-blue-500/30'}`}>
-                <h4 className={`text-sm font-black mb-1 ${themeMode === 'light' ? 'text-slate-800' : 'text-white'}`}>إعدادات الذكاء الاصطناعي</h4>
+                <h4 className={`text-sm font-semibold mb-1 ${themeMode === 'light' ? 'text-slate-800' : 'text-white'}`}>إعدادات الذكاء الاصطناعي</h4>
                 
                 <div className="flex flex-col gap-1.5">
-                    <label className={`text-xs font-bold ${themeMode === 'light' ? 'text-slate-600' : 'text-cyan-300'}`}>اسمك (كيف يناديك؟)</label>
+                    <label className={`text-xs font-medium ${themeMode === 'light' ? 'text-slate-600' : 'text-blue-200'}`}>اسمك (كيف يناديك؟)</label>
                     <input 
                         type="text" 
                         value={userName}
@@ -253,13 +253,13 @@ export default function VoiceChatWidget({ themeMode, summaryData, historyData, h
                         className={`px-3 py-2 text-xs rounded-xl border outline-none ${
                             themeMode === 'light' 
                             ? 'bg-slate-50 border-slate-200 text-slate-800 focus:border-blue-400' 
-                            : 'bg-slate-800 border-slate-700 text-white focus:border-cyan-400'
+                            : 'bg-slate-800 border-slate-700 text-white focus:border-white'
                         }`}
                     />
                 </div>
 
                 <div className="flex flex-col gap-1.5">
-                    <label className={`text-xs font-bold ${themeMode === 'light' ? 'text-slate-600' : 'text-cyan-300'}`}>أسلوب وشخصية الردود</label>
+                    <label className={`text-xs font-medium ${themeMode === 'light' ? 'text-slate-600' : 'text-blue-200'}`}>أسلوب وشخصية الردود</label>
                     <textarea 
                         value={botPersona}
                         onChange={(e) => setBotPersona(e.target.value)}
@@ -268,7 +268,7 @@ export default function VoiceChatWidget({ themeMode, summaryData, historyData, h
                         className={`px-3 py-2 text-xs rounded-xl border outline-none resize-none ${
                             themeMode === 'light' 
                             ? 'bg-slate-50 border-slate-200 text-slate-800 focus:border-blue-400' 
-                            : 'bg-slate-800 border-slate-700 text-white focus:border-cyan-400'
+                            : 'bg-slate-800 border-slate-700 text-white focus:border-white'
                         }`}
                     />
                 </div>
@@ -295,7 +295,7 @@ export default function VoiceChatWidget({ themeMode, summaryData, historyData, h
                 className={`w-14 h-14 rounded-full shadow-2xl transition-all hover:scale-110 flex items-center justify-center overflow-hidden group ${
                     isActive 
                         ? 'bg-rose-500 text-white animate-pulse shadow-rose-500/50' 
-                        : (themeMode === 'light' ? 'bg-white text-blue-600 border border-slate-200' : 'bg-slate-800 text-cyan-400 border border-slate-700')
+                        : (themeMode === 'light' ? 'bg-white text-blue-600 border border-slate-200' : 'bg-slate-800 text-white border border-slate-700')
                 }`}
                 title="Live Voice Assistant"
             >
