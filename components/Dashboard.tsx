@@ -411,11 +411,8 @@ const Dashboard: React.FC<DashboardProps> = ({ summaryData, historyData, history
         const dateContext = latestDate ? `The COT data is current as of ${latestDate}. Today is ${today}.` : `Today is ${today}.`;
         
         const searchInstruction = `
-            SEARCH TASK 1 (Context): Search for key **Geopolitical, Economic, and Political** news that affected ${selectedItem ? selectedItem.Commodity : "the market"}. 
-            **CRITICAL:** Focus specifically on the period from **${latestDate || "recent past"}** to **TODAY (${today})**. What has happened SINCE the data was released?
-            SEARCH TASK 2 (Forward Looking): Search for the **upcoming economic calendar** for ${selectedItem ? selectedItem.Commodity : "major global markets"} for the next 7 days starting from today, ${today}. 
-            **CRITICAL:** Look for high-impact events on **Forex Factory** or similar reliable economic calendars. 
-            **MANDATORY:** You MUST specifically check for upcoming **Unemployment Claims** data if relevant to the asset (especially for USD pairs/Indices).
+            Context Task: Incorporate the most critical **Geopolitical, Economic, and Political** drivers currently affecting ${selectedItem ? selectedItem.Commodity : "the global markets"} based on your training data and current macro themes.
+            Forward Looking Task (Trader Playbook): Predict the types of **upcoming economic events** that would typically impact ${selectedItem ? selectedItem.Commodity : "major global markets"} (e.g., NFP, CPI, FOMC, Unemployment Claims) and explain how the market would react based on the current COT positioning.
         `;
 
         if (selectedItem) {
@@ -441,7 +438,7 @@ const Dashboard: React.FC<DashboardProps> = ({ summaryData, historyData, history
             - Always state the exact numerical price first (e.g., "$2,915.50 - Institutional Order Block"), followed by the technical reasoning.
             `;
 
-            prompt = `Act as a friendly, expert trading mentor. Speak directly to me (the user) in a supportive, conversational tone.
+            prompt = `Act as an elite, institutional-grade trading mentor. Speak directly to me (the user) in a decisive, data-driven, and highly analytical tone. No fluff.
             Analyze this COT report data for ${selectedItem.Commodity}:
             ${dateContext}
             Current Data:
@@ -460,10 +457,10 @@ const Dashboard: React.FC<DashboardProps> = ({ summaryData, historyData, history
             {
               "sentiment": {
                 "label": "Bullish" | "Bearish" | "Neutral",
-                "reason": "Brief 1-sentence reason"
+                "reason": "Brief 1-sentence analytical reason based on COT flow and price."
               },
-              "perspective": "Your friendly explanation of the market situation. What is smart money doing?",
-              "actionable_advice": "Specific 'If I Were You' advice. Tell me exactly what you would do.",
+              "perspective": "Deep, elite-level analysis combining the 6-week COT trend with current geopolitical/macro news. Explain exactly what institutional 'smart money' is doing and WHY, using real-world drivers. Do NOT be vague.",
+              "actionable_advice": "Specific 'If I Were You' advice. Provide a concrete, highly realistic trading strategy. Tell me exactly what you would do right now based on the daily timeframe, current price, and COT trend.",
               "key_levels": {
                 "current_price": "$${liveQuote ? liveQuote.price : 'Current spot price'}",
                 "resistance": "Exact numerical price (e.g. $4,485.50) - Tactical R1 resistance / Liquidity sweep",
@@ -473,26 +470,26 @@ const Dashboard: React.FC<DashboardProps> = ({ summaryData, historyData, history
                 "support_2": "Exact lower numerical price (e.g. $4,410.00) - S2 discount demand pool",
                 "invalidation_level": "Exact numerical price (e.g. $4,395.00) - Structural thesis invalidation"
               },
-              "institutional_bias": "Brief analysis of institutional positioning changes (Accumulation/Distribution).",
+              "institutional_bias": "Specific analysis of the change in Long vs Short positions and what that means for upcoming volatility.",
               "global_context": {
                 "news_highlights": [
-                    "MACRO/GEO 1: Specific, hard-hitting Geopolitical or Central Bank news from the last 48 hours.",
-                    "MACRO/GEO 2: Major economic data or global trade/political shift.",
+                    "MACRO/GEO 1: Specific, real geopolitical or economic news from the last 48 hours affecting this asset.",
+                    "MACRO/GEO 2: Real economic data point or global trade shift.",
                     "MACRO/GEO 3: Another pure macroeconomic driver affecting institutional risk appetite."
                 ],
-                "weekly_impact": "Deep analytical conclusion on how these specific macro/geopolitical events either validate or contradict the COT institutional positioning.",
-                "market_sentiment_score": "Number 0-100. 0=Extreme Risk-Off (Safe Havens bid), 100=Extreme Risk-On. Base this purely on macro/geopolitical fears vs. greed.",
-                "key_risks": ["Black Swan / Macro Risk 1", "Geopolitical / Economic Risk 2"]
+                "weekly_impact": "Deep analytical conclusion on how these specific events validate or contradict the COT institutional positioning.",
+                "market_sentiment_score": "Number 0-100. 0=Extreme Risk-Off, 100=Extreme Risk-On.",
+                "key_risks": ["Real, specific Macro Risk 1", "Real, specific Geopolitical Risk 2"]
               },
               "playbook": [
                 {
-                  "event": "Event Name",
-                  "date": "Date/Time",
-                  "forecast": "Consensus Forecast",
-                  "plan": "What to do if it beats/misses",
-                  "why": "Reasoning based on market conditions",
-                  "when_to_act": "Specific timing or trigger",
-                  "impact_if_deviates": "What happens if actual != forecast"
+                  "event": "Upcoming Economic Event Type (e.g., US CPI, FOMC, NFP)",
+                  "date": "Expected Timeframe",
+                  "forecast": "Typical Market Expectation",
+                  "plan": "Specific trading plan (e.g., 'If CPI prints > forecast, look to short $Commodity at R1')",
+                  "why": "Institutional reasoning based on yield/dollar dynamics",
+                  "when_to_act": "Specific timing (e.g., 'Wait for 15m candle close post-release')",
+                  "impact_if_deviates": "What exactly happens to this asset if actual != forecast"
                 }
               ]
             }
@@ -503,7 +500,7 @@ const Dashboard: React.FC<DashboardProps> = ({ summaryData, historyData, history
                 .slice(0, 10)
                 .map(d => `${d.Commodity}: NetPos ${d["Net Positions"]}, Chg ${d["Net Change"]}`);
 
-            prompt = `Act as a friendly, expert trading mentor. Analyze the current COT market overview based on these top movers:
+            prompt = `Act as an elite, institutional-grade trading mentor. Analyze the current COT market overview based on these top movers:
             ${dateContext}
             ${JSON.stringify(topMovers)}
             
@@ -513,35 +510,35 @@ const Dashboard: React.FC<DashboardProps> = ({ summaryData, historyData, history
             {
               "sentiment": {
                 "label": "Risk-On" | "Risk-Off" | "Neutral",
-                "reason": "Brief 1-sentence reason"
+                "reason": "Brief 1-sentence analytical reason based on global flows."
               },
-              "perspective": "Big picture market themes and drivers.",
-              "actionable_advice": "Which assets to watch and where the opportunities are.",
+              "perspective": "Deep, big-picture market themes. Synthesize the top movers with the current global macro news you searched for. What is the overarching institutional narrative?",
+              "actionable_advice": "Which specific assets to watch based on extreme COT positioning and upcoming macro catalysts.",
               "key_levels": {
                 "support": "Key global support zones (e.g., DXY levels)",
                 "resistance": "Key global resistance zones",
-                "pivot_point": "Critical market pivot"
+                "pivot_point": "Critical global market pivot"
               },
               "institutional_bias": "Overall institutional flow analysis (Risk-On/Risk-Off flows).",
               "global_context": {
                 "news_highlights": [
-                    "MACRO/GEO 1: Specific, hard-hitting Geopolitical or Central Bank news from the last 48 hours.",
-                    "MACRO/GEO 2: Major economic data or global trade/political shift.",
-                    "MACRO/GEO 3: Another pure macroeconomic driver affecting institutional risk appetite."
+                    "MACRO/GEO 1: Specific, real geopolitical or economic news from the last 48 hours.",
+                    "MACRO/GEO 2: Real economic data point or global trade shift.",
+                    "MACRO/GEO 3: Another pure macroeconomic driver affecting global risk appetite."
                 ],
-                "weekly_impact": "Deep analytical conclusion on how these specific macro/geopolitical events shape global Risk-On/Risk-Off flows.",
-                "market_sentiment_score": "Number 0-100. 0=Extreme Risk-Off (Safe Havens bid), 100=Extreme Risk-On.",
-                "key_risks": ["Black Swan / Macro Risk 1", "Geopolitical / Economic Risk 2"]
+                "weekly_impact": "Deep analytical conclusion on how these specific events shape global Risk-On/Risk-Off flows.",
+                "market_sentiment_score": "Number 0-100. 0=Extreme Risk-Off, 100=Extreme Risk-On.",
+                "key_risks": ["Real, specific Macro Risk 1", "Real, specific Geopolitical Risk 2"]
               },
               "playbook": [
                 {
-                  "event": "Event Name",
-                  "date": "Date/Time",
-                  "forecast": "Consensus Forecast",
-                  "plan": "Trading plan",
-                  "why": "Reasoning",
-                  "when_to_act": "Timing/Trigger",
-                  "impact_if_deviates": "Impact analysis"
+                  "event": "Upcoming Economic Event Type",
+                  "date": "Expected Timeframe",
+                  "forecast": "Typical Market Expectation",
+                  "plan": "Specific trading plan for global markets",
+                  "why": "Reasoning based on yield/dollar dynamics",
+                  "when_to_act": "Specific timing",
+                  "impact_if_deviates": "Impact analysis across asset classes"
                 }
               ]
             }
@@ -552,11 +549,11 @@ const Dashboard: React.FC<DashboardProps> = ({ summaryData, historyData, history
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
-                model: 'gemini-3.1-flash',
+                model: 'gemini-3.6-flash',
                 prompt,
-                tools: [{ googleSearch: {} }],
+                 
                 responseMimeType: "application/json",
-                systemInstruction: "You are a friendly, experienced trading mentor. You explain things simply and clearly. You are not a robot; you are a helpful guide. Always ground your advice in the data and news provided. You have access to Google Search; ALWAYS search for TODAY'S DAILY TIMEFRAME technical support and resistance levels from sites like Investing.com or TradingView. The user trades STRICTLY on the DAILY timeframe. Be decisive but responsible. Return ONLY valid JSON."
+                systemInstruction: "You are an elite, institutional-grade trading mentor. You analyze data with cold, hard logic. You are highly specific and data-driven. Always ground your advice in real-world macroeconomic drivers and current market data. The user trades STRICTLY on the DAILY timeframe. Be decisive, concrete, and responsible. Return ONLY valid JSON."
             })
         });
 

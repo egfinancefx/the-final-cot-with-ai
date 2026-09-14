@@ -52,7 +52,7 @@ interface AnalysisData {
     playbook: PlaybookEvent[];
 }
 
-const AIAnalysisOverlay: React.FC<AIAnalysisOverlayProps> = ({ isOpen, onClose, isLoading, analysis, title, data }) => {
+const AIAnalysisOverlay: React.FC<AIAnalysisOverlayProps> = ({ isAiOfflineMode, isOpen, onClose, isLoading, analysis, title, data }) => {
   const [copied, setCopied] = useState(false);
   const [parsedData, setParsedData] = useState<AnalysisData | null>(null);
   
@@ -247,7 +247,7 @@ const AIAnalysisOverlay: React.FC<AIAnalysisOverlayProps> = ({ isOpen, onClose, 
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
-                model: 'gemini-3.1-flash-lite',
+                model: 'gemini-2.5-flash',
                 prompt,
                 responseMimeType: "application/json"
             })
@@ -312,6 +312,18 @@ const AIAnalysisOverlay: React.FC<AIAnalysisOverlayProps> = ({ isOpen, onClose, 
 
       return (
           <div className={`space-y-8 animate-in fade-in slide-in-from-bottom-8 duration-700 ${isRTL ? 'text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}>
+              {isAiOfflineMode && (
+                  <div className="bg-rose-500/10 border border-rose-500/20 rounded-2xl p-4 flex items-start gap-3 relative overflow-hidden group">
+                      <div className="absolute inset-0 bg-gradient-to-r from-rose-500/0 via-rose-500/5 to-rose-500/0 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000"></div>
+                      <AlertTriangle className="w-5 h-5 text-rose-400 shrink-0 mt-0.5" />
+                      <div>
+                          <h4 className="text-rose-400 font-medium text-sm">Gemini API Quota Exceeded</h4>
+                          <p className="text-rose-400/80 text-xs mt-1">
+                              Your API key has hit its rate limit or quota. The analysis shown below is a generic, fallback report generated locally. Please check your Google AI Studio billing/plan, wait a moment, and try again.
+                          </p>
+                      </div>
+                  </div>
+              )}
               
               {/* 1. Hero Section: Sentiment & Strategy */}
               <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">

@@ -27,14 +27,14 @@ async function startServer() {
   app.use(cors());
   app.use(express.json());
 
-  const CANDIDATE_MODELS = ["gemini-3.1-flash-lite", "gemini-flash-latest", "gemini-3.8-flash"];
+  const CANDIDATE_MODELS = ["gemini-2.5-flash", "gemini-3.6-flash", "gemini-3.8-flash"];
 
   // Helper to execute Gemini requests with automatic fallback across models on 503/429
   async function executeGeminiWithFallback(
     ai: GoogleGenAI,
     contents: any,
     config: any = {},
-    preferredModel: string = "gemini-3.1-flash-lite"
+    preferredModel: string = "gemini-2.5-flash"
   ): Promise<string> {
     const modelsToTry = [
       preferredModel,
@@ -54,7 +54,7 @@ async function startServer() {
           return response.text;
         }
       } catch (err: any) {
-        lastError = err;
+        fs.appendFileSync("error.log", "Model Error: " + model + " " + err.message + "\n"); lastError = err;
         const status = err?.status || err?.code;
         // If 503 (high demand) or 429 (rate limit/quota), seamlessly attempt next model
         if (status === 503 || status === 429 || status === 500) {
@@ -74,7 +74,7 @@ async function startServer() {
               return fallbackRes.text;
             }
           } catch (retryErr) {
-            lastError = retryErr;
+            fs.appendFileSync("error.log", "Retry Error: " + retryErr.message + "\n"); lastError = retryErr;
             continue;
           }
         }
@@ -86,7 +86,7 @@ async function startServer() {
   // API Route for standard text / analysis generation
   app.post("/api/gemini", async (req, res) => {
     try {
-      const { prompt, model = "gemini-3.1-flash-lite", systemInstruction, tools, responseMimeType } = req.body;
+      const { prompt, model = "gemini-2.5-flash", systemInstruction, tools, responseMimeType } = req.body;
       if (!prompt) {
         return res.status(400).json({ error: "Prompt is required" });
       }
@@ -116,7 +116,7 @@ async function startServer() {
   // API Route for multi-turn chat
   app.post("/api/chat", async (req, res) => {
     try {
-      const { message, history = [], systemInstruction, model = "gemini-3.1-flash-lite" } = req.body;
+      const { message, history = [], systemInstruction, model = "gemini-2.5-flash" } = req.body;
       if (!message) {
         return res.status(400).json({ error: "Message is required" });
       }
@@ -383,7 +383,7 @@ ${livePricesContext}
 ${parsed.data}`;
 
             session = await ai.live.connect({
-                model: "gemini-3.1-flash-live-preview",
+                model: "gemini-3.6-flash-live-preview",
                 config: {
                 responseModalities: ["AUDIO"] as Modality[],
                 speechConfig: {
