@@ -120,7 +120,7 @@ const App: React.FC = () => {
   }
 
   return (
-    <div className={`min-h-screen font-sans overflow-hidden flex flex-col transition-colors duration-700 ${getThemeBackground()} bg-fixed bg-cover`}>
+    <div className={`h-screen min-h-screen font-sans overflow-hidden flex flex-col transition-colors duration-700 ${getThemeBackground()} bg-fixed bg-cover`}>
       {/* Fixed Header Container */}
       <div className="fixed top-0 w-full z-50 flex flex-col">
         {/* Main Navbar */}
@@ -201,7 +201,7 @@ const App: React.FC = () => {
       </div>
 
       {/* Main Content - Adjusted top padding for header + ticker */}
-      <main className="w-full max-w-[1920px] mx-auto px-3 sm:px-5 lg:px-6 pt-[90px] pb-2 flex-1 flex flex-col overflow-hidden">
+      <main className="w-full max-w-[1920px] mx-auto px-3 sm:px-5 lg:px-6 pt-[90px] pb-2 flex-1 flex flex-col min-h-0 overflow-y-auto lg:overflow-hidden custom-scrollbar">
         {isLoading && summaryData.length === 0 ? (
           <div className="flex flex-col items-center justify-center flex-1 h-full">
             <Loader2 className="w-12 h-12 text-blue-500 animate-spin mb-4" />
@@ -214,7 +214,7 @@ const App: React.FC = () => {
               <h3 className={`${themeMode === 'light' ? 'text-slate-900' : 'text-white'} font-medium mb-2`}>Sync Error</h3>
               <p className="text-slate-400 text-sm mb-4">{error}</p>
               <button 
-                onClick={fetchData}
+                onClick={fetchData} 
                 className="px-4 py-2 bg-red-500/20 hover:bg-red-500/30 text-red-300 rounded-lg text-sm font-semibold transition-colors"
               >
                 Try Again
@@ -222,7 +222,7 @@ const App: React.FC = () => {
             </div>
           </div>
         ) : currentView === 'compare' ? (
-          <div className="animate-fade-in flex-1 flex flex-col">
+          <div className="animate-fade-in flex-1 min-h-0 flex flex-col">
             <CompareView 
               assets={compareAssets}
               summaryData={summaryData}
@@ -233,7 +233,7 @@ const App: React.FC = () => {
             />
           </div>
         ) : (
-          <div className="animate-fade-in flex-1 flex flex-col">
+          <div className="animate-fade-in flex-1 min-h-0 flex flex-col">
              <Dashboard 
               summaryData={summaryData} 
               historyData={historyData}

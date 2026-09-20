@@ -37,11 +37,20 @@ const TradingViewWidget: React.FC<{ symbol: string, themeMode: string }> = React
     };
 
     if (typeof window.TradingView === 'undefined') {
-      const script = document.createElement('script');
-      script.src = 'https://s3.tradingview.com/tv.js';
-      script.async = true;
-      script.onload = initWidget;
-      document.head.appendChild(script);
+      let script = document.querySelector('script[src="https://s3.tradingview.com/tv.js"]') as HTMLScriptElement | null;
+      if (!script) {
+        script = document.createElement('script');
+        script.src = 'https://s3.tradingview.com/tv.js';
+        script.async = true;
+        document.head.appendChild(script);
+      }
+      script.addEventListener('load', initWidget);
+      return () => {
+        script?.removeEventListener('load', initWidget);
+        if (container.current) {
+          container.current.innerHTML = '';
+        }
+      };
     } else {
       initWidget();
     }

@@ -54,7 +54,10 @@ async function startServer() {
           return response.text;
         }
       } catch (err: any) {
-        fs.appendFileSync("error.log", "Model Error: " + model + " " + err.message + "\n"); lastError = err;
+        lastError = err;
+        try {
+          fs.appendFileSync("error.log", `Model Error: ${model} ${err?.message || String(err)}\n`);
+        } catch (_) {}
         const status = err?.status || err?.code;
         // If 503 (high demand) or 429 (rate limit/quota), seamlessly attempt next model
         if (status === 503 || status === 429 || status === 500) {
@@ -73,8 +76,11 @@ async function startServer() {
             if (fallbackRes && typeof fallbackRes.text === "string") {
               return fallbackRes.text;
             }
-          } catch (retryErr) {
-            fs.appendFileSync("error.log", "Retry Error: " + retryErr.message + "\n"); lastError = retryErr;
+          } catch (retryErr: any) {
+            lastError = retryErr;
+            try {
+              fs.appendFileSync("error.log", `Retry Error: ${retryErr?.message || String(retryErr)}\n`);
+            } catch (_) {}
             continue;
           }
         }
@@ -349,6 +355,16 @@ async function startServer() {
     console.log("Client connected to /live");
     let session: any = null;
 
+    const safeSend = (payload: any) => {
+      if (clientWs.readyState === WebSocket.OPEN) {
+        try {
+          clientWs.send(typeof payload === 'string' ? payload : JSON.stringify(payload));
+        } catch (err) {
+          console.error("Failed to send to client WS:", err);
+        }
+      }
+    };
+
     clientWs.on("message", async (data) => {
       try {
         const parsed = JSON.parse(data.toString());
@@ -358,7 +374,7 @@ async function startServer() {
             try {
               ai = getGeminiClient();
             } catch (initErr: any) {
-              clientWs.send(JSON.stringify({ error: initErr.message }));
+              safeSend({ error: initErr.message });
               return;
             }
 
@@ -395,11 +411,11 @@ ${parsed.data}`;
                     onopen: () => { console.log("Gemini WebSocket OPENED"); },
                     onerror: (e) => { 
                         console.error("Gemini WebSocket ERROR", e); 
-                        clientWs.send(JSON.stringify({ error: "Gemini WS Error: " + String(e) }));
+                        safeSend({ error: "Gemini WS Error: " + String(e) });
                     },
                     onclose: (e) => { 
                         console.log("Gemini WebSocket CLOSED", e.code, e.reason); 
-                        clientWs.send(JSON.stringify({ error: "Gemini WS Closed: " + e.code + " " + e.reason }));
+                        safeSend({ error: "Gemini WS Closed: " + e.code + " " + e.reason });
                     },
                     onmessage: (message: LiveServerMessage) => {
                         try {
@@ -409,24 +425,24 @@ ${parsed.data}`;
                             for (const part of message.serverContent.modelTurn.parts) {
                                 const audio = part.inlineData?.data;
                                 if (audio) {
-                                    clientWs.send(JSON.stringify({ audio }));
+                                    safeSend({ audio });
                                 }
                             }
                         }
                         if (message.serverContent?.interrupted) {
-                            clientWs.send(JSON.stringify({ interrupted: true }));
+                            safeSend({ interrupted: true });
                         }
                     }
                 }
             });
-            clientWs.send(JSON.stringify({ ready: true }));
+            safeSend({ ready: true });
             
             // Prompt the AI to start speaking immediately
             if (session) {
                 try {
                     session.sendClientContent({ turns: `مرحباً! لقد اتصلت للتو. رحب بي (اسمي: ${userName}) واطلب مني كيف يمكن أن تساعدني، التزم بشخصيتك: ${botPersona}`, turnComplete: true });
                 } catch (err: any) {
-                    clientWs.send(JSON.stringify({ error: "Init Error: " + err.message }));
+                    safeSend({ error: "Init Error: " + err.message });
                 }
             }
 
@@ -442,12 +458,18 @@ ${parsed.data}`;
         }
       } catch (e: any) {
         console.error("Error processing client message", e);
-        clientWs.send(JSON.stringify({ error: e.message || String(e) }));
+        safeSend({ error: e.message || String(e) });
       }
     });
 
     clientWs.on("close", () => {
       console.log("Client disconnected");
+      if (session) {
+        try {
+          session.close();
+        } catch (e) {}
+        session = null;
+      }
     });
   });
 

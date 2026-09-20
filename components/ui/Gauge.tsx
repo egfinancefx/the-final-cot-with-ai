@@ -35,6 +35,14 @@ export function Gauge({
   const notchLength = size * 0.15; // 15% of size
   const innerRadius = radius - notchLength;
 
+  const safeValue = typeof value === 'number' && Number.isFinite(value) 
+    ? Math.min(100, Math.max(0, value)) 
+    : 50;
+
+  const safeCenterValue = typeof centerValue === 'number' && Number.isFinite(centerValue)
+    ? centerValue
+    : 0;
+
   const notches = useMemo(() => {
     const notchList = [];
     for (let i = 0; i <= totalNotches; i++) {
@@ -48,14 +56,14 @@ export function Gauge({
       const x2 = radius + radius * Math.cos(angleRad);
       const y2 = radius + radius * Math.sin(angleRad);
 
-      const isActive = percentage * 100 <= value;
+      const isActive = percentage * 100 <= safeValue;
 
       notchList.push({
         x1, y1, x2, y2, isActive, index: i
       });
     }
     return notchList;
-  }, [totalNotches, startAngle, endAngle, radius, innerRadius, value]);
+  }, [totalNotches, startAngle, endAngle, radius, innerRadius, safeValue]);
 
   return (
     <div className={`relative flex items-center justify-center ${className}`} style={{ width: size, height: size }}>
@@ -83,7 +91,7 @@ export function Gauge({
           />
         ))}
       </svg>
-      {centerValue !== undefined && (
+      {centerValue !== undefined && Number.isFinite(centerValue) && (
         <motion.div 
             className="absolute inset-0 flex flex-col items-center justify-center font-mono pointer-events-none"
             initial={{ opacity: 0, scale: 0.5 }}
@@ -91,7 +99,7 @@ export function Gauge({
             transition={{ duration: 0.5, delay: (animationDelayMs / 1000) + 0.3 }}
         >
           <NumberFlow 
-            value={centerValue} 
+            value={safeCenterValue} 
             format={{ notation: "compact", maximumFractionDigits: 1 }}
             className={`${size <= 50 ? 'text-[10px] sm:text-[11px]' : 'text-sm'} font-semibold tracking-tight ${valueClassName}`}
           />

@@ -62,6 +62,13 @@ export default function VoiceChatWidget({ themeMode, summaryData, historyData, h
     localStorage.setItem('ai_bot_persona', botPersona);
   }, [userName, botPersona]);
 
+  // Clean up on unmount to release microphone and audio contexts
+  useEffect(() => {
+    return () => {
+      stopVoiceChat();
+    };
+  }, []);
+
   const startVoiceChat = async () => {
     try {
       setIsConnecting(true);
@@ -214,11 +221,15 @@ export default function VoiceChatWidget({ themeMode, summaryData, historyData, h
       streamRef.current = null;
     }
     if (inputAudioCtxRef.current) {
-      inputAudioCtxRef.current.close();
+      if (inputAudioCtxRef.current.state !== 'closed') {
+        inputAudioCtxRef.current.close().catch(() => {});
+      }
       inputAudioCtxRef.current = null;
     }
     if (outputAudioCtxRef.current) {
-      outputAudioCtxRef.current.close();
+      if (outputAudioCtxRef.current.state !== 'closed') {
+        outputAudioCtxRef.current.close().catch(() => {});
+      }
       outputAudioCtxRef.current = null;
     }
   };

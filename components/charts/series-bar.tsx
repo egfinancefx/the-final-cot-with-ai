@@ -86,18 +86,70 @@ export interface SeriesBarProps {
   fill?: string;
   /** Tooltip dot color when fill is gradient/pattern. Default: fill */
   stroke?: string;
-  /** Corner radius for bar top corners. Default: 0 (square tops, similar to Bar lineCap="butt") */
+  /** Corner radius for bar top corners or capsule. Default: 0 */
   radius?: number;
+  /** Whether to render a rounded dome head at top. Default: true when radius > 0 */
+  roundedHead?: boolean;
+  /** Whether to round bottom corners too (capsule/pill mode). Default: false */
+  roundBottom?: boolean;
   /** Animate grow from baseline. Default: true */
   animate?: boolean;
   /** Opacity for non-hovered bars when another point is hovered (matches BarChart). Default: 0.3 */
   fadedOpacity?: number;
 }
 
+/**
+ * Generates an SVG path with a rounded head (dome top corners) or capsule shape.
+ */
+export function getTopRoundedBarPath(
+  x: number,
+  y: number,
+  width: number,
+  height: number,
+  radius: number,
+  roundBottom: boolean = false
+): string {
+  if (width <= 0 || height <= 0) return "";
+  const maxR = Math.min(width / 2, height / (roundBottom ? 2 : 1));
+  const r = Math.max(0, Math.min(radius, maxR));
+
+  if (r <= 0.5) {
+    return `M ${x} ${y} h ${width} v ${height} h ${-width} Z`;
+  }
+
+  if (roundBottom) {
+    // Pill / capsule shape with both top and bottom fully rounded
+    return (
+      `M ${x} ${y + height - r} ` +
+      `A ${r} ${r} 0 0 1 ${x + r} ${y + height} ` +
+      `L ${x + width - r} ${y + height} ` +
+      `A ${r} ${r} 0 0 1 ${x + width} ${y + height - r} ` +
+      `L ${x + width} ${y + r} ` +
+      `A ${r} ${r} 0 0 1 ${x + width - r} ${y} ` +
+      `L ${x + r} ${y} ` +
+      `A ${r} ${r} 0 0 1 ${x} ${y + r} ` +
+      `Z`
+    );
+  }
+
+  // Rounded head: top-left and top-right curved dome, bottom corners flat on baseline
+  return (
+    `M ${x} ${y + height} ` +
+    `L ${x} ${y + r} ` +
+    `A ${r} ${r} 0 0 1 ${x + r} ${y} ` +
+    `L ${x + width - r} ${y} ` +
+    `A ${r} ${r} 0 0 1 ${x + width} ${y + r} ` +
+    `L ${x + width} ${y + height} ` +
+    `Z`
+  );
+}
+
 export function SeriesBar({
   dataKey,
   fill = chartCssVars.linePrimary,
   radius = 0,
+  roundedHead = true,
+  roundBottom = false,
   animate = true,
   fadedOpacity = 0.3,
 }: SeriesBarProps) {
@@ -236,8 +288,29 @@ export function SeriesBar({
               key={`${dataKey}-${categoryLabel}-${revealEpoch}`}
               radius={effectiveRadius}
               revealEpoch={revealEpoch}
+              roundBottom={roundBottom}
+              roundedHead={roundedHead}
               x={barLeft}
               y={valueY}
+            />
+          );
+        }
+
+        if (roundedHead && effectiveRadius > 0) {
+          return (
+            <motion.path
+              animate={{ opacity: isFaded ? fadedOpacity : 1 }}
+              d={getTopRoundedBarPath(
+                barLeft,
+                valueY,
+                barWidth,
+                barHeight,
+                effectiveRadius,
+                roundBottom
+              )}
+              fill={fill}
+              key={`${dataKey}-${categoryLabel}`}
+              transition={{ opacity: { duration: 0.12 } }}
             />
           );
         }
@@ -277,6 +350,8 @@ interface SeriesBarRectProps {
   revealEpoch: number;
   isFaded: boolean;
   fadedOpacity: number;
+  roundedHead?: boolean;
+  roundBottom?: boolean;
 }
 
 function SeriesBarRect({
@@ -293,11 +368,42 @@ function SeriesBarRect({
   revealEpoch,
   isFaded,
   fadedOpacity,
+  roundedHead = true,
+  roundBottom = false,
 }: SeriesBarRectProps) {
   const enterAnim = transitionWithDelay(
     enterTransition,
     index * calculatedStaggerDelay
   );
+
+  if (roundedHead && radius > 0) {
+    return (
+      <motion.g
+        animate={{
+          opacity: isFaded ? fadedOpacity : 1,
+          scaleY: 1,
+        }}
+        initial={{ opacity: 0, scaleY: 0 }}
+        key={`series-bar-${index}-${revealEpoch}`}
+        style={{
+          transformOrigin: `${x + barWidth / 2}px ${innerHeight}px`,
+        }}
+        transition={enterAnim}
+      >
+        <path
+          d={getTopRoundedBarPath(
+            x,
+            y,
+            barWidth,
+            barHeight,
+            radius,
+            roundBottom
+          )}
+          fill={fill}
+        />
+      </motion.g>
+    );
+  }
 
   return (
     <motion.rect

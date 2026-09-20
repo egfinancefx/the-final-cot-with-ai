@@ -12,8 +12,7 @@ import { SummaryRow, HistoryRow, ThemeMode } from '../types';
 import KPICard from './KPICard';
 import AssetTrendCard from './AssetTrendCard';
 import TopChangesRingCard from './TopChangesRingCard';
-import MostVolumeAssetsCard from './MostVolumeAssetsCard';
-import RingChartCard from './RingChartCard';
+import RadarChartCard from './RingChartCard';
 import BarRoundedChartCard from './BarRoundedChartCard';
 import AIAnalysisOverlay from './AIAnalysisOverlay';
 import CompareModal from './CompareModal';
@@ -593,7 +592,7 @@ const Dashboard: React.FC<DashboardProps> = ({ summaryData, historyData, history
   const iconColor = getIconColorClass();
 
   return (
-    <div key={refreshKey || 'dashboard-root'} className="flex flex-col h-full gap-2.5 sm:gap-3 overflow-hidden">
+    <div key={refreshKey || 'dashboard-root'} className="flex flex-col h-full flex-1 min-h-0 gap-2 sm:gap-2.5 overflow-hidden">
       {/* Header Bar */}
       <div className={`flex flex-col sm:flex-row justify-between items-center gap-2.5 backdrop-blur-xl px-3 sm:px-4 py-2 sm:py-2.5 rounded-xl border shrink-0 z-40 transition-colors duration-500 ${themeStyles.headerBg}`}>
         <div className="flex items-center gap-3 w-full sm:w-auto">
@@ -1054,13 +1053,13 @@ const Dashboard: React.FC<DashboardProps> = ({ summaryData, historyData, history
             </div>
           </div>
       ) : (
-          <div className="flex flex-col gap-2.5 sm:gap-3 shrink-0">
+          <div className="flex-1 min-h-0 flex flex-col gap-2 sm:gap-2.5">
             {/* Macro Grid: Left/Center (9 cols on xl/2xl = 75%) + Right (3 cols on xl/2xl = 25%) */}
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-2.5 sm:gap-3 items-stretch">
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-2 sm:gap-2.5 items-stretch flex-1 min-h-0">
               {/* Left & Center Main Section (col-span-8 on lg, col-span-9 on xl/2xl to give cards maximum space) */}
-              <div className="lg:col-span-8 xl:col-span-9 2xl:col-span-9 flex flex-col gap-2.5 sm:gap-3">
+              <div className="lg:col-span-8 xl:col-span-9 2xl:col-span-9 flex flex-col gap-2 sm:gap-2.5 h-full flex-1 min-h-0">
                 {/* 1. The 3 Cards Row: [ 1 ] [ 2 ] [ 3 ] */}
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5 sm:gap-3 shrink-0">
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 sm:gap-2.5 shrink-0">
                   {(() => {
                       const assetsToShow = favorites.length > 0 
                           ? favorites.slice(0, 3) 
@@ -1100,16 +1099,16 @@ const Dashboard: React.FC<DashboardProps> = ({ summaryData, historyData, history
                   })()}
                 </div>
 
-                {/* 2. Below the 4 cards: Ring Chart (Left) + Bar Rounded Chart (Center) */}
-                <div className="grid grid-cols-1 md:grid-cols-12 gap-2.5 sm:gap-3 flex-1 min-h-[210px] max-h-[275px]">
-                  {/* Ring Chart (Left) */}
+                {/* 2. Below the 3 cards: Radar Chart (Left) + Bar Rounded Chart (Center) */}
+                <div className="grid grid-cols-1 md:grid-cols-12 gap-2 sm:gap-2.5 flex-1 min-h-0">
+                  {/* Radar Chart (Left) */}
                   <motion.div 
                     initial={{ opacity: 0, y: 15 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.5, delay: 0.15 }}
-                    className="md:col-span-5 flex flex-col h-full"
+                    className="md:col-span-5 flex flex-col h-full min-h-0"
                   >
-                    <RingChartCard 
+                    <RadarChartCard 
                       summaryData={summaryData} 
                       themeMode={themeMode} 
                     />
@@ -1120,10 +1119,12 @@ const Dashboard: React.FC<DashboardProps> = ({ summaryData, historyData, history
                     initial={{ opacity: 0, y: 15 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.5, delay: 0.2 }}
-                    className="md:col-span-7 flex flex-col h-full"
+                    className="md:col-span-7 flex flex-col h-full min-h-0"
                   >
                     <BarRoundedChartCard 
                       summaryData={summaryData} 
+                      historyData={historyData}
+                      historyDates={historyDates}
                       themeMode={themeMode}
                       onSelectAsset={(commodity) => setSelectedCommodity(commodity)}
                     />
@@ -1131,35 +1132,18 @@ const Dashboard: React.FC<DashboardProps> = ({ summaryData, historyData, history
                 </div>
               </div>
 
-              {/* Right Column Section: shifted and compacted to the right (col-span-3 on xl/2xl) */}
-              <div className="lg:col-span-4 xl:col-span-3 2xl:col-span-3 flex flex-col gap-2.5 sm:gap-3">
-                {/* Top Changes Ring Chart (Replaces Radar Chart) */}
+              {/* Right Column Section: Top Changes Ring Chart */}
+              <div className="lg:col-span-4 xl:col-span-3 2xl:col-span-3 flex flex-col h-full min-h-0">
                 <motion.div 
                   initial={{ opacity: 0, x: 20 }}
                   animate={{ opacity: 1, x: 0 }}
                   transition={{ duration: 0.5, delay: 0.12 }}
-                  className="flex-1 min-h-[200px]"
+                  className="flex-1 h-full min-h-0 flex flex-col"
                 >
                   <TopChangesRingCard 
                     summaryData={summaryData} 
                     themeMode={themeMode}
                     onSelectAsset={(commodity) => setSelectedCommodity(commodity)}
-                    compact={true}
-                  />
-                </motion.div>
-
-                {/* Most Volume Assets (Bottom) */}
-                <motion.div 
-                  initial={{ opacity: 0, x: 20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ duration: 0.5, delay: 0.25 }}
-                  className="flex-1 min-h-[200px]"
-                >
-                  <MostVolumeAssetsCard 
-                    summaryData={summaryData} 
-                    themeMode={themeMode}
-                    onSelectAsset={(commodity) => setSelectedCommodity(commodity)}
-                    limit={4}
                   />
                 </motion.div>
               </div>
@@ -1169,7 +1153,7 @@ const Dashboard: React.FC<DashboardProps> = ({ summaryData, historyData, history
 
       {/* Market Scanner Grid */}
       {!selectedItem && (
-        <div className={`backdrop-blur-xl rounded-xl border shadow-xl overflow-hidden flex-1 min-h-0 flex flex-col mt-2 animate-fade-in delay-100 ${themeStyles.chartBg}`}>
+        <div className={`backdrop-blur-xl rounded-xl border shadow-xl overflow-hidden ${isMarketScannerOpen ? 'flex-1 min-h-[280px]' : 'shrink-0'} flex flex-col animate-fade-in delay-100 ${themeStyles.chartBg}`}>
             <div 
                 className={`px-4 py-2 border-b flex flex-col sm:flex-row justify-between items-center gap-2 shrink-0 cursor-pointer ${themeStyles.tableHeader}`}
                 onClick={() => setIsMarketScannerOpen(!isMarketScannerOpen)}

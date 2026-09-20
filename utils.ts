@@ -1,3 +1,5 @@
+import { twMerge } from "tailwind-merge";
+import { type ClassValue, clsx } from "clsx";
 
 import { SummaryRow, HistoryRow } from './types';
 
@@ -148,7 +150,6 @@ export const generateLocalFallbackAnalysis = (
   const isStrongBear = !isBullish && netPos < 0;
   const sentimentLabel = isStrongBull ? "Bullish" : isStrongBear ? "Bearish" : (isBullish ? "Mildly Bullish" : "Mildly Bearish");
 
-  // Calculate realistic key price levels if live price is provided
   let keyLevelsObj: any = {
     support: "Institutional demand zone / Previous session low",
     resistance: "Institutional supply zone / Previous session high",
@@ -161,8 +162,6 @@ export const generateLocalFallbackAnalysis = (
     const pHigh = liveQuote.high || pPrice * 1.008;
     const pLow = liveQuote.low || pPrice * 0.992;
     const pClose = liveQuote.prevClose || pPrice;
-
-    // Classic Pivot Points formula
     const pivot = (pHigh + pLow + pClose) / 3;
     const r1 = (2 * pivot) - pLow;
     const s1 = (2 * pivot) - pHigh;
@@ -181,6 +180,14 @@ export const generateLocalFallbackAnalysis = (
     };
   }
 
+  const pAsset = `Structural Market Thesis: Smart Money vs. Retail Dynamics\n\nThe Commitment of Traders (COT) data reveals a highly distinct positioning structure for ${commodity}. Institutional participants and commercial hedgers are currently heavily skewed ${netPos >= 0 ? 'NET LONG' : 'NET SHORT'}, holding ${Math.abs(netPos).toLocaleString()} net contracts. The most recent reporting period saw an aggressive ${isBullish ? 'accumulation' : 'distribution'} phase of ${Math.abs(netChange).toLocaleString()} contracts, indicating that the 'Smart Money' is actively front-running anticipated macroeconomic shifts.\n\nWhen we contextualize this directional flow against the broader geopolitical landscape and recent central bank rhetoric, we see a clear institutional conviction. Retail traders are likely caught offsides, fading this structural trend. This divergence creates a highly asymmetric daily timeframe opportunity. The institutional footprint is undeniable: they are absorbing liquidity at discount levels and building massive inventory for a sustained ${isBullish ? 'bullish markup' : 'bearish markdown'} phase.`;
+
+  const pMacro = `Macro Structural Thesis: Cross-Asset Institutional Flows\n\nThe aggregate Commitment of Traders (COT) data reveals massive rotational capital flows across global asset classes. We are witnessing a clear divergence where 'Smart Money' is aggressively reallocating capital in response to shifting central bank liquidity cycles and geopolitical friction.\n\nMetals, currencies, and energy are completely decoupling. The institutional footprint shows distinct accumulation in specific safe-haven or high-yield assets, while actively liquidating exposure in highly levered risk-on sectors. This is not a retail-driven market; this is a pure, systematic institutional rotation. Understanding these hidden flows provides a massive edge for daily timeframe positioning, allowing us to align with the deepest pockets in the market.`;
+
+  const aAsset = `Tactical 'If I Were You' Playbook (Daily Timeframe):\n\n1. Directional Bias: Strictly ${isBullish ? 'LONG (Buy the dips)' : 'SHORT (Sell the rallies)'} based on the massive institutional ${isBullish ? 'accumulation' : 'distribution'}. Do not counter-trend trade this asset.\n2. Entry Condition (The Setup): Wait patiently for the daily price action to sweep retail liquidity at the tactical ${isBullish ? 'Support (S1)' : 'Resistance (R1)'} zone. Do not enter randomly; let the price come to the calculated institutional equilibrium.\n3. Execution Trigger: We need a clear DAILY CLOSE that rejects the ${isBullish ? 'S1/S2 discount zones' : 'R1/R2 premium zones'}. A strong rejection candle (pin bar or engulfing) confirms the Smart Money is defending their average entry price.\n4. Risk Management: Hard stop-loss placed exactly below the Structural Invalidation Level. If the daily candle closes beyond this line, our institutional thesis is broken and we exit immediately.\n5. Profit Targets: Scale out 50% of the position at the first major liquidity pool (R1 for longs, S1 for shorts), and hold the runner towards the extreme R2/S2 targets.`;
+
+  const aMacro = `Tactical Macro Playbook:\n\n1. Asset Selection: Isolate the 2 or 3 specific commodities/currencies showing the most aggressive week-over-week Net Change in institutional positioning. Ignore the rest.\n2. Execution Framing: Wait for major macroeconomic data releases (e.g., NFP, CPI) to create artificial 'whipsaws'. Use these engineered liquidity sweeps to enter in the direction of the dominant COT trend.\n3. Risk Management: Never trade the initial news spike. Wait for the New York session daily close to confirm the true institutional intent before committing capital.`;
+
   const data = {
     sentiment: {
       label: sentimentLabel,
@@ -188,12 +195,8 @@ export const generateLocalFallbackAnalysis = (
         ? `Institutional positioning changed by ${netChange > 0 ? '+' : ''}${netChange.toLocaleString()} contracts to reach a net position of ${netPos.toLocaleString()} contracts.`
         : "Macro institutional flows show distinct positioning shifts across major asset sectors."
     },
-    perspective: isAsset
-      ? `Institutional traders are ${netPos >= 0 ? 'net long' : 'net short'} on ${commodity}. The latest weekly move indicates active ${isBullish ? 'accumulation' : 'distribution'} by commercial and institutional participants.`
-      : "Market structure reveals directional divergence between metals, currencies, and energy contracts.",
-    actionable_advice: isAsset
-      ? `Align order flow with the institutional bias (${sentimentLabel}). Watch for price pullbacks into key support/resistance zones before executing, and maintain strict risk management.`
-      : "Focus on assets with the highest institutional net changes, and wait for session liquidity confirmation.",
+    perspective: isAsset ? pAsset : pMacro,
+    actionable_advice: isAsset ? aAsset : aMacro,
     key_levels: keyLevelsObj,
     institutional_bias: isAsset
       ? `${isBullish ? 'Accumulation' : 'Distribution'} (Weekly shift: ${netChange > 0 ? '+' : ''}${netChange.toLocaleString()} contracts)`
@@ -223,8 +226,6 @@ export const generateLocalFallbackAnalysis = (
 
   return JSON.stringify(data, null, 2);
 };
-import { type ClassValue, clsx } from "clsx";
-import { twMerge } from "tailwind-merge";
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));

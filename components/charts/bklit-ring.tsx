@@ -27,6 +27,7 @@ export type RingLineCap = "round" | "butt";
 export interface RingProps {
   index: number;
   color?: string;
+  trackColor?: string;
   animate?: boolean;
   showGlow?: boolean;
   lineCap?: RingLineCap;
@@ -65,6 +66,7 @@ function RingProgressPath({
 export const Ring = memo(function Ring({
   index,
   color: colorProp,
+  trackColor,
   animate = true,
   showGlow = true,
   lineCap = "round",
@@ -98,7 +100,8 @@ export const Ring = memo(function Ring({
   const progressComplete = useEnterComplete(progressMount);
 
   const ringData = data[index];
-  const progress = ringData ? ringData.value / ringData.maxValue : 0;
+  const rawProgress = ringData && ringData.maxValue > 0 ? ringData.value / ringData.maxValue : 0;
+  const progress = Number.isFinite(rawProgress) ? Math.min(1, Math.max(0, rawProgress)) : 0;
   const arcRange = endAngle - startAngle;
 
   const animatedProgressPath = useTransform(progressMount, (v) => {
@@ -138,6 +141,7 @@ export const Ring = memo(function Ring({
 
   const { innerRadius, outerRadius } = getRingRadii(index);
   const color = colorProp || getColor(index);
+  const bgFill = trackColor || ringCssVars.ringBackground;
 
   const isHovered = hoveredIndex === index;
   const isFaded = hoveredIndex !== null && hoveredIndex !== index;
@@ -186,7 +190,7 @@ export const Ring = memo(function Ring({
           opacity: { duration: 0.15 },
         }}
       >
-        <path d={bgPath} fill={ringCssVars.ringBackground} />
+        <path d={bgPath} fill={bgFill} />
         {progressPath ? <path d={progressPath} fill={color} /> : null}
       </motion.g>
     );
@@ -203,7 +207,7 @@ export const Ring = memo(function Ring({
           opacity: layerOpacity,
         }}
       >
-        <path d={bgPath} fill={ringCssVars.ringBackground} />
+        <path d={bgPath} fill={bgFill} />
       </motion.g>
     );
   }
@@ -219,7 +223,7 @@ export const Ring = memo(function Ring({
         opacity: { duration: 0.15 },
       }}
     >
-      <path d={bgPath} fill={ringCssVars.ringBackground} />
+      <path d={bgPath} fill={bgFill} />
       <RingProgressPath
         animatedProgressPath={animatedProgressPath}
         color={color}

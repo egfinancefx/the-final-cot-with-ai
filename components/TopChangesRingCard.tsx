@@ -3,9 +3,8 @@ import { SummaryRow, ThemeMode } from '../types';
 import { formatCurrency } from '../utils';
 import { RingChart } from './charts/bklit-ring-chart';
 import { Ring } from './charts/bklit-ring';
-import { RingCenter } from './charts/bklit-ring-center';
 import { RingData } from './charts/bklit-ring-context';
-import { CircleDot, TrendingUp, TrendingDown, ArrowUpRight, ArrowDownRight } from 'lucide-react';
+import { CircleDot, TrendingUp, TrendingDown } from 'lucide-react';
 
 interface TopChangesRingCardProps {
   summaryData: SummaryRow[];
@@ -14,30 +13,120 @@ interface TopChangesRingCardProps {
   compact?: boolean;
 }
 
-// 5 harmonious, eye-friendly, distinct modern tones (Blue, Emerald, Amber, Violet, Rose)
-const TOP5_PALETTE = [
-  '#3b82f6', // Currencies (Euro/Pound/etc)
-  '#10b981', // Emerald / Agriculture / Copper
-  '#f59e0b', // Gold / Precious Metals
-  '#8b5cf6', // Indices / Modern asset
-  '#f43f5e', // Energy / Crude Oil
+// Harmonious deep and medium-dark blue palette with no pale or whitish tones
+const BLUE_PALETTE_LIGHT = [
+  '#172554', // Deepest Navy Blue (Blue 950)
+  '#1e3a8a', // Dark Midnight Blue (Blue 900)
+  '#1e40af', // Dark Royal Blue (Blue 800)
+  '#1d4ed8', // Dark Cobalt Blue (Blue 700)
+  '#2563eb', // Rich Sapphire Blue (Blue 600)
 ];
 
-// Helper to filter out sovereign debt, interest rate derivatives, and treasury notes
-const isDebtOrNote = (name: string): boolean => {
-  const lower = name.toLowerCase();
-  return (
-    lower.includes('note') ||
+const BLUE_PALETTE_DARK = [
+  '#1e40af', // Dark Royal Blue (Blue 800)
+  '#1d4ed8', // Dark Cobalt Blue (Blue 700)
+  '#2563eb', // Rich Sapphire Blue (Blue 600)
+  '#3b82f6', // Solid Saturated Blue (Blue 500)
+  '#0284c7', // Deep Ocean Blue (Sky 600)
+];
+
+// Specific target asset groups requested: Currencies, Metals, and strictly (Nasdaq, S&P 500, Dow Jones)
+const TARGET_COMMODITIES = new Set([
+  // 1. Currencies
+  "Euro FX",
+  "British Pound",
+  "Japanese Yen",
+  "Canadian Dollar",
+  "Australian Dollar",
+  "Swiss Franc",
+  "New Zealand Dollar",
+  "Mexican Peso",
+  "Brazilian Real",
+  "South African Rand",
+  "U.S. Dollar Index",
+  // 2. Metals
+  "Gold",
+  "Silver",
+  "High Grade Copper",
+  "Platinum",
+  "Palladium",
+  // 3. Core Indices strictly: Nasdaq, S&P 500, Dow Jones
+  "Nasdaq 100 E-Mini",
+  "S&P 500 E-Mini",
+  "Dow Futures Mini",
+]);
+
+const isEligibleTargetAsset = (name: string): boolean => {
+  if (!name) return false;
+  const trimmed = name.trim();
+  if (TARGET_COMMODITIES.has(trimmed)) return true;
+
+  const lower = trimmed.toLowerCase();
+
+  // Strictly exclude Russell and VIX
+  if (lower.includes('vix') || lower.includes('russell')) return false;
+
+  // Strictly exclude energy, crypto, grains/agriculture, bonds/rates
+  if (
+    lower.includes('oil') ||
+    lower.includes('gas') ||
+    lower.includes('ulsd') ||
+    lower.includes('gasoline') ||
+    lower.includes('bitcoin') ||
+    lower.includes('ether') ||
+    lower.includes('crypto') ||
+    lower.includes('corn') ||
+    lower.includes('soybean') ||
+    lower.includes('wheat') ||
+    lower.includes('cattle') ||
+    lower.includes('hogs') ||
+    lower.includes('cotton') ||
+    lower.includes('coffee') ||
+    lower.includes('sugar') ||
+    lower.includes('cocoa') ||
+    lower.includes('lumber') ||
     lower.includes('bond') ||
-    lower.includes('year') ||
-    lower.includes('yr ') ||
-    lower.includes('fed funds') ||
+    lower.includes('note') ||
+    lower.includes('treasury') ||
     lower.includes('sofr') ||
-    lower.includes('t-note') ||
-    lower.includes('t-bond') ||
-    lower.includes('bills') ||
-    lower.includes('treasury')
-  );
+    lower.includes('fed funds') ||
+    lower.includes('bills')
+  ) {
+    return false;
+  }
+
+  // Check if it's Nasdaq, S&P 500, or Dow
+  if (lower.includes('nasdaq') || lower.includes('s&p 500') || lower.includes('dow')) {
+    return true;
+  }
+
+  // Check if it's Gold, Silver, Copper, Platinum, Palladium
+  if (
+    lower.includes('gold') ||
+    lower.includes('silver') ||
+    lower.includes('copper') ||
+    lower.includes('platinum') ||
+    lower.includes('palladium')
+  ) {
+    return true;
+  }
+
+  // Check if it's a Currency
+  if (
+    lower.includes('euro') ||
+    lower.includes('pound') ||
+    lower.includes('yen') ||
+    lower.includes('franc') ||
+    lower.includes('peso') ||
+    lower.includes('real') ||
+    lower.includes('rand') ||
+    lower.includes('dollar index') ||
+    (lower.includes('dollar') && (lower.includes('canadian') || lower.includes('australian') || lower.includes('zealand')))
+  ) {
+    return true;
+  }
+
+  return false;
 };
 
 export const TopChangesRingCard: React.FC<TopChangesRingCardProps> = ({
@@ -46,17 +135,18 @@ export const TopChangesRingCard: React.FC<TopChangesRingCardProps> = ({
   onSelectAsset
 }) => {
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
+  const palette = themeMode === 'light' ? BLUE_PALETTE_LIGHT : BLUE_PALETTE_DARK;
 
-  // Top 5 assets by absolute Net Change (|Net Change|) in Currencies, Metals, Energy, Crypto
-  const { ringData, top5Rows, totalAbsoluteShift } = useMemo(() => {
+  // Top 5 assets by absolute Net Change strictly in Currencies, Metals, and (Nasdaq, S&P 500, Dow Jones)
+  const { ringData, top5Rows } = useMemo(() => {
     if (!summaryData || summaryData.length === 0) {
-      return { ringData: [], top5Rows: [], totalAbsoluteShift: 0 };
+      return { ringData: [], top5Rows: [] };
     }
 
-    // Filter out bonds/notes
+    // Filter strictly for Currencies, Metals, and specified Indices (Nasdaq, S&P 500, Dow Jones)
     const eligibleRows = summaryData.filter(row => {
       const name = row.Commodity || '';
-      return !isDebtOrNote(name);
+      return isEligibleTargetAsset(name);
     });
 
     // Sort descending by absolute Net Change magnitude
@@ -68,11 +158,11 @@ export const TopChangesRingCard: React.FC<TopChangesRingCardProps> = ({
 
     const top5 = sorted.slice(0, 5);
     if (top5.length === 0) {
-      return { ringData: [], top5Rows: [], totalAbsoluteShift: 0 };
+      return { ringData: [], top5Rows: [] };
     }
 
     const maxChange = Math.max(...top5.map(r => Math.abs(r["Net Change"] || 0)), 1);
-    const totalShift = top5.reduce((acc, curr) => acc + Math.abs(curr["Net Change"] || 0), 0);
+    const palette = themeMode === 'light' ? BLUE_PALETTE_LIGHT : BLUE_PALETTE_DARK;
 
     const data: RingData[] = top5.map((row, idx) => {
       const absVal = Math.abs(row["Net Change"] || 0);
@@ -80,12 +170,12 @@ export const TopChangesRingCard: React.FC<TopChangesRingCardProps> = ({
         label: row.Commodity,
         value: absVal,
         maxValue: maxChange * 1.06, // Clean progress ceiling
-        color: TOP5_PALETTE[idx % TOP5_PALETTE.length],
+        color: palette[idx % palette.length],
       };
     });
 
-    return { ringData: data, top5Rows: top5, totalAbsoluteShift: totalShift };
-  }, [summaryData]);
+    return { ringData: data, top5Rows: top5 };
+  }, [summaryData, themeMode]);
 
   const cardBg = themeMode === 'light' 
     ? 'bg-white border-slate-200/80 shadow-sm' 
@@ -93,8 +183,6 @@ export const TopChangesRingCard: React.FC<TopChangesRingCardProps> = ({
 
   const textMain = themeMode === 'light' ? 'text-slate-900' : 'text-slate-100';
   const textSub = themeMode === 'light' ? 'text-slate-500' : 'text-slate-400';
-
-  const activeHoveredRow = hoveredIndex !== null && top5Rows[hoveredIndex] ? top5Rows[hoveredIndex] : null;
 
   return (
     <div className={`rounded-xl sm:rounded-2xl border p-3 sm:p-3.5 flex flex-col h-full transition-all duration-300 ${cardBg}`}>
@@ -108,68 +196,39 @@ export const TopChangesRingCard: React.FC<TopChangesRingCardProps> = ({
             <h3 className={`text-xs sm:text-sm font-semibold tracking-tight leading-tight truncate ${textMain}`}>
               Top 5 Net Position Shifts
             </h3>
-            <p className={`text-[10px] truncate ${textSub}`}>Currencies, metals & energy weekly rebalancing</p>
+            <p className={`text-[10px] truncate ${textSub}`}>Currencies, metals & core indices (Nasdaq, S&P 500, Dow)</p>
           </div>
         </div>
 
         <span className={`text-[9px] font-mono font-medium px-2 py-0.5 rounded-full border shrink-0 ${
           themeMode === 'light' 
-            ? 'bg-slate-100/80 text-slate-600 border-slate-200' 
-            : 'bg-slate-800/80 text-slate-300 border-slate-700/60'
+            ? 'bg-blue-50 text-blue-700 border-blue-200' 
+            : 'bg-blue-950/70 text-blue-300 border-blue-800/60'
         }`}>
-          Top 5 Movers
+          FX, Metals & Indices
         </span>
       </div>
 
-      {/* Ring Chart Centerpiece - 5 rings with spacious stroke and clear spacing */}
-      <div className="flex-1 w-full min-h-[160px] max-h-[195px] relative flex items-center justify-center my-0.5">
+      {/* Ring Chart Centerpiece - 5 animated concentric rings */}
+      <div className="flex-1 w-full min-h-[170px] relative flex items-center justify-center my-1">
         {ringData.length > 0 ? (
           <RingChart 
             data={ringData} 
-            size={180} 
-            strokeWidth={10} 
-            ringGap={5} 
-            baseInnerRadius={32}
+            size={204} 
+            strokeWidth={11} 
+            ringGap={4.5} 
+            baseInnerRadius={26}
             hoveredIndex={hoveredIndex}
             onHoverChange={setHoveredIndex}
           >
             {ringData.map((item, index) => (
-              <Ring index={index} key={item.label} showGlow={false} />
+              <Ring 
+                index={index} 
+                key={item.label} 
+                showGlow={false} 
+                trackColor={themeMode === 'light' ? 'rgba(30, 58, 138, 0.08)' : 'rgba(30, 58, 138, 0.25)'}
+              />
             ))}
-            <RingCenter 
-              defaultLabel="Top 5 Shifts"
-              children={({ isHovered, label }) => {
-                if (isHovered && activeHoveredRow) {
-                  const netVal = activeHoveredRow["Net Change"] || 0;
-                  const isUp = netVal >= 0;
-                  return (
-                    <div className="flex flex-col items-center justify-center text-center px-1 max-w-[95px]">
-                      <span className={`text-[11px] font-semibold truncate w-full ${textMain}`} title={label}>
-                        {label}
-                      </span>
-                      <div className={`flex items-center justify-center gap-0.5 my-0.5 font-mono text-xs font-bold ${isUp ? 'text-emerald-500' : 'text-rose-500'}`}>
-                        {isUp ? <ArrowUpRight className="w-3 h-3 shrink-0 stroke-[2.5]" /> : <ArrowDownRight className="w-3 h-3 shrink-0 stroke-[2.5]" />}
-                        <span>{formatCurrency(netVal)}</span>
-                      </div>
-                      <span className={`text-[8px] uppercase tracking-wider font-medium ${textSub}`}>
-                        Net Shift
-                      </span>
-                    </div>
-                  );
-                }
-
-                return (
-                  <div className="flex flex-col items-center justify-center text-center px-1 max-w-[95px]">
-                    <span className={`text-xs sm:text-sm font-mono font-bold tracking-tight ${themeMode === 'light' ? 'text-blue-600' : 'text-blue-400'}`}>
-                      {formatCurrency(totalAbsoluteShift)}
-                    </span>
-                    <span className={`text-[8px] font-medium uppercase tracking-wider mt-0.5 ${textSub}`}>
-                      Top 5 Volume
-                    </span>
-                  </div>
-                );
-              }}
-            />
           </RingChart>
         ) : (
           <div className={`text-xs ${textSub} flex items-center gap-1.5`}>
@@ -183,7 +242,7 @@ export const TopChangesRingCard: React.FC<TopChangesRingCardProps> = ({
         {top5Rows.map((row, idx) => {
           const rawChange = row["Net Change"] || 0;
           const isUp = rawChange >= 0;
-          const color = TOP5_PALETTE[idx % TOP5_PALETTE.length];
+          const color = palette[idx % palette.length];
           const isSelected = hoveredIndex === idx;
 
           return (
