@@ -11,6 +11,10 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { SummaryRow, HistoryRow, ThemeMode } from '../types';
 import KPICard from './KPICard';
 import AssetTrendCard from './AssetTrendCard';
+import TopChangesRingCard from './TopChangesRingCard';
+import MostVolumeAssetsCard from './MostVolumeAssetsCard';
+import RingChartCard from './RingChartCard';
+import BarRoundedChartCard from './BarRoundedChartCard';
 import AIAnalysisOverlay from './AIAnalysisOverlay';
 import CompareModal from './CompareModal';
 import HeatmapModal from './HeatmapModal';
@@ -27,10 +31,11 @@ interface DashboardProps {
   themeMode: ThemeMode;
   latestDate: string | null;
   onNavigateToCompare?: (assets: string[]) => void;
+  refreshKey?: number;
 }
 
-// Curated list of assets organized by category
-const FEATURED_ASSETS = ['Gold', 'Bitcoin Micro', 'Dow Futures Mini', 'Euro FX'];
+// Curated list of assets organized by category (3 core pillars: Metals, Indices, Currencies)
+const FEATURED_ASSETS = ['Gold', 'Dow Futures Mini', 'Euro FX'];
 
 const COMPARE_COLORS = ['#f59e0b', '#10b981', '#8b5cf6'];
 
@@ -126,7 +131,7 @@ const AssetSelector: React.FC<{
   );
 };
 
-const Dashboard: React.FC<DashboardProps> = ({ summaryData, historyData, historyDates, themeMode, latestDate, onNavigateToCompare }) => {
+const Dashboard: React.FC<DashboardProps> = ({ summaryData, historyData, historyDates, themeMode, latestDate, onNavigateToCompare, refreshKey }) => {
   const [selectedCommodity, setSelectedCommodity] = useState<string>('');
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   
@@ -142,7 +147,7 @@ const Dashboard: React.FC<DashboardProps> = ({ summaryData, historyData, history
   // Scanner State
   const [searchTerm, setSearchTerm] = useState('');
   const [sortConfig, setSortConfig] = useState<{ key: keyof SummaryRow | 'Sentiment'; direction: 'asc' | 'desc' } | null>(null);
-  const [isMarketScannerOpen, setIsMarketScannerOpen] = useState(true);
+  const [isMarketScannerOpen, setIsMarketScannerOpen] = useState(false);
 
   // AI State
   const [isAIModalOpen, setIsAIModalOpen] = useState(false);
@@ -588,13 +593,13 @@ const Dashboard: React.FC<DashboardProps> = ({ summaryData, historyData, history
   const iconColor = getIconColorClass();
 
   return (
-    <div className="flex flex-col h-full gap-6 overflow-hidden">
+    <div key={refreshKey || 'dashboard-root'} className="flex flex-col h-full gap-2.5 sm:gap-3 overflow-hidden">
       {/* Header Bar */}
-      <div className={`flex flex-col sm:flex-row justify-between items-center gap-4 backdrop-blur-xl p-4 rounded-2xl border shrink-0 z-40 transition-colors duration-500 ${themeStyles.headerBg}`}>
-        <div className="flex items-center gap-4 w-full sm:w-auto">
+      <div className={`flex flex-col sm:flex-row justify-between items-center gap-2.5 backdrop-blur-xl px-3 sm:px-4 py-2 sm:py-2.5 rounded-xl border shrink-0 z-40 transition-colors duration-500 ${themeStyles.headerBg}`}>
+        <div className="flex items-center gap-3 w-full sm:w-auto">
             <button 
                 onClick={() => setSelectedCommodity('')}
-                className={`relative group p-0.5 rounded-xl transition-all shadow-lg overflow-hidden ${!selectedCommodity ? 'scale-105' : ''}`}
+                className={`relative group p-0.5 rounded-xl transition-all shadow-md overflow-hidden ${!selectedCommodity ? 'scale-105' : ''}`}
                 title="Market Overview"
             >
                 {/* Animated Border Gradient */}
@@ -608,43 +613,43 @@ const Dashboard: React.FC<DashboardProps> = ({ summaryData, historyData, history
                 }`}></div>
 
                 {/* Content */}
-                <div className={`relative z-10 p-2 ${
+                <div className={`relative z-10 p-1.5 ${
                     !selectedCommodity 
                         ? 'text-white' 
                         : (themeMode === 'light' ? 'text-slate-500' : 'text-slate-400')
                 }`}>
-                    <LayoutDashboard className="w-5 h-5 group-hover:animate-bounce" />
+                    <LayoutDashboard className="w-4 h-4 group-hover:animate-bounce" />
                 </div>
             </button>
             <div className="flex flex-col">
-                <h2 className={`text-xl font-medium flex items-center gap-3 tracking-tight font-heading leading-none ${themeStyles.textMain}`}>
-                    <Activity className={`w-5 h-5 ${selectedCommodity ? iconColor : themeStyles.textSub}`} />
+                <h2 className={`text-base sm:text-lg font-medium flex items-center gap-2 tracking-tight font-heading leading-none ${themeStyles.textMain}`}>
+                    <Activity className={`w-4 h-4 ${selectedCommodity ? iconColor : themeStyles.textSub}`} />
                     {selectedCommodity ? selectedCommodity : "Market Overview"}
                 </h2>
                 {selectedItem && (
-                    <span className={`text-[10px] font-medium uppercase tracking-widest mt-1 ${themeStyles.textSub}`}>Futures & Options</span>
+                    <span className={`text-[9px] font-medium uppercase tracking-widest mt-0.5 ${themeStyles.textSub}`}>Futures & Options</span>
                 )}
             </div>
         </div>
         
-        <div className="flex flex-col sm:flex-row items-center gap-2.5 w-full md:w-auto">
+        <div className="flex flex-col sm:flex-row items-center gap-2 w-full md:w-auto">
             {/* Action Buttons Group - Exact equal widths and identical heights */}
-            <div className="grid grid-cols-4 gap-2 w-full sm:w-auto sm:flex sm:items-center">
+            <div className="grid grid-cols-4 gap-1.5 w-full sm:w-auto sm:flex sm:items-center">
                 {/* Heatmap Button */}
                 <button
                     onClick={() => setIsHeatmapOpen(true)}
-                    className="relative group h-11 w-full sm:w-28 rounded-xl overflow-hidden shadow-lg transition-all active:scale-95 flex items-center justify-center shrink-0"
+                    className="relative group h-8 sm:h-9 w-full sm:w-24 rounded-lg overflow-hidden shadow-sm transition-all active:scale-95 flex items-center justify-center shrink-0"
                     title="خريطة الحرارة لتمركزات السوق (Market Heatmap)"
                 >
                     {/* Animated Border Gradient */}
                     <div className="absolute inset-[-100%] bg-[conic-gradient(from_90deg_at_50%_50%,#0000_0%,#10b981_50%,#0000_100%)] animate-[spin_4s_linear_infinite]" />
                     
                     {/* Inner Background */}
-                    <div className={`absolute inset-[1.5px] rounded-[10px] z-0 ${themeMode === 'light' ? 'bg-white' : 'bg-slate-900'}`}></div>
+                    <div className={`absolute inset-[1.5px] rounded-[7px] z-0 ${themeMode === 'light' ? 'bg-white' : 'bg-slate-900'}`}></div>
                     
                     {/* Content */}
-                    <div className={`relative z-10 flex items-center justify-center gap-1.5 sm:gap-2 w-full px-1.5 text-xs sm:text-[13px] font-medium ${themeMode === 'light' ? 'text-emerald-600' : 'text-emerald-400'}`}>
-                        <MapIcon className="w-4 h-4 shrink-0 group-hover:animate-pulse" />
+                    <div className={`relative z-10 flex items-center justify-center gap-1.5 w-full px-1 text-xs font-medium ${themeMode === 'light' ? 'text-emerald-600' : 'text-emerald-400'}`}>
+                        <MapIcon className="w-3.5 h-3.5 shrink-0 group-hover:animate-pulse" />
                         <span className="truncate">Heatmap</span>
                     </div>
                 </button>
@@ -652,18 +657,18 @@ const Dashboard: React.FC<DashboardProps> = ({ summaryData, historyData, history
                 {/* Compare Button */}
                 <button
                     onClick={() => setIsCompareModalOpen(true)}
-                    className="relative group h-11 w-full sm:w-28 rounded-xl overflow-hidden shadow-lg transition-all active:scale-95 flex items-center justify-center shrink-0"
+                    className="relative group h-8 sm:h-9 w-full sm:w-24 rounded-lg overflow-hidden shadow-sm transition-all active:scale-95 flex items-center justify-center shrink-0"
                     title="مقارنة الأصول وتمركزات الحيتان (Compare Assets)"
                 >
                     {/* Animated Border Gradient */}
                     <div className="absolute inset-[-100%] bg-[conic-gradient(from_90deg_at_50%_50%,#0000_0%,#8b5cf6_50%,#0000_100%)] animate-[spin_3s_linear_infinite_reverse]" />
                     
                     {/* Inner Background */}
-                    <div className={`absolute inset-[1.5px] rounded-[10px] z-0 ${themeMode === 'light' ? 'bg-white' : 'bg-slate-900'}`}></div>
+                    <div className={`absolute inset-[1.5px] rounded-[7px] z-0 ${themeMode === 'light' ? 'bg-white' : 'bg-slate-900'}`}></div>
                     
                     {/* Content */}
-                    <div className={`relative z-10 flex items-center justify-center gap-1.5 sm:gap-2 w-full px-1.5 text-xs sm:text-[13px] font-medium ${themeMode === 'light' ? 'text-indigo-600' : 'text-indigo-400'}`}>
-                        <Scale className="w-4 h-4 shrink-0 group-hover:animate-pulse" />
+                    <div className={`relative z-10 flex items-center justify-center gap-1.5 w-full px-1 text-xs font-medium ${themeMode === 'light' ? 'text-indigo-600' : 'text-indigo-400'}`}>
+                        <Scale className="w-3.5 h-3.5 shrink-0 group-hover:animate-pulse" />
                         <span className="truncate">Compare</span>
                     </div>
                 </button>
@@ -671,18 +676,18 @@ const Dashboard: React.FC<DashboardProps> = ({ summaryData, historyData, history
                 {/* AI Insight Button */}
                 <button
                     onClick={handleAIAnalysis}
-                    className="relative group h-11 w-full sm:w-28 rounded-xl overflow-hidden shadow-lg transition-all active:scale-95 flex items-center justify-center shrink-0"
+                    className="relative group h-8 sm:h-9 w-full sm:w-24 rounded-lg overflow-hidden shadow-sm transition-all active:scale-95 flex items-center justify-center shrink-0"
                     title="التحليل الذكي وتوليد الرؤى (AI Insights)"
                 >
                     {/* Animated Border Gradient */}
                     <div className="absolute inset-[-100%] bg-[conic-gradient(from_90deg_at_50%_50%,#0000_0%,#3b82f6_50%,#0000_100%)] animate-[spin_3s_linear_infinite]" />
                     
                     {/* Inner Background */}
-                    <div className={`absolute inset-[1.5px] rounded-[10px] z-0 ${themeMode === 'light' ? 'bg-white' : 'bg-slate-900'}`}></div>
+                    <div className={`absolute inset-[1.5px] rounded-[7px] z-0 ${themeMode === 'light' ? 'bg-white' : 'bg-slate-900'}`}></div>
                     
                     {/* Content */}
-                    <div className={`relative z-10 flex items-center justify-center gap-1.5 sm:gap-2 w-full px-1.5 text-xs sm:text-[13px] font-medium ${themeMode === 'light' ? 'text-blue-600' : 'text-white'}`}>
-                        <Sparkles className="w-4 h-4 shrink-0 group-hover:animate-pulse" />
+                    <div className={`relative z-10 flex items-center justify-center gap-1.5 w-full px-1 text-xs font-medium ${themeMode === 'light' ? 'text-blue-600' : 'text-white'}`}>
+                        <Sparkles className="w-3.5 h-3.5 shrink-0 group-hover:animate-pulse" />
                         <span className="truncate">AI Insight</span>
                     </div>
                 </button>
@@ -690,28 +695,28 @@ const Dashboard: React.FC<DashboardProps> = ({ summaryData, historyData, history
                 {/* Educational Guide Button */}
                 <button
                     onClick={() => setIsGuideOpen(true)}
-                    className="relative group h-11 w-full sm:w-28 rounded-xl overflow-hidden shadow-lg transition-all active:scale-95 flex items-center justify-center shrink-0"
+                    className="relative group h-8 sm:h-9 w-full sm:w-24 rounded-lg overflow-hidden shadow-sm transition-all active:scale-95 flex items-center justify-center shrink-0"
                     title="الدليل التعليمي التفاعلي لتقرير COT ومحاكي ميزان القوى"
                 >
                     {/* Animated Border Gradient */}
                     <div className="absolute inset-[-100%] bg-[conic-gradient(from_90deg_at_50%_50%,#0000_0%,#06b6d4_50%,#0000_100%)] animate-[spin_4s_linear_infinite]" />
                     
                     {/* Inner Background */}
-                    <div className={`absolute inset-[1.5px] rounded-[10px] z-0 ${themeMode === 'light' ? 'bg-white' : 'bg-slate-900'}`}></div>
+                    <div className={`absolute inset-[1.5px] rounded-[7px] z-0 ${themeMode === 'light' ? 'bg-white' : 'bg-slate-900'}`}></div>
                     
                     {/* Content */}
-                    <div className={`relative z-10 flex items-center justify-center gap-1.5 sm:gap-2 w-full px-1.5 text-xs sm:text-[13px] font-medium ${themeMode === 'light' ? 'text-blue-700' : 'text-white'}`}>
-                        <GraduationCap className="w-4 h-4 shrink-0 group-hover:scale-110 transition-transform" />
+                    <div className={`relative z-10 flex items-center justify-center gap-1.5 w-full px-1 text-xs font-medium ${themeMode === 'light' ? 'text-blue-700' : 'text-white'}`}>
+                        <GraduationCap className="w-3.5 h-3.5 shrink-0 group-hover:scale-110 transition-transform" />
                         <span className="truncate">Guide</span>
                     </div>
                 </button>
             </div>
 
             {/* Dropdown */}
-            <div className="relative w-full sm:w-60 shrink-0" ref={dropdownRef}>
+            <div className="relative w-full sm:w-52 shrink-0" ref={dropdownRef}>
             <button
                 onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-                className={`w-full h-11 flex items-center justify-between backdrop-blur-xl border rounded-xl px-4 text-sm transition-all ${isDropdownOpen ? 'ring-2' : ''} ${themeMode === 'light' ? 'bg-white border-slate-200 text-slate-700 hover:bg-slate-50 ring-blue-500/30' : 'bg-white/5 border-white/10 text-white hover:bg-white/10 ring-white/10'}`}
+                className={`w-full h-8 sm:h-9 flex items-center justify-between backdrop-blur-xl border rounded-lg px-3 text-xs sm:text-sm transition-all ${isDropdownOpen ? 'ring-2' : ''} ${themeMode === 'light' ? 'bg-white border-slate-200 text-slate-700 hover:bg-slate-50 ring-blue-500/30' : 'bg-white/5 border-white/10 text-white hover:bg-white/10 ring-white/10'}`}
             >
                 <span className={`truncate font-medium ${!selectedCommodity ? 'opacity-60' : ''}`}>
                     {selectedCommodity || "Select Asset..."}
@@ -1049,61 +1054,133 @@ const Dashboard: React.FC<DashboardProps> = ({ summaryData, historyData, history
             </div>
           </div>
       ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 shrink-0">
-            {/* Determine what to show: User favorites if they exist (up to 4), otherwise fallback to FEATURED_ASSETS */}
-            {(() => {
-                const assetsToShow = favorites.length > 0 
-                    ? favorites.slice(0, 4) 
-                    : FEATURED_ASSETS;
-                
-                return assetsToShow.map((assetName, index) => {
-                    const summary = filteredSummaryData.find(s => s.Commodity === assetName);
-                    const history = historyData.find(h => h.Commodity === assetName);
-                    if (!summary) return null;
-                    return (
-                        <motion.div
-                            key={assetName}
-                            initial={{ opacity: 0, y: 32, x: (index - 1.5) * 16 }}
-                            animate={{ opacity: 1, y: 0, x: 0 }}
-                            transition={{ 
-                              duration: 0.7, 
-                              delay: index * 0.12, 
-                              ease: [0.22, 1, 0.36, 1] 
-                            }}
-                            className="h-full"
-                        >
-                            <AssetTrendCard
-                                index={index}
-                                title={assetName}
-                                commodity={assetName}
-                                summaryRow={summary}
-                                historyRow={history}
-                                dates={historyDates}
-                                onClick={() => setSelectedCommodity(assetName)}
-                                isSelected={false}
-                                themeMode={themeMode}
-                            />
-                        </motion.div>
-                    );
-                });
-            })()}
+          <div className="flex flex-col gap-2.5 sm:gap-3 shrink-0">
+            {/* Macro Grid: Left/Center (9 cols on xl/2xl = 75%) + Right (3 cols on xl/2xl = 25%) */}
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-2.5 sm:gap-3 items-stretch">
+              {/* Left & Center Main Section (col-span-8 on lg, col-span-9 on xl/2xl to give cards maximum space) */}
+              <div className="lg:col-span-8 xl:col-span-9 2xl:col-span-9 flex flex-col gap-2.5 sm:gap-3">
+                {/* 1. The 3 Cards Row: [ 1 ] [ 2 ] [ 3 ] */}
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5 sm:gap-3 shrink-0">
+                  {(() => {
+                      const assetsToShow = favorites.length > 0 
+                          ? favorites.slice(0, 3) 
+                          : FEATURED_ASSETS;
+                      
+                      return assetsToShow.map((assetName, index) => {
+                          const summary = filteredSummaryData.find(s => s.Commodity === assetName);
+                          const history = historyData.find(h => h.Commodity === assetName);
+                          if (!summary) return null;
+                          return (
+                              <motion.div
+                                  key={assetName}
+                                  initial={{ opacity: 0, y: 20 }}
+                                  animate={{ opacity: 1, y: 0 }}
+                                  transition={{ 
+                                    duration: 0.5, 
+                                    delay: index * 0.08, 
+                                    ease: [0.22, 1, 0.36, 1] 
+                                  }}
+                                  className="h-full"
+                              >
+                                  <AssetTrendCard
+                                      index={index}
+                                      title={assetName}
+                                      commodity={assetName}
+                                      summaryRow={summary}
+                                      historyRow={history}
+                                      dates={historyDates}
+                                      onClick={() => setSelectedCommodity(assetName)}
+                                      isSelected={false}
+                                      themeMode={themeMode}
+                                      compact={true}
+                                  />
+                              </motion.div>
+                          );
+                      });
+                  })()}
+                </div>
+
+                {/* 2. Below the 4 cards: Ring Chart (Left) + Bar Rounded Chart (Center) */}
+                <div className="grid grid-cols-1 md:grid-cols-12 gap-2.5 sm:gap-3 flex-1 min-h-[210px] max-h-[275px]">
+                  {/* Ring Chart (Left) */}
+                  <motion.div 
+                    initial={{ opacity: 0, y: 15 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.5, delay: 0.15 }}
+                    className="md:col-span-5 flex flex-col h-full"
+                  >
+                    <RingChartCard 
+                      summaryData={summaryData} 
+                      themeMode={themeMode} 
+                    />
+                  </motion.div>
+
+                  {/* Bar Rounded Chart (Center) */}
+                  <motion.div 
+                    initial={{ opacity: 0, y: 15 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.5, delay: 0.2 }}
+                    className="md:col-span-7 flex flex-col h-full"
+                  >
+                    <BarRoundedChartCard 
+                      summaryData={summaryData} 
+                      themeMode={themeMode}
+                      onSelectAsset={(commodity) => setSelectedCommodity(commodity)}
+                    />
+                  </motion.div>
+                </div>
+              </div>
+
+              {/* Right Column Section: shifted and compacted to the right (col-span-3 on xl/2xl) */}
+              <div className="lg:col-span-4 xl:col-span-3 2xl:col-span-3 flex flex-col gap-2.5 sm:gap-3">
+                {/* Top Changes Ring Chart (Replaces Radar Chart) */}
+                <motion.div 
+                  initial={{ opacity: 0, x: 20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ duration: 0.5, delay: 0.12 }}
+                  className="flex-1 min-h-[200px]"
+                >
+                  <TopChangesRingCard 
+                    summaryData={summaryData} 
+                    themeMode={themeMode}
+                    onSelectAsset={(commodity) => setSelectedCommodity(commodity)}
+                    compact={true}
+                  />
+                </motion.div>
+
+                {/* Most Volume Assets (Bottom) */}
+                <motion.div 
+                  initial={{ opacity: 0, x: 20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ duration: 0.5, delay: 0.25 }}
+                  className="flex-1 min-h-[200px]"
+                >
+                  <MostVolumeAssetsCard 
+                    summaryData={summaryData} 
+                    themeMode={themeMode}
+                    onSelectAsset={(commodity) => setSelectedCommodity(commodity)}
+                    limit={4}
+                  />
+                </motion.div>
+              </div>
+            </div>
           </div>
       )}
 
       {/* Market Scanner Grid */}
       {!selectedItem && (
-        <div className={`backdrop-blur-xl rounded-2xl border shadow-2xl overflow-hidden flex-1 min-h-0 flex flex-col mt-4 animate-fade-in delay-100 ${themeStyles.chartBg}`}>
+        <div className={`backdrop-blur-xl rounded-xl border shadow-xl overflow-hidden flex-1 min-h-0 flex flex-col mt-2 animate-fade-in delay-100 ${themeStyles.chartBg}`}>
             <div 
-                className={`px-6 py-4 border-b flex flex-col sm:flex-row justify-between items-center gap-4 shrink-0 cursor-pointer ${themeStyles.tableHeader}`}
+                className={`px-4 py-2 border-b flex flex-col sm:flex-row justify-between items-center gap-2 shrink-0 cursor-pointer ${themeStyles.tableHeader}`}
                 onClick={() => setIsMarketScannerOpen(!isMarketScannerOpen)}
             >
-                <div className="flex items-center gap-3">
-                    <div className={`p-2 rounded-lg transition-transform duration-300 ${isMarketScannerOpen ? 'rotate-0' : '-rotate-90'} ${themeMode === 'light' ? 'bg-blue-100 text-blue-600' : 'bg-blue-500/20 text-blue-400'}`}>
-                        <ChevronDown className="w-5 h-5" />
+                <div className="flex items-center gap-2.5">
+                    <div className={`p-1.5 rounded-lg transition-transform duration-300 ${isMarketScannerOpen ? 'rotate-0' : '-rotate-90'} ${themeMode === 'light' ? 'bg-blue-100 text-blue-600' : 'bg-blue-500/20 text-blue-400'}`}>
+                        <ChevronDown className="w-4 h-4" />
                     </div>
                     <div>
-                        <h3 className={`text-base font-medium tracking-tight font-heading ${themeStyles.textMain}`}>Market Scanner</h3>
-                        <p className={`text-xs ${themeStyles.textSub}`}>Real-time institutional positioning</p>
+                        <h3 className={`text-xs sm:text-sm font-medium tracking-tight font-heading ${themeStyles.textMain}`}>Market Scanner</h3>
+                        <p className={`text-[10px] ${themeStyles.textSub}`}>Real-time institutional positioning</p>
                     </div>
                 </div>
                 

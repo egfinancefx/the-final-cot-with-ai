@@ -98,8 +98,10 @@
     --chart-scale-04: oklch(0.68 0.02 106);
     --chart-scale-05: oklch(0.55 0.025 106);
     --chart-scale-pattern-color: oklch(0.96 0.005 106);
+    --border: rgba(148, 163, 184, 0.22);
   }
   .dark {
+    --border: rgba(255, 255, 255, 0.08);
     --chart-1: oklch(1 0 none);
     --chart-2: oklch(0.73 0 none);
     --chart-3: oklch(0.51 0 none);

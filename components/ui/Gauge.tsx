@@ -93,7 +93,7 @@ export function Gauge({
           <NumberFlow 
             value={centerValue} 
             format={{ notation: "compact", maximumFractionDigits: 1 }}
-            className={`text-sm font-semibold tracking-tight ${valueClassName}`}
+            className={`${size <= 50 ? 'text-[10px] sm:text-[11px]' : 'text-sm'} font-semibold tracking-tight ${valueClassName}`}
           />
         </motion.div>
       )}

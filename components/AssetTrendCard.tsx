@@ -37,6 +37,7 @@ interface AssetTrendCardProps {
   isSelected: boolean;
   themeMode: ThemeMode;
   index?: number;
+  compact?: boolean;
 }
 
 const AssetTrendCard: React.FC<AssetTrendCardProps> = ({ 
@@ -47,14 +48,15 @@ const AssetTrendCard: React.FC<AssetTrendCardProps> = ({
   onClick,
   isSelected,
   themeMode,
-  index = 0
+  index = 0,
+  compact = false
 }) => {
   const [isHovered, setIsHovered] = useState(false);
 
   // Strict Theme Icon Coloring (Only Light vs Ocean)
   const getAssetIcon = (name: string) => {
     const n = name.toLowerCase();
-    const baseClass = "w-7 h-7 transition-colors duration-300";
+    const baseClass = `${compact ? 'w-4 h-4' : 'w-7 h-7'} transition-colors duration-300`;
 
     // Determine color based strictly on Theme Mode first, then Asset Type
     let colorClass = "";
@@ -200,42 +202,42 @@ const AssetTrendCard: React.FC<AssetTrendCardProps> = ({
       onClick={onClick}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
-      className={`relative rounded-2xl border cursor-pointer transition-all duration-300 cubic-bezier(0.4, 0, 0.2, 1) overflow-hidden group flex flex-col justify-between backdrop-blur-md 
+      className={`relative ${compact ? 'rounded-xl sm:rounded-2xl' : 'rounded-2xl'} border cursor-pointer transition-all duration-300 cubic-bezier(0.4, 0, 0.2, 1) overflow-hidden group flex flex-col justify-between backdrop-blur-md 
         ${getThemeBaseStyles()} ${isSelected ? 'scale-[1.03] -translate-y-1' : 'hover:scale-[1.03] hover:-translate-y-1'}`}
     >
       {/* Header Section */}
-      <div className="p-6 pb-2 relative z-10">
-        <div className="flex justify-between items-center gap-4">
+      <div className={`${compact ? 'p-2.5 sm:p-3 pb-0' : 'p-6 pb-2'} relative z-10`}>
+        <div className={`flex justify-between items-center ${compact ? 'gap-2' : 'gap-4'}`}>
             {/* Left Column: Title & Context */}
-            <div className="flex flex-col gap-3 flex-1 min-w-0">
-                <div className="flex items-center gap-3">
-                    <div className={`p-3 rounded-xl border shrink-0 transition-all duration-300 
+            <div className={`flex flex-col ${compact ? 'gap-1' : 'gap-3'} flex-1 min-w-0`}>
+                <div className={`flex items-center ${compact ? 'gap-2' : 'gap-3'}`}>
+                    <div className={`${compact ? 'p-1.5 rounded-lg' : 'p-3 rounded-xl'} border shrink-0 transition-all duration-300 
                         ${themeMode === 'light' ? 'bg-slate-100 border-slate-200' : 
                           'bg-slate-950/60 border-blue-500/10 group-hover:border-blue-500/50 group-hover:shadow-[0_0_15px_rgba(59,130,246,0.15)]'}
                     `}>
                         {getAssetIcon(title)}
                     </div>
                     <div className="flex flex-col min-w-0">
-                        <h3 className={`font-medium text-lg leading-none tracking-tight font-heading truncate pr-2 transition-colors ${getTextColor('primary')}`}>{title}</h3>
-                        <span className={`text-[11px] font-medium uppercase tracking-wider mt-1.5 ${getTextColor('sub')}`}>Futures</span>
+                        <h3 className={`font-semibold ${compact ? 'text-xs sm:text-sm' : 'text-lg'} leading-none tracking-tight font-heading truncate pr-1 transition-colors ${getTextColor('primary')}`}>{title}</h3>
+                        <span className={`${compact ? 'text-[9px] mt-0.5' : 'text-[10px] mt-1.5'} font-medium uppercase tracking-wider ${getTextColor('sub')}`}>Futures</span>
                     </div>
                 </div>
                 
-                <div className="flex items-center gap-2 mt-1 pl-1">
-                     <span className={`text-xs font-medium flex items-center px-2.5 py-1 rounded-md border backdrop-blur-md ${getPillStyle(isChangePositive)}`}>
-                        {isChangePositive ? <ArrowUpRight className="w-3.5 h-3.5 mr-1"/> : <ArrowDownRight className="w-3.5 h-3.5 mr-1"/>}
+                <div className={`flex items-center gap-1.5 ${compact ? 'mt-0.5' : 'mt-1'} pl-0.5`}>
+                     <span className={`${compact ? 'text-[9px] sm:text-[10px] px-1.5 py-0.5' : 'text-xs px-2.5 py-1'} font-medium font-mono flex items-center rounded border backdrop-blur-md ${getPillStyle(isChangePositive)}`}>
+                        {isChangePositive ? <ArrowUpRight className={`${compact ? 'w-2.5 h-2.5' : 'w-3 h-3'} mr-0.5`}/> : <ArrowDownRight className={`${compact ? 'w-2.5 h-2.5' : 'w-3 h-3'} mr-0.5`}/>}
                         {formatCurrency(Math.abs(netChange))}
                     </span>
-                    <span className={`text-[10px] font-medium uppercase tracking-wide ${getTextColor('secondary')}`}>Net Chg</span>
+                    <span className={`${compact ? 'text-[8px] sm:text-[9px]' : 'text-[9px]'} font-medium uppercase tracking-wide ${getTextColor('secondary')}`}>Net Chg</span>
                 </div>
             </div>
             
             {/* Right Column: Gauge Animation */}
-            <div className="shrink-0 flex items-center justify-center -mt-2 -mr-2">
+            <div className={`shrink-0 flex items-center justify-center ${compact ? '-mt-0.5 -mr-0.5' : '-mt-2 -mr-2'}`}>
                 <Gauge 
                     value={longRatio} 
                     centerValue={netPos}
-                    size={80}
+                    size={compact ? 46 : 80}
                     activeFill={themeMode === 'light' ? '#2563eb' : '#3b82f6'}
                     inactiveFill={themeMode === 'light' ? 'rgba(37, 99, 235, 0.15)' : 'rgba(59, 130, 246, 0.2)'}
                     valueClassName={themeMode === 'light' ? 'text-blue-700' : 'text-blue-400'}
@@ -246,10 +248,10 @@ const AssetTrendCard: React.FC<AssetTrendCardProps> = ({
       </div>
 
       {/* Sparkline Chart */}
-      <div className="h-28 w-full px-0 opacity-80 group-hover:opacity-100 transition-all duration-500 mt-2 relative z-10 -mb-2">
+      <div className={`${compact ? 'h-9 sm:h-10 -mb-1 mt-0.5' : 'h-28 -mb-2 mt-2'} w-full px-0 opacity-80 group-hover:opacity-100 transition-all duration-500 relative z-10`}>
         <ResponsiveContainer width="100%" height="100%">
           {/* Added margin to prevent stroke clipping at top/bottom */}
-          <AreaChart data={chartData} margin={{ top: 12, right: 0, left: 0, bottom: 12 }}>
+          <AreaChart data={chartData} margin={{ top: compact ? 4 : 12, right: 0, left: 0, bottom: compact ? 4 : 12 }}>
             <defs>
               <linearGradient id={chartId} x1="0" y1="0" x2="0" y2="1">
                 <stop offset="5%" stopColor={gradientColor} stopOpacity={gradientOpacity}/>
@@ -335,29 +337,29 @@ const AssetTrendCard: React.FC<AssetTrendCardProps> = ({
           ${themeMode === 'light' ? 'bg-slate-100 border-slate-200' : 
             'bg-blue-500/5 border-blue-500/5'}
       `}>
-          <div className={`p-4 flex flex-col items-center border-r transition-colors 
+          <div className={`${compact ? 'p-1.5 sm:p-2' : 'p-4'} flex flex-col items-center border-r transition-colors 
             ${themeMode === 'light' ? 'border-slate-200 hover:bg-white' : 
               'border-blue-500/5 hover:bg-blue-900/10'}`}>
-              <span className={`text-[10px] uppercase font-medium tracking-wide mb-1 opacity-60`}>Longs</span>
+              <span className={`${compact ? 'text-[8px] sm:text-[9px] mb-0.5' : 'text-[10px] mb-1'} uppercase font-medium tracking-wide opacity-60`}>Longs</span>
               
-              <div className={`flex items-center gap-1 text-xl font-medium font-mono ${longChange > 0 ? (themeMode === 'light' ? 'text-blue-600' : 'text-blue-400') : (themeMode === 'light' ? 'text-rose-600' : 'text-rose-400')}`}>
-                  {longChange > 0 ? <ArrowUpRight className="w-5 h-5" /> : longChange < 0 ? <ArrowDownRight className="w-5 h-5" /> : <Minus className="w-5 h-5" />}
+              <div className={`flex items-center gap-0.5 sm:gap-1 font-medium font-mono ${compact ? 'text-xs sm:text-[13px]' : 'text-xl'} ${longChange > 0 ? (themeMode === 'light' ? 'text-blue-600' : 'text-blue-400') : (themeMode === 'light' ? 'text-rose-600' : 'text-rose-400')}`}>
+                  {longChange > 0 ? <ArrowUpRight className={compact ? "w-3 h-3" : "w-5 h-5"} /> : longChange < 0 ? <ArrowDownRight className={compact ? "w-3 h-3" : "w-5 h-5"} /> : <Minus className={compact ? "w-3 h-3" : "w-5 h-5"} />}
                   <span>{formatCurrency(Math.abs(longChange))}</span>
               </div>
               
-              <span className={`text-[10px] font-medium font-mono mt-0.5 opacity-40`}>
+              <span className={`${compact ? 'text-[8px] sm:text-[9px] mt-0' : 'text-[10px] mt-0.5'} font-medium font-mono opacity-40`}>
                   Pos: {formatCurrency(longPos)}
               </span>
           </div>
-          <div className={`p-4 flex flex-col items-center transition-colors ${themeMode === 'light' ? 'hover:bg-white' : 'hover:bg-slate-800/50'}`}>
-              <span className={`text-[10px] uppercase font-medium tracking-wide mb-1 opacity-60`}>Shorts</span>
+          <div className={`${compact ? 'p-1.5 sm:p-2' : 'p-4'} flex flex-col items-center transition-colors ${themeMode === 'light' ? 'hover:bg-white' : 'hover:bg-slate-800/50'}`}>
+              <span className={`${compact ? 'text-[8px] sm:text-[9px] mb-0.5' : 'text-[10px] mb-1'} uppercase font-medium tracking-wide opacity-60`}>Shorts</span>
               
-              <div className={`flex items-center gap-1 text-xl font-medium font-mono ${shortChange > 0 ? (themeMode === 'light' ? 'text-blue-600' : 'text-blue-400') : (themeMode === 'light' ? 'text-rose-600' : 'text-rose-400')}`}>
-                  {shortChange > 0 ? <ArrowUpRight className="w-5 h-5" /> : shortChange < 0 ? <ArrowDownRight className="w-5 h-5" /> : <Minus className="w-5 h-5" />}
+              <div className={`flex items-center gap-0.5 sm:gap-1 font-medium font-mono ${compact ? 'text-xs sm:text-[13px]' : 'text-xl'} ${shortChange > 0 ? (themeMode === 'light' ? 'text-blue-600' : 'text-blue-400') : (themeMode === 'light' ? 'text-rose-600' : 'text-rose-400')}`}>
+                  {shortChange > 0 ? <ArrowUpRight className={compact ? "w-3 h-3" : "w-5 h-5"} /> : shortChange < 0 ? <ArrowDownRight className={compact ? "w-3 h-3" : "w-5 h-5"} /> : <Minus className={compact ? "w-3 h-3" : "w-5 h-5"} />}
                   <span>{formatCurrency(Math.abs(shortChange))}</span>
               </div>
 
-              <span className={`text-[10px] font-medium font-mono mt-0.5 opacity-40`}>
+              <span className={`${compact ? 'text-[8px] sm:text-[9px] mt-0' : 'text-[10px] mt-0.5'} font-medium font-mono opacity-40`}>
                   Pos: {formatCurrency(shortPos)}
               </span>
           </div>

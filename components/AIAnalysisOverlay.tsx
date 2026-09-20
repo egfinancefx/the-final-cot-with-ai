@@ -2,6 +2,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import { X, Bot, Loader2, Sparkles, Copy, Check, TrendingUp, TrendingDown, Minus, Languages, ChevronDown, Calendar, Filter, Activity, Scale, Target, Zap, ArrowRight, AlertTriangle, Info, AlertOctagon, Globe, Newspaper, Brain, ShieldAlert, Volume2, VolumeX } from 'lucide-react';
+import { motion } from 'motion/react';
 import { SummaryRow } from '../types';
 import { formatCurrency } from '../utils';
 
@@ -292,9 +293,30 @@ const AIAnalysisOverlay: React.FC<AIAnalysisOverlayProps> = ({ isAiOfflineMode, 
 
   const isRTL = currentLang === 'Arabic';
 
+  
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    show: {
+      opacity: 1,
+      transition: { staggerChildren: 0.1, delayChildren: 0.1 }
+    }
+  };
+
+  const itemVariants = {
+    hidden: { opacity: 0, y: 20, scale: 0.96, filter: 'blur(4px)' },
+    show: { 
+        opacity: 1, 
+        y: 0, 
+        scale: 1, 
+        filter: 'blur(0px)',
+        transition: { type: "spring" as const, stiffness: 250, damping: 20 } 
+    }
+  };
+
+
+
   const renderContent = () => {
       if (!parsedData) {
-          // Fallback rendering if JSON parse fails or error text
           return (
               <div className="rounded-3xl border border-slate-700/60 bg-slate-900/60 p-8 backdrop-blur-md flex flex-col items-center justify-center text-center space-y-4 my-6">
                   <div className="p-3.5 bg-amber-500/10 border border-amber-500/20 rounded-2xl">
@@ -311,9 +333,9 @@ const AIAnalysisOverlay: React.FC<AIAnalysisOverlayProps> = ({ isAiOfflineMode, 
       const isBearish = sentimentColor === 'rose';
 
       return (
-          <div className={`space-y-8 animate-in fade-in slide-in-from-bottom-8 duration-700 ${isRTL ? 'text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}>
+          <motion.div variants={containerVariants} initial="hidden" animate="show" className={`flex flex-col gap-6 p-1 ${isRTL ? 'text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}>
               {isAiOfflineMode && (
-                  <div className="bg-rose-500/10 border border-rose-500/20 rounded-2xl p-4 flex items-start gap-3 relative overflow-hidden group">
+                  <motion.div variants={itemVariants} className="bg-rose-500/10 border border-rose-500/20 rounded-2xl p-4 flex items-start gap-3 relative overflow-hidden group">
                       <div className="absolute inset-0 bg-gradient-to-r from-rose-500/0 via-rose-500/5 to-rose-500/0 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000"></div>
                       <AlertTriangle className="w-5 h-5 text-rose-400 shrink-0 mt-0.5" />
                       <div>
@@ -322,13 +344,43 @@ const AIAnalysisOverlay: React.FC<AIAnalysisOverlayProps> = ({ isAiOfflineMode, 
                               Your API key has hit its rate limit or quota. The analysis shown below is a generic, fallback report generated locally. Please check your Google AI Studio billing/plan, wait a moment, and try again.
                           </p>
                       </div>
-                  </div>
+                  </motion.div>
               )}
               
-              {/* 1. Hero Section: Sentiment & Strategy */}
-              <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+              {/* Top Row: Mentor's Perspective */}
+              <motion.div variants={itemVariants} className="bg-slate-900/40 border border-white/5 rounded-3xl p-8 relative overflow-hidden backdrop-blur-sm group hover:border-white/10 transition-all duration-500">
+                  <div className={`absolute top-0 w-1.5 h-full bg-gradient-to-b from-blue-500 via-white to-blue-600 ${isRTL ? 'right-0' : 'left-0'}`}></div>
+                  
+                  <div className="flex items-start gap-5 mb-8">
+                      <div className="p-3.5 bg-gradient-to-br from-blue-600 to-blue-500 rounded-2xl shadow-lg shadow-blue-500/20 shrink-0 ring-1 ring-white/10">
+                          <Brain className="w-6 h-6 text-white" />
+                      </div>
+                      <div>
+                          <h3 className="text-2xl font-medium text-white mb-2 font-heading tracking-tight">Mentor's Perspective</h3>
+                          <p className="text-slate-400 text-sm leading-relaxed max-w-2xl">{parsedData.perspective}</p>
+                      </div>
+                  </div>
+
+                  <div className="bg-gradient-to-r from-blue-500/10 to-blue-400/5 rounded-2xl p-6 border border-blue-500/10 relative overflow-hidden group-hover:border-blue-500/20 transition-colors">
+                      <div className="absolute top-0 right-0 p-3 opacity-10">
+                          <Target className="w-24 h-24 text-blue-400 -rotate-12" />
+                      </div>
+                      <div className="relative z-10">
+                        <div className="flex items-center gap-2 mb-3 text-white">
+                            <Sparkles className="w-4 h-4" />
+                            <span className="text-xs font-medium uppercase tracking-wider">If I Were You</span>
+                        </div>
+                        <p className="text-blue-50 text-lg font-medium leading-relaxed italic">
+                            "{parsedData.actionable_advice}"
+                        </p>
+                      </div>
+                  </div>
+              </motion.div>
+
+              {/* Second Row: Grid of 3 (Sentiment, Institutional Bias, Key Levels) */}
+              <motion.div variants={containerVariants} className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                   {/* Sentiment Card */}
-                  <div className={`lg:col-span-1 rounded-3xl p-8 border relative overflow-hidden flex flex-col justify-between group transition-all duration-500 hover:shadow-2xl
+                  <motion.div variants={itemVariants} className={`rounded-3xl p-8 border relative overflow-hidden flex flex-col justify-between group transition-all duration-500 hover:shadow-2xl
                       ${isBullish ? 'bg-emerald-950/20 border-emerald-500/20 hover:border-emerald-500/40' : 
                         isBearish ? 'bg-rose-950/20 border-rose-500/20 hover:border-rose-500/40' : 
                         'bg-blue-950/20 border-blue-500/20 hover:border-blue-500/40'}`}>
@@ -371,401 +423,179 @@ const AIAnalysisOverlay: React.FC<AIAnalysisOverlayProps> = ({ isAiOfflineMode, 
                               </div>
                           </div>
                       )}
-                  </div>
+                  </motion.div>
 
-                  {/* Mentor Strategy Card */}
-                  <div className="lg:col-span-2 bg-slate-900/40 border border-white/5 rounded-3xl p-8 relative overflow-hidden backdrop-blur-sm group hover:border-white/10 transition-all duration-500">
-                      <div className={`absolute top-0 w-1.5 h-full bg-gradient-to-b from-blue-500 via-white to-blue-600 ${isRTL ? 'right-0' : 'left-0'}`}></div>
-                      
-                      <div className="flex items-start gap-5 mb-8">
-                          <div className="p-3.5 bg-gradient-to-br from-blue-600 to-blue-500 rounded-2xl shadow-lg shadow-blue-500/20 shrink-0 ring-1 ring-white/10">
-                              <Brain className="w-6 h-6 text-white" />
+                  {/* Institutional Bias */}
+                  {parsedData.institutional_bias && (
+                      <motion.div variants={itemVariants} className="bg-slate-800/30 border border-white/5 rounded-3xl p-6 relative overflow-hidden group hover:border-white/10 transition-all duration-300">
+                          <div className="flex items-center gap-3 mb-6 text-blue-400">
+                              <div className="p-2 bg-blue-500/10 rounded-lg">
+                                <ShieldAlert className="w-5 h-5" />
+                              </div>
+                              <span className="text-xs font-medium uppercase tracking-widest text-slate-400">Institutional Bias</span>
                           </div>
-                          <div>
-                              <h3 className="text-2xl font-medium text-white mb-2 font-heading tracking-tight">Mentor's Perspective</h3>
-                              <p className="text-slate-400 text-sm leading-relaxed max-w-2xl">{parsedData.perspective}</p>
+                          <div className="p-4 bg-slate-900/50 rounded-2xl border border-white/5 mt-auto h-full flex items-center">
+                              <p className="text-slate-300 text-sm leading-relaxed font-medium">{parsedData.institutional_bias}</p>
                           </div>
-                      </div>
+                      </motion.div>
+                  )}
 
-                      <div className="bg-gradient-to-r from-blue-500/10 to-blue-400/5 rounded-2xl p-6 border border-blue-500/10 relative overflow-hidden group-hover:border-blue-500/20 transition-colors">
-                          <div className="absolute top-0 right-0 p-3 opacity-10">
-                              <Target className="w-24 h-24 text-blue-400 -rotate-12" />
+                  {/* Key Levels */}
+                  {parsedData.key_levels && (
+                      <motion.div variants={itemVariants} className="bg-slate-800/30 border border-white/5 rounded-3xl p-6 relative overflow-hidden flex flex-col group hover:border-white/10 transition-all duration-300">
+                          <div className="flex items-center justify-between mb-5 flex-wrap gap-2">
+                              <div className="flex items-center gap-3 text-purple-400">
+                                  <div className="p-2 bg-purple-500/10 rounded-lg">
+                                    <Scale className="w-5 h-5" />
+                                  </div>
+                                  <span className="text-xs font-medium uppercase tracking-widest text-slate-400">Key Levels</span>
+                              </div>
+                              {parsedData.key_levels.current_price && (
+                                  <div className="flex items-center gap-2 px-3 py-1 bg-white/10 border border-white/30 rounded-full">
+                                      <span className="relative flex h-2 w-2">
+                                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-white opacity-75"></span>
+                                        <span className="relative inline-flex rounded-full h-2 w-2 bg-white"></span>
+                                      </span>
+                                      <span className="text-[11px] font-mono font-medium text-blue-200">
+                                          Spot: {parsedData.key_levels.current_price}
+                                      </span>
+                                  </div>
+                              )}
                           </div>
-                          <div className="relative z-10">
-                            <div className="flex items-center gap-2 mb-3 text-white">
-                                <Sparkles className="w-4 h-4" />
-                                <span className="text-xs font-medium uppercase tracking-wider">If I Were You</span>
-                            </div>
-                            <p className="text-blue-50 text-lg font-medium leading-relaxed italic">
-                                "{parsedData.actionable_advice}"
-                            </p>
-                          </div>
-                      </div>
-                  </div>
-              </div>
+                          
+                          <div className="flex flex-col h-full justify-center gap-3 relative py-2 mt-auto">
+                              <div className="absolute left-[1.375rem] top-4 bottom-4 w-0.5 bg-gradient-to-b from-purple-500/30 via-rose-500/30 via-yellow-500/30 to-emerald-500/30 border-l border-dashed border-white/10"></div>
 
-              {/* 2. Key Levels & Institutional Bias */}
-              {(parsedData.key_levels || parsedData.institutional_bias) && (
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                      {parsedData.key_levels && (
-                          <div className="bg-slate-800/30 border border-white/5 rounded-2xl p-6 relative overflow-hidden flex flex-col">
-                              <div className="flex items-center justify-between mb-5 flex-wrap gap-2">
-                                  <div className="flex items-center gap-3 text-purple-400">
-                                      <div className="p-2 bg-purple-500/10 rounded-lg">
-                                        <Scale className="w-4 h-4" />
+                              {parsedData.key_levels.resistance_2 && (
+                                  <div className="relative flex items-center gap-4 group/level">
+                                      <div className="w-11 h-11 rounded-xl bg-purple-500/10 border border-purple-500/30 flex items-center justify-center shrink-0 z-10 group-hover/level:bg-purple-500/20 transition-all">
+                                          <TrendingUp className="w-4 h-4 text-purple-400" />
                                       </div>
-                                      <div>
-                                          <span className="text-xs font-medium uppercase tracking-widest block">Key Price Levels</span>
-                                          <span className="text-[10px] text-slate-400 font-normal">ICT Order Flow & Technical Anchors</span>
+                                      <div className="flex-1 bg-slate-900/50 rounded-xl px-4 py-2 border border-white/5">
+                                          <div className="text-[10px] text-slate-500 font-medium uppercase tracking-wider">Major Resistance</div>
+                                          <div className="text-purple-300 font-mono font-medium text-sm">{parsedData.key_levels.resistance_2}</div>
                                       </div>
                                   </div>
-                                  {parsedData.key_levels.current_price && (
-                                      <div className="flex items-center gap-2 px-3 py-1 bg-white/10 border border-white/30 rounded-full">
-                                          <span className="relative flex h-2 w-2">
-                                            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-white opacity-75"></span>
-                                            <span className="relative inline-flex rounded-full h-2 w-2 bg-white"></span>
-                                          </span>
-                                          <span className="text-[11px] font-mono font-medium text-blue-200">
-                                              Spot: {parsedData.key_levels.current_price}
-                                          </span>
-                                      </div>
-                                  )}
+                              )}
+                              
+                              <div className="relative flex items-center gap-4 group/level">
+                                  <div className="w-11 h-11 rounded-xl bg-rose-500/10 border border-rose-500/30 flex items-center justify-center shrink-0 z-10 group-hover/level:bg-rose-500/20 transition-all">
+                                      <TrendingUp className="w-4 h-4 text-rose-400" />
+                                  </div>
+                                  <div className="flex-1 bg-slate-900/50 rounded-xl px-4 py-2 border border-white/5">
+                                      <div className="text-[10px] text-slate-500 font-medium uppercase tracking-wider">Local Resistance</div>
+                                      <div className="text-rose-300 font-mono font-medium text-sm">{parsedData.key_levels.resistance}</div>
+                                  </div>
                               </div>
                               
-                              {(() => {
-                                  // Vertical Price Ladder Visualization
-                                  return (
-                                      <div className="flex flex-col h-full justify-between gap-2.5 relative py-1">
-                                          {/* Connecting Line */}
-                                          <div className="absolute left-6 top-4 bottom-4 w-0.5 bg-gradient-to-b from-purple-500/30 via-rose-500/30 via-yellow-500/30 to-emerald-500/30 border-l border-dashed border-white/10"></div>
+                              <div className="relative flex items-center gap-4 group/level">
+                                  <div className="w-11 h-11 rounded-xl bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center shrink-0 z-10 group-hover/level:bg-emerald-500/20 transition-all">
+                                      <TrendingDown className="w-4 h-4 text-emerald-400" />
+                                  </div>
+                                  <div className="flex-1 bg-slate-900/50 rounded-xl px-4 py-2 border border-white/5">
+                                      <div className="text-[10px] text-slate-500 font-medium uppercase tracking-wider">Local Support</div>
+                                      <div className="text-emerald-300 font-mono font-medium text-sm">{parsedData.key_levels.support}</div>
+                                  </div>
+                              </div>
 
-                                          {/* Macro Resistance 2 (if present) */}
-                                          {parsedData.key_levels.resistance_2 && (
-                                              <div className="relative flex items-center gap-4 group">
-                                                  <div className="w-12 h-12 rounded-xl bg-purple-500/10 border border-purple-500/30 flex items-center justify-center shrink-0 z-10 shadow-[0_0_15px_rgba(168,85,247,0.1)] group-hover:bg-purple-500/20 group-hover:border-purple-500/50 transition-all">
-                                                      <TrendingDown className="w-5 h-5 text-purple-400" />
-                                                  </div>
-                                                  <div className="flex-1 flex flex-col min-w-0">
-                                                      <div className="flex justify-between items-baseline">
-                                                          <span className="text-[10px] font-medium text-purple-400 uppercase tracking-widest mb-0.5">Macro Supply</span>
-                                                          <span className="text-[10px] text-purple-400/60 font-mono">R2</span>
-                                                      </div>
-                                                      <div className="p-2.5 bg-slate-900/50 border border-white/5 rounded-lg flex justify-between items-center group-hover:border-purple-500/30 transition-colors">
-                                                          <span className="font-mono font-medium text-slate-100 text-sm md:text-base tracking-tight truncate">{parsedData.key_levels.resistance_2}</span>
-                                                      </div>
-                                                  </div>
-                                              </div>
-                                          )}
+                              {parsedData.key_levels.support_2 && (
+                                  <div className="relative flex items-center gap-4 group/level">
+                                      <div className="w-11 h-11 rounded-xl bg-teal-500/10 border border-teal-500/30 flex items-center justify-center shrink-0 z-10 group-hover/level:bg-teal-500/20 transition-all">
+                                          <TrendingDown className="w-4 h-4 text-teal-400" />
+                                      </div>
+                                      <div className="flex-1 bg-slate-900/50 rounded-xl px-4 py-2 border border-white/5">
+                                          <div className="text-[10px] text-slate-500 font-medium uppercase tracking-wider">Major Support</div>
+                                          <div className="text-teal-300 font-mono font-medium text-sm">{parsedData.key_levels.support_2}</div>
+                                      </div>
+                                  </div>
+                              )}
+                          </div>
+                      </motion.div>
+                  )}
+              </motion.div>
 
-                                          {/* Resistance 1 Level */}
-                                          <div className="relative flex items-center gap-4 group">
-                                              <div className="w-12 h-12 rounded-xl bg-rose-500/10 border border-rose-500/30 flex items-center justify-center shrink-0 z-10 shadow-[0_0_15px_rgba(244,63,94,0.1)] group-hover:bg-rose-500/20 group-hover:border-rose-500/50 transition-all">
-                                                  <TrendingDown className="w-5 h-5 text-rose-400" />
-                                              </div>
-                                              <div className="flex-1 flex flex-col min-w-0">
-                                                  <div className="flex justify-between items-baseline">
-                                                      <span className="text-[10px] font-medium text-rose-400 uppercase tracking-widest mb-0.5">Resistance</span>
-                                                      <span className="text-[10px] text-rose-400/60 font-mono">R1</span>
-                                                  </div>
-                                                  <div className="p-2.5 bg-slate-900/50 border border-white/5 rounded-lg flex justify-between items-center group-hover:border-rose-500/30 transition-colors">
-                                                      <span className="font-mono font-medium text-white text-sm md:text-base tracking-tight truncate">{parsedData.key_levels.resistance}</span>
-                                                      <div className="w-2 h-2 rounded-full bg-rose-500 animate-pulse shrink-0 ml-2"></div>
-                                                  </div>
-                                              </div>
-                                          </div>
-
-                                          {/* Current Spot Price Anchor Marker (if available) */}
-                                          {parsedData.key_levels.current_price && (
-                                              <div className="relative flex items-center gap-4 py-0.5 z-10">
-                                                  <div className="w-12 flex justify-center shrink-0">
-                                                      <div className="w-3.5 h-3.5 rounded-full bg-white shadow-[0_0_12px_#22d3ee] flex items-center justify-center">
-                                                          <div className="w-1.5 h-1.5 rounded-full bg-slate-950"></div>
-                                                      </div>
-                                                  </div>
-                                                  <div className="flex-1 flex items-center gap-2 border-t border-dashed border-white/30">
-                                                      <span className="text-[10px] uppercase font-mono font-medium tracking-wider text-blue-200 bg-blue-950/40 px-2 py-0.5 rounded border border-white/30">
-                                                          Current Spot Price
-                                                      </span>
-                                                      <span className="font-mono text-xs font-semibold text-blue-100">
-                                                          {parsedData.key_levels.current_price}
+              {/* Playbook / Actionable Events */}
+              {parsedData.playbook && parsedData.playbook.length > 0 && (
+                  <motion.div variants={containerVariants} className="space-y-4">
+                      <motion.div variants={itemVariants} className="flex items-center gap-3 px-2">
+                          <Target className="w-5 h-5 text-blue-400" />
+                          <h3 className="text-xl font-medium text-white font-heading tracking-tight">Trader's Playbook</h3>
+                      </motion.div>
+                      
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                          {parsedData.playbook.map((event, idx) => {
+                              return (
+                                  <motion.div variants={itemVariants} key={idx} className="rounded-3xl border overflow-hidden relative group transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl bg-slate-900/40 border-white/5 hover:border-white/10">
+                                      <div className="p-6">
+                                          <div className="flex justify-between items-start mb-4">
+                                              <div>
+                                                  <div className="flex items-center gap-2 mb-2">
+                                                      <span className="px-2.5 py-1 rounded-md text-[10px] font-medium tracking-wider uppercase border bg-blue-500/20 text-blue-300 border-blue-500/30">
+                                                          {event.date}
                                                       </span>
                                                   </div>
-                                              </div>
-                                          )}
-
-                                          {/* Pivot Level */}
-                                          <div className="relative flex items-center gap-4 group">
-                                              <div className="w-12 h-12 rounded-xl bg-yellow-500/10 border border-yellow-500/30 flex items-center justify-center shrink-0 z-10 shadow-[0_0_15px_rgba(234,179,8,0.1)] group-hover:bg-yellow-500/20 group-hover:border-yellow-500/50 transition-all">
-                                                  <Target className="w-5 h-5 text-yellow-400" />
-                                              </div>
-                                              <div className="flex-1 flex flex-col min-w-0">
-                                                  <div className="flex justify-between items-baseline">
-                                                      <span className="text-[10px] font-medium text-yellow-400 uppercase tracking-widest mb-0.5">Pivot Point</span>
-                                                      <span className="text-[10px] text-yellow-400/60 font-mono">PP (Equilibrium)</span>
-                                                  </div>
-                                                  <div className="p-2.5 bg-slate-900/50 border border-white/5 rounded-lg flex justify-between items-center group-hover:border-yellow-500/30 transition-colors">
-                                                      <span className="font-mono font-medium text-white text-sm md:text-base tracking-tight truncate">{parsedData.key_levels.pivot_point}</span>
-                                                      <div className="w-2 h-2 rounded-full bg-yellow-500 shrink-0 ml-2"></div>
-                                                  </div>
+                                                  <div className="text-xl font-medium text-white tracking-tight leading-tight">{event.event}</div>
                                               </div>
                                           </div>
 
-                                          {/* Support 1 Level */}
-                                          <div className="relative flex items-center gap-4 group">
-                                              <div className="w-12 h-12 rounded-xl bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center shrink-0 z-10 shadow-[0_0_15px_rgba(16,185,129,0.1)] group-hover:bg-emerald-500/20 group-hover:border-emerald-500/50 transition-all">
-                                                  <TrendingUp className="w-5 h-5 text-emerald-400" />
+                                          <div className="grid grid-cols-2 gap-3 mb-4">
+                                              <div className="bg-slate-950/50 rounded-xl p-3 border border-white/5">
+                                                  <div className="text-[10px] text-slate-500 uppercase tracking-wider mb-1 font-medium">Forecast</div>
+                                                  <div className="font-mono text-sm text-slate-200">{event.forecast}</div>
                                               </div>
-                                              <div className="flex-1 flex flex-col min-w-0">
-                                                  <div className="flex justify-between items-baseline">
-                                                      <span className="text-[10px] font-medium text-emerald-400 uppercase tracking-widest mb-0.5">Support</span>
-                                                      <span className="text-[10px] text-emerald-400/60 font-mono">S1</span>
-                                                  </div>
-                                                  <div className="p-2.5 bg-slate-900/50 border border-white/5 rounded-lg flex justify-between items-center group-hover:border-emerald-500/30 transition-colors">
-                                                      <span className="font-mono font-medium text-white text-sm md:text-base tracking-tight truncate">{parsedData.key_levels.support}</span>
-                                                      <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse shrink-0 ml-2"></div>
-                                                  </div>
+                                              <div className="bg-slate-950/50 rounded-xl p-3 border border-white/5">
+                                                  <div className="text-[10px] text-slate-500 uppercase tracking-wider mb-1 font-medium">Plan</div>
+                                                  <div className="text-sm text-emerald-400 font-medium">{event.plan}</div>
                                               </div>
                                           </div>
-
-                                          {/* Support 2 Level (if present) */}
-                                          {parsedData.key_levels.support_2 && (
-                                              <div className="relative flex items-center gap-4 group">
-                                                  <div className="w-12 h-12 rounded-xl bg-teal-500/10 border border-teal-500/30 flex items-center justify-center shrink-0 z-10 shadow-[0_0_15px_rgba(20,184,166,0.1)] group-hover:bg-teal-500/20 group-hover:border-teal-500/50 transition-all">
-                                                      <TrendingUp className="w-5 h-5 text-teal-400" />
-                                                  </div>
-                                                  <div className="flex-1 flex flex-col min-w-0">
-                                                      <div className="flex justify-between items-baseline">
-                                                          <span className="text-[10px] font-medium text-teal-400 uppercase tracking-widest mb-0.5">Discount Demand</span>
-                                                          <span className="text-[10px] text-teal-400/60 font-mono">S2</span>
-                                                      </div>
-                                                      <div className="p-2.5 bg-slate-900/50 border border-white/5 rounded-lg flex justify-between items-center group-hover:border-teal-500/30 transition-colors">
-                                                          <span className="font-mono font-medium text-slate-100 text-sm md:text-base tracking-tight truncate">{parsedData.key_levels.support_2}</span>
-                                                      </div>
-                                                  </div>
+                                          
+                                          <div className="space-y-3 mt-4">
+                                              <div className="bg-slate-950/50 rounded-xl p-3 border border-white/5">
+                                                  <div className="text-[10px] text-slate-500 uppercase tracking-wider mb-1 font-medium">When to Act</div>
+                                                  <div className="text-xs text-slate-300 font-medium">{event.when_to_act}</div>
                                               </div>
-                                          )}
-
-                                          {/* Invalidation Level (if present) */}
-                                          {parsedData.key_levels.invalidation_level && (
-                                              <div className="relative flex items-center gap-4 mt-1 group">
-                                                  <div className="w-12 h-12 rounded-xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-center shrink-0 z-10 shadow-[0_0_15px_rgba(245,158,11,0.1)] group-hover:bg-amber-500/20 group-hover:border-amber-500/50 transition-all">
-                                                      <ShieldAlert className="w-5 h-5 text-amber-400" />
-                                                  </div>
-                                                  <div className="flex-1 flex flex-col min-w-0">
-                                                      <div className="flex justify-between items-baseline">
-                                                          <span className="text-[10px] font-medium text-amber-400 uppercase tracking-widest mb-0.5">Thesis Invalidation</span>
-                                                          <span className="text-[10px] text-amber-400/70 font-mono font-semibold">Risk Limit</span>
-                                                      </div>
-                                                      <div className="p-2.5 bg-amber-950/25 border border-amber-500/25 rounded-lg flex justify-between items-center group-hover:border-amber-500/40 transition-colors">
-                                                          <span className="font-mono font-medium text-amber-200 text-xs md:text-sm tracking-tight truncate">{parsedData.key_levels.invalidation_level}</span>
-                                                      </div>
-                                                  </div>
+                                              <div className="bg-slate-950/50 rounded-xl p-3 border border-rose-500/10">
+                                                  <div className="text-[10px] text-rose-500/80 uppercase tracking-wider mb-1 font-medium">Risk if Deviates</div>
+                                                  <div className="text-xs text-rose-300 font-medium">{event.impact_if_deviates}</div>
                                               </div>
-                                          )}
+                                          </div>
                                       </div>
-                                  );
-                              })()}
-                          </div>
-                      )}
-                      
-                      {parsedData.institutional_bias && (
-                          <div className="bg-slate-800/30 border border-white/5 rounded-2xl p-6 flex flex-col relative overflow-hidden group">
-                              {/* Background Graphic */}
-                              <div className="absolute -right-6 -bottom-6 w-32 h-32 bg-white/10 rounded-full blur-2xl pointer-events-none group-hover:bg-white/20 transition-colors duration-500"></div>
-
-                              <div className="flex items-center gap-3 mb-5 text-white relative z-10">
-                                  <div className="p-2 bg-white/10 rounded-lg">
-                                    <Activity className="w-4 h-4" />
-                                  </div>
-                                  <span className="text-xs font-medium uppercase tracking-widest">Institutional Flow</span>
-                              </div>
-                              
-                              <div className="flex-1 relative z-10 flex flex-col">
-                                <div className="p-4 bg-slate-900/50 border border-white/5 rounded-xl mb-6 flex-1">
-                                    <p className="text-slate-300 text-sm leading-relaxed font-medium">
-                                        {parsedData.institutional_bias}
-                                    </p>
-                                </div>
-                                
-                                {/* Visual Flow Indicator */}
-                                <div>
-                                    <div className="flex justify-between mb-2 text-[10px] font-medium uppercase text-slate-500">
-                                        <span>Net Short</span>
-                                        <span>Neutral</span>
-                                        <span>Net Long</span>
-                                    </div>
-                                    <div className="h-2 bg-slate-700/50 rounded-full overflow-hidden flex relative">
-                                        {/* Animated Bar */}
-                                        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent w-full -translate-x-full animate-[shimmer_2s_infinite]"></div>
-                                        <div className="h-full bg-gradient-to-r from-blue-500/50 to-white w-2/3 rounded-full"></div>
-                                    </div>
-                                </div>
-                              </div>
-                          </div>
-                      )}
-                  </div>
+                                  </motion.div>
+                              );
+                          })}
+                      </div>
+                  </motion.div>
               )}
 
-              {/* 3. Global Context & News Highlights */}
-              {(parsedData.global_context || parsedData.news_summary) && (
-                  <div className="bg-slate-800/30 border border-white/5 rounded-2xl p-6 relative overflow-hidden group hover:border-white/10 transition-all duration-500">
-                      <div className="absolute top-0 right-0 w-64 h-64 bg-indigo-500/5 rounded-full blur-[80px] -mr-16 -mt-16 pointer-events-none"></div>
-                      
-                      <div className="relative z-10">
-                        <div className="flex items-center gap-3 mb-6 text-indigo-400">
-                            <div className="p-2 bg-indigo-500/10 rounded-lg">
-                                <Globe className="w-4 h-4" />
-                            </div>
-                            <span className="text-xs font-medium uppercase tracking-widest">Global Context & Highlights</span>
-                        </div>
-
-                        {parsedData.global_context ? (
-                            <div className="space-y-6">
-                                {/* Sentiment Score & Risks Grid */}
-                                {(parsedData.global_context.market_sentiment_score !== undefined || parsedData.global_context.key_risks) && (
-                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-2">
-                                        {/* Sentiment Score Gauge */}
-                                        {parsedData.global_context.market_sentiment_score !== undefined && (
-                                            <div className="bg-slate-900/50 rounded-xl p-4 border border-white/5">
-                                                <div className="flex justify-between items-end mb-2">
-                                                    <span className="text-[10px] font-medium uppercase text-slate-500">Fear & Greed</span>
-                                                    <span className={`text-xl font-medium ${parsedData.global_context.market_sentiment_score > 50 ? 'text-emerald-400' : 'text-rose-400'}`}>
-                                                        {parsedData.global_context.market_sentiment_score}
-                                                    </span>
-                                                </div>
-                                                <div className="h-2 bg-slate-700/50 rounded-full overflow-hidden">
-                                                    <div 
-                                                        className={`h-full rounded-full transition-all duration-1000 ${parsedData.global_context.market_sentiment_score > 50 ? 'bg-emerald-500' : 'bg-rose-500'}`}
-                                                        style={{ width: `${parsedData.global_context.market_sentiment_score}%` }}
-                                                    ></div>
-                                                </div>
-                                            </div>
-                                        )}
-
-                                        {/* Key Risks */}
-                                        {parsedData.global_context.key_risks && (
-                                            <div className="bg-slate-900/50 rounded-xl p-4 border border-white/5">
-                                                <div className="flex items-center gap-2 mb-2 text-rose-400">
-                                                    <ShieldAlert className="w-3 h-3" />
-                                                    <span className="text-[10px] font-medium uppercase">Key Risks</span>
-                                                </div>
-                                                <div className="flex flex-wrap gap-2">
-                                                    {parsedData.global_context.key_risks.map((risk, idx) => (
-                                                        <span key={idx} className="text-[10px] font-medium px-2 py-1 rounded bg-rose-500/10 text-rose-300 border border-rose-500/20">
-                                                            {risk}
-                                                        </span>
-                                                    ))}
-                                                </div>
-                                            </div>
-                                        )}
-                                    </div>
-                                )}
-
-                                {/* Highlights List */}
-                                <div className="space-y-3">
-                                    {parsedData.global_context.news_highlights.map((highlight, idx) => (
-                                        <div key={idx} className="flex gap-3 items-start group/item">
-                                            <div className="mt-1 p-1 bg-slate-700/50 rounded-full shrink-0 group-hover/item:bg-indigo-500/20 transition-colors">
-                                                <Newspaper className="w-3 h-3 text-slate-400 group-hover/item:text-indigo-400" />
-                                            </div>
-                                            <p className="text-slate-300 text-sm leading-relaxed">{highlight}</p>
-                                        </div>
-                                    ))}
-                                </div>
-
-                                {/* Weekly Impact Box */}
-                                <div className="bg-gradient-to-r from-indigo-500/10 to-blue-500/5 border border-indigo-500/20 rounded-xl p-4 relative overflow-hidden">
-                                    <div className="absolute top-0 left-0 w-1 h-full bg-indigo-500"></div>
-                                    <div className="flex items-start gap-3">
-                                        <div className="mt-0.5">
-                                            <TrendingUp className="w-4 h-4 text-indigo-400" />
-                                        </div>
-                                        <div>
-                                            <span className="text-[10px] font-medium text-indigo-300 uppercase tracking-wider block mb-1">Weekly Impact Forecast</span>
-                                            <p className="text-slate-200 text-sm font-medium leading-relaxed">
-                                                {parsedData.global_context.weekly_impact}
-                                            </p>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        ) : (
-                            <p className="text-slate-300 text-sm leading-relaxed max-w-4xl">
-                                {parsedData.news_summary}
-                            </p>
-                        )}
-                      </div>
-                  </div>
-              )}
-
-              {/* 4. Trader's Playbook Grid */}
-              <div>
-                  <div className="flex items-center gap-3 mb-8">
-                      <div className="p-2 bg-yellow-500/10 rounded-lg">
-                        <Zap className="w-5 h-5 text-yellow-400" />
-                      </div>
-                      <h3 className="text-2xl font-medium text-white tracking-tight">Trader's Playbook</h3>
-                  </div>
-
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-                      {parsedData.playbook.map((item, idx) => (
-                          <div key={idx} className="bg-slate-900/60 border border-white/5 rounded-2xl overflow-hidden hover:border-blue-500/30 transition-all duration-300 group hover:shadow-xl hover:shadow-blue-900/10 hover:-translate-y-1">
-                              {/* Event Header */}
-                              <div className="p-5 bg-white/5 border-b border-white/5 flex justify-between items-start group-hover:bg-white/10 transition-colors">
-                                  <div>
-                                      <div className="flex items-center gap-2 mb-2">
-                                          <div className="px-2 py-0.5 rounded bg-blue-500/20 text-blue-400 text-[10px] font-medium uppercase tracking-wider border border-blue-500/20">
-                                            {item.date}
-                                          </div>
-                                      </div>
-                                      <h4 className="text-white font-medium text-lg leading-tight">{item.event}</h4>
-                                  </div>
-                                  <div className={`text-right ${isRTL ? 'text-left' : ''}`}>
-                                      <span className="text-[10px] font-medium text-slate-500 uppercase tracking-wider block mb-1">Forecast</span>
-                                      <span className="text-sm font-mono font-medium text-slate-200 bg-slate-800 px-2 py-1 rounded border border-white/5">{item.forecast}</span>
-                                  </div>
-                              </div>
-
-                              {/* Action Plan */}
-                              <div className="p-5 space-y-5">
-                                  <div>
-                                      <div className="text-[10px] font-medium text-slate-500 uppercase tracking-widest mb-2">The Plan</div>
-                                      <p className="text-slate-200 text-sm font-medium leading-relaxed">{item.plan}</p>
-                                  </div>
-                                  
-                                  <div className="grid grid-cols-2 gap-4 p-4 bg-slate-800/50 rounded-xl border border-white/5">
-                                      <div>
-                                          <div className="text-[10px] font-medium text-blue-400 uppercase mb-1.5 flex items-center gap-1">
-                                            <Info className="w-3 h-3" /> Why?
-                                          </div>
-                                          <p className="text-xs text-slate-400 font-medium leading-relaxed">{item.why}</p>
-                                      </div>
-                                      <div>
-                                          <div className="text-[10px] font-medium text-emerald-400 uppercase mb-1.5 flex items-center gap-1">
-                                            <Target className="w-3 h-3" /> When to Act
-                                          </div>
-                                          <p className="text-xs text-slate-400 font-medium leading-relaxed">{item.when_to_act}</p>
-                                      </div>
-                                  </div>
-
-                                  {/* Risk Warning */}
-                                  <div className="pt-2 flex gap-3 items-start">
-                                      <div className="mt-0.5 shrink-0 p-1 bg-slate-800 rounded-md border border-white/5">
-                                          {getImpactIcon(item.impact_if_deviates)}
-                                      </div>
-                                      <div className="flex-1">
-                                        <span className="text-[10px] font-medium text-slate-500 uppercase tracking-wider block mb-0.5">Risk Factor</span>
-                                        <p className="text-xs text-slate-300 font-medium">
-                                            {item.impact_if_deviates}
-                                        </p>
-                                      </div>
-                                  </div>
-                              </div>
+              {/* Global Context */}
+              {parsedData.global_context && (
+                  <motion.div variants={containerVariants} className="bg-slate-800/30 border border-white/5 rounded-3xl p-6 lg:p-8">
+                      <motion.div variants={itemVariants} className="flex items-center gap-3 mb-6 text-emerald-400">
+                          <div className="p-2 bg-emerald-500/10 rounded-xl">
+                            <Globe className="w-5 h-5" />
                           </div>
-                      ))}
-                  </div>
-              </div>
-          </div>
+                          <h3 className="text-lg font-medium text-white font-heading tracking-tight">Global Context</h3>
+                      </motion.div>
+                      
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                          <motion.div variants={itemVariants} className="space-y-3">
+                              <div className="text-xs font-medium uppercase tracking-widest text-slate-500 mb-2">News Highlights</div>
+                              {parsedData.global_context.news_highlights.map((news, i) => (
+                                  <div key={i} className="flex gap-3 text-sm text-slate-300 font-medium">
+                                      <Minus className="w-4 h-4 text-emerald-500 shrink-0 mt-0.5" />
+                                      <span className="leading-relaxed">{news}</span>
+                                  </div>
+                              ))}
+                          </motion.div>
+                          
+                          <motion.div variants={itemVariants} className="bg-slate-900/50 p-5 rounded-2xl border border-white/5">
+                              <div className="text-xs font-medium uppercase tracking-widest text-slate-500 mb-3">Weekly Impact</div>
+                              <p className="text-sm text-slate-300 font-medium leading-relaxed">{parsedData.global_context.weekly_impact}</p>
+                          </motion.div>
+                      </div>
+                  </motion.div>
+              )}
+          </motion.div>
       );
   };
 
