@@ -137,32 +137,36 @@ export const BarRoundedChartCard: React.FC<BarRoundedChartCardProps> = ({
         {/* Asset Selection Filter & Head Style Toggle */}
         <div className="flex items-center gap-2 overflow-x-auto max-w-full py-0.5">
           {/* Head Style Selector */}
-          <div className="flex items-center gap-0.5 bg-slate-100 dark:bg-slate-800/90 p-0.5 rounded-lg border border-slate-200/70 dark:border-slate-700/70 shrink-0">
+          <div className="flex items-center gap-1 bg-slate-100 dark:bg-slate-800/90 p-1 rounded-lg border border-slate-200/70 dark:border-slate-700/70 shrink-0 shadow-inner">
             <button
+              type="button"
               onClick={() => setBarHeadStyle('dome')}
-              className={`px-1.5 py-0.5 rounded text-[9px] font-medium transition-all ${
+              className={`px-2 py-1 rounded-md text-[10px] font-medium transition-all flex items-center gap-1.5 cursor-pointer select-none active:scale-95 ${
                 barHeadStyle === 'dome'
-                  ? (themeMode === 'light' ? 'bg-white text-blue-600 shadow-sm font-semibold' : 'bg-blue-500/30 text-blue-300 font-semibold border border-blue-500/30')
+                  ? (themeMode === 'light' ? 'bg-white text-blue-600 shadow-sm font-semibold' : 'bg-blue-500/30 text-blue-300 font-semibold border border-blue-500/40 shadow-sm')
                   : 'text-slate-500 hover:text-slate-800 dark:hover:text-slate-200'
               }`}
               title="رأس مستدير (Rounded Head)"
             >
+              <span className={`w-2.5 h-3 border border-current rounded-t-full rounded-b-none shrink-0 ${barHeadStyle === 'dome' ? 'bg-current opacity-70' : 'opacity-40'}`} />
               Rounded Head
             </button>
             <button
+              type="button"
               onClick={() => setBarHeadStyle('capsule')}
-              className={`px-1.5 py-0.5 rounded text-[9px] font-medium transition-all ${
+              className={`px-2 py-1 rounded-md text-[10px] font-medium transition-all flex items-center gap-1.5 cursor-pointer select-none active:scale-95 ${
                 barHeadStyle === 'capsule'
-                  ? (themeMode === 'light' ? 'bg-white text-blue-600 shadow-sm font-semibold' : 'bg-blue-500/30 text-blue-300 font-semibold border border-blue-500/30')
+                  ? (themeMode === 'light' ? 'bg-white text-blue-600 shadow-sm font-semibold' : 'bg-blue-500/30 text-blue-300 font-semibold border border-blue-500/40 shadow-sm')
                   : 'text-slate-500 hover:text-slate-800 dark:hover:text-slate-200'
               }`}
               title="كبسولة كاملة مستديرة الزوايا (Full Capsule)"
             >
+              <span className={`w-2.5 h-3 border border-current rounded-full shrink-0 ${barHeadStyle === 'capsule' ? 'bg-current opacity-70' : 'opacity-40'}`} />
               Capsule
             </button>
           </div>
 
-          <div className="h-3 w-px bg-slate-200 dark:bg-slate-700/70 shrink-0" />
+          <div className="h-4 w-px bg-slate-200 dark:bg-slate-700/70 shrink-0" />
 
           {/* Asset Pills */}
           <div className="flex items-center gap-1 shrink-0">
@@ -172,14 +176,15 @@ export const BarRoundedChartCard: React.FC<BarRoundedChartCardProps> = ({
               return (
                 <button
                   key={asset}
+                  type="button"
                   onClick={() => {
                     setSelectedAsset(asset);
                     if (onSelectAsset) onSelectAsset(asset);
                   }}
-                  className={`px-2 py-0.5 rounded text-[9px] font-medium transition-all whitespace-nowrap ${
+                  className={`px-2.5 py-1 rounded-md text-[10px] font-medium transition-all whitespace-nowrap cursor-pointer select-none active:scale-95 ${
                     isSelected
-                      ? (themeMode === 'light' ? 'bg-blue-600 text-white shadow-sm' : 'bg-blue-500/30 text-blue-300 border border-blue-500/40')
-                      : (themeMode === 'light' ? 'text-slate-500 hover:bg-slate-100' : 'text-slate-400 hover:bg-slate-800')
+                      ? (themeMode === 'light' ? 'bg-blue-600 text-white shadow-sm font-semibold' : 'bg-blue-500/30 text-blue-300 border border-blue-500/40 shadow-sm font-semibold')
+                      : (themeMode === 'light' ? 'text-slate-600 hover:bg-slate-100' : 'text-slate-400 hover:bg-slate-800')
                   }`}
                 >
                   {shortName}
@@ -193,21 +198,23 @@ export const BarRoundedChartCard: React.FC<BarRoundedChartCardProps> = ({
       {/* ComposedChart centerpiece from biklit library */}
       <div className="flex-1 w-full min-h-[190px] relative flex items-center justify-center my-0.5">
         <ComposedChart 
-          margin={{ top: 8, right: 8, bottom: 40, left: 8 }} 
+          margin={{ top: 10, right: 16, bottom: 36, left: 16 }} 
           data={data} 
           xDataKey="date" 
           aspectRatio="2 / 1" 
           barGap={0} 
           maxBarSize={32}
+          revealSignature={`${selectedAsset}-${barHeadStyle}`}
         >
           <Grid horizontal />
           <Area dataKey="runRate" curve={curveCatmullRom.alpha(0.42)} fill="var(--chart-4)" fillOpacity={0.32} />
           <SeriesBar 
             dataKey="units" 
             fill="var(--chart-3)" 
-            radius={16} 
+            radius={14} 
             roundedHead={true} 
             roundBottom={barHeadStyle === 'capsule'} 
+            bottomInset={barHeadStyle === 'capsule' ? 8 : 0}
           />
           <Line dataKey="revenue" curve={curveCatmullRom.alpha(0.42)} stroke="var(--chart-1)" strokeWidth={2.5} />
           <ChartTooltip showCrosshair={false} />

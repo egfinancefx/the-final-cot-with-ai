@@ -92,6 +92,8 @@ export interface SeriesBarProps {
   roundedHead?: boolean;
   /** Whether to round bottom corners too (capsule/pill mode). Default: false */
   roundBottom?: boolean;
+  /** Clearance/inset from baseline in px for capsule mode. Default: 8 */
+  bottomInset?: number;
   /** Animate grow from baseline. Default: true */
   animate?: boolean;
   /** Opacity for non-hovered bars when another point is hovered (matches BarChart). Default: 0.3 */
@@ -107,23 +109,26 @@ export function getTopRoundedBarPath(
   width: number,
   height: number,
   radius: number,
-  roundBottom: boolean = false
+  roundBottom: boolean = false,
+  bottomInset: number = 0
 ): string {
   if (width <= 0 || height <= 0) return "";
-  const maxR = Math.min(width / 2, height / (roundBottom ? 2 : 1));
+  const effectiveHeight = roundBottom ? Math.max(width, height - bottomInset) : height;
+  const maxR = Math.min(width / 2, effectiveHeight / (roundBottom ? 2 : 1));
   const r = Math.max(0, Math.min(radius, maxR));
 
   if (r <= 0.5) {
-    return `M ${x} ${y} h ${width} v ${height} h ${-width} Z`;
+    return `M ${x} ${y} h ${width} v ${effectiveHeight} h ${-width} Z`;
   }
 
   if (roundBottom) {
-    // Pill / capsule shape with both top and bottom fully rounded
+    // Pill / capsule shape with both top and bottom fully rounded and elevated above baseline
+    const bottomY = y + effectiveHeight;
     return (
-      `M ${x} ${y + height - r} ` +
-      `A ${r} ${r} 0 0 1 ${x + r} ${y + height} ` +
-      `L ${x + width - r} ${y + height} ` +
-      `A ${r} ${r} 0 0 1 ${x + width} ${y + height - r} ` +
+      `M ${x} ${bottomY - r} ` +
+      `A ${r} ${r} 0 0 1 ${x + r} ${bottomY} ` +
+      `L ${x + width - r} ${bottomY} ` +
+      `A ${r} ${r} 0 0 1 ${x + width} ${bottomY - r} ` +
       `L ${x + width} ${y + r} ` +
       `A ${r} ${r} 0 0 1 ${x + width - r} ${y} ` +
       `L ${x + r} ${y} ` +
@@ -150,6 +155,7 @@ export function SeriesBar({
   radius = 0,
   roundedHead = true,
   roundBottom = false,
+  bottomInset,
   animate = true,
   fadedOpacity = 0.3,
 }: SeriesBarProps) {
@@ -280,12 +286,13 @@ export function SeriesBar({
               barWidth={barWidth}
               calculatedStaggerDelay={calculatedStaggerDelay}
               enterTransition={enterTransition}
+              bottomInset={roundBottom ? (bottomInset ?? 8) : 0}
               fadedOpacity={fadedOpacity}
               fill={fill}
               index={i}
               innerHeight={innerHeight}
               isFaded={isFaded}
-              key={`${dataKey}-${categoryLabel}-${revealEpoch}`}
+              key={`${dataKey}-${categoryLabel}-${revealEpoch}-${roundBottom ? 'capsule' : 'dome'}`}
               radius={effectiveRadius}
               revealEpoch={revealEpoch}
               roundBottom={roundBottom}
@@ -297,6 +304,7 @@ export function SeriesBar({
         }
 
         if (roundedHead && effectiveRadius > 0) {
+          const effectiveBottomInset = roundBottom ? (bottomInset ?? 8) : 0;
           return (
             <motion.path
               animate={{ opacity: isFaded ? fadedOpacity : 1 }}
@@ -306,10 +314,11 @@ export function SeriesBar({
                 barWidth,
                 barHeight,
                 effectiveRadius,
-                roundBottom
+                roundBottom,
+                effectiveBottomInset
               )}
               fill={fill}
-              key={`${dataKey}-${categoryLabel}`}
+              key={`${dataKey}-${categoryLabel}-${roundBottom ? 'capsule' : 'dome'}`}
               transition={{ opacity: { duration: 0.12 } }}
             />
           );
@@ -320,7 +329,7 @@ export function SeriesBar({
             animate={{ opacity: isFaded ? fadedOpacity : 1 }}
             fill={fill}
             height={barHeight}
-            key={`${dataKey}-${categoryLabel}`}
+            key={`${dataKey}-${categoryLabel}-${roundBottom ? 'capsule' : 'dome'}`}
             rx={effectiveRadius}
             ry={effectiveRadius}
             transition={{ opacity: { duration: 0.12 } }}
@@ -352,6 +361,7 @@ interface SeriesBarRectProps {
   fadedOpacity: number;
   roundedHead?: boolean;
   roundBottom?: boolean;
+  bottomInset?: number;
 }
 
 function SeriesBarRect({
@@ -370,6 +380,7 @@ function SeriesBarRect({
   fadedOpacity,
   roundedHead = true,
   roundBottom = false,
+  bottomInset = 0,
 }: SeriesBarRectProps) {
   const enterAnim = transitionWithDelay(
     enterTransition,
@@ -384,7 +395,7 @@ function SeriesBarRect({
           scaleY: 1,
         }}
         initial={{ opacity: 0, scaleY: 0 }}
-        key={`series-bar-${index}-${revealEpoch}`}
+        key={`series-bar-${index}-${revealEpoch}-${roundBottom ? 'capsule' : 'dome'}`}
         style={{
           transformOrigin: `${x + barWidth / 2}px ${innerHeight}px`,
         }}
@@ -397,7 +408,8 @@ function SeriesBarRect({
             barWidth,
             barHeight,
             radius,
-            roundBottom
+            roundBottom,
+            bottomInset
           )}
           fill={fill}
         />

@@ -294,11 +294,24 @@ const TimeSeriesChartCore = memo(function TimeSeriesChartCore({
       maxTime = mergeProjectionXDomainMax(maxTime, projectionConfigs);
     }
 
+    const barPadding = composedBarDataKeys?.length
+      ? Math.max(16, Math.ceil((composedBarSize ?? Math.min(composedMaxBarSize ?? 32, 32)) / 2) + 8)
+      : 0;
+
     return scaleTime({
-      range: [0, innerWidth],
+      range: [barPadding, Math.max(barPadding, innerWidth - barPadding)],
       domain: [minTime, maxTime],
     });
-  }, [innerWidth, plotData, projectionConfigs, xAccessor, xDomain]);
+  }, [
+    composedBarDataKeys?.length,
+    composedBarSize,
+    composedMaxBarSize,
+    innerWidth,
+    plotData,
+    projectionConfigs,
+    xAccessor,
+    xDomain,
+  ]);
 
   // When brushing, keep the full series for path rendering so edge fades stay
   // anchored to the viewport while the line pans through them. Y-domain and
@@ -322,8 +335,20 @@ const TimeSeriesChartCore = memo(function TimeSeriesChartCore({
     if (slotCount < 2) {
       return 0;
     }
-    return innerWidth / (slotCount - 1);
-  }, [innerWidth, visiblePlotData.length, xDomain, xDomainSlotCount]);
+    const barPadding = composedBarDataKeys?.length
+      ? Math.max(16, Math.ceil((composedBarSize ?? Math.min(composedMaxBarSize ?? 32, 32)) / 2) + 8)
+      : 0;
+    const availableWidth = Math.max(0, innerWidth - barPadding * 2);
+    return availableWidth / (slotCount - 1);
+  }, [
+    composedBarDataKeys?.length,
+    composedBarSize,
+    composedMaxBarSize,
+    innerWidth,
+    visiblePlotData.length,
+    xDomain,
+    xDomainSlotCount,
+  ]);
 
   const yDomainSkeletonByAxis = useMemo(
     () =>

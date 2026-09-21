@@ -15,7 +15,14 @@ function getGeminiClient(): GoogleGenAI {
     throw new Error("GEMINI_API_KEY environment variable is not configured on the server.");
   }
   if (!aiClient) {
-    aiClient = new GoogleGenAI({ apiKey });
+    aiClient = new GoogleGenAI({
+      apiKey,
+      httpOptions: {
+        headers: {
+          'User-Agent': 'aistudio-build',
+        }
+      }
+    });
   }
   return aiClient;
 }
@@ -399,11 +406,11 @@ ${livePricesContext}
 ${parsed.data}`;
 
             session = await ai.live.connect({
-                model: "gemini-3.6-flash-live-preview",
+                model: "gemini-3.8-live",
                 config: {
                 responseModalities: ["AUDIO"] as Modality[],
                 speechConfig: {
-                    voiceConfig: { prebuiltVoiceConfig: { voiceName: "Aoede" } },
+                    voiceConfig: { prebuiltVoiceConfig: { voiceName: "Zephyr" } },
                 },
                 systemInstruction: systemInstruction
                 },
@@ -440,7 +447,15 @@ ${parsed.data}`;
             // Prompt the AI to start speaking immediately
             if (session) {
                 try {
-                    session.sendClientContent({ turns: `مرحباً! لقد اتصلت للتو. رحب بي (اسمي: ${userName}) واطلب مني كيف يمكن أن تساعدني، التزم بشخصيتك: ${botPersona}`, turnComplete: true });
+                    session.sendClientContent({
+                        turns: [
+                            {
+                                role: 'user',
+                                parts: [{ text: `مرحباً! لقد اتصلت للتو. رحب بي (اسمي: ${userName}) واطلب مني كيف يمكن أن تساعدني، التزم بشخصيتك: ${botPersona}` }]
+                            }
+                        ],
+                        turnComplete: true
+                    });
                 } catch (err: any) {
                     safeSend({ error: "Init Error: " + err.message });
                 }
@@ -454,7 +469,15 @@ ${parsed.data}`;
                 }
             });
         } else if (parsed.text && session) {
-            session.sendClientContent({ turns: parsed.text, turnComplete: true });
+            session.sendClientContent({
+                turns: [
+                    {
+                        role: 'user',
+                        parts: [{ text: parsed.text }]
+                    }
+                ],
+                turnComplete: true
+            });
         }
       } catch (e: any) {
         console.error("Error processing client message", e);
