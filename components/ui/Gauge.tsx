@@ -76,7 +76,7 @@ export function Gauge({
             x2={notch.x2}
             y2={notch.y2}
             strokeLinecap="round"
-            strokeWidth={size * 0.025}
+            strokeWidth={Math.max(1.75, size * 0.026)}
             initial={{ opacity: 0, scale: 0.8 }}
             animate={{ 
               opacity: notch.isActive ? 1 : 0.4, 
@@ -101,7 +101,7 @@ export function Gauge({
           <NumberFlow 
             value={safeCenterValue} 
             format={{ notation: "compact", maximumFractionDigits: 1 }}
-            className={`${size <= 50 ? 'text-[10px] sm:text-[11px]' : 'text-sm'} font-semibold tracking-tight ${valueClassName}`}
+            className={`${size <= 50 ? 'text-[10px]' : size <= 72 ? 'text-xs sm:text-[13px] font-bold' : 'text-sm font-semibold'} tracking-tight ${valueClassName}`}
           />
         </motion.div>
       )}

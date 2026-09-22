@@ -140,7 +140,8 @@ export const generateLocalFallbackAnalysis = (
   commodity: string | null,
   summaryRow?: SummaryRow | null,
   _historyPoints?: { date: string; value: number }[],
-  liveQuote?: LiveQuoteData | null
+  liveQuote?: LiveQuoteData | null,
+  ffEvents?: any[]
 ): string => {
   const isAsset = !!commodity && !!summaryRow;
   const netPos = summaryRow ? summaryRow["Net Positions"] : 0;
@@ -188,6 +189,42 @@ export const generateLocalFallbackAnalysis = (
 
   const aMacro = `Tactical Macro Playbook:\n\n1. Asset Selection: Isolate the 2 or 3 specific commodities/currencies showing the most aggressive week-over-week Net Change in institutional positioning. Ignore the rest.\n2. Execution Framing: Wait for major macroeconomic data releases (e.g., NFP, CPI) to create artificial 'whipsaws'. Use these engineered liquidity sweeps to enter in the direction of the dominant COT trend.\n3. Risk Management: Never trade the initial news spike. Wait for the New York session daily close to confirm the true institutional intent before committing capital.`;
 
+  // Build playbook from real Forex Factory events if available
+  let playbookList: any[] = [];
+  if (Array.isArray(ffEvents) && ffEvents.length > 0) {
+    playbookList = ffEvents.slice(0, 8).map(ev => {
+      const isHoli = ev.impact === 'Holiday';
+      const formattedDate = ev.date ? new Date(ev.date).toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' }) : 'This Week';
+      return {
+        event: `[${ev.country}] ${ev.title}`,
+        date: `${formattedDate} (${ev.country})`,
+        forecast: isHoli ? 'Bank Holiday (Thinned Liquidity)' : `Forecast: ${ev.forecast || '--'} | Prior: ${ev.previous || '--'}`,
+        plan: isHoli 
+          ? `Anticipate wider institutional spreads and reduced depth of market in ${ev.country} sessions. Avoid tight scalping.`
+          : `Monitor initial spike around ${ev.country} release. Look for false breakouts against key COT support/resistance.`,
+        why: isHoli
+          ? `Major banking desks in ${ev.country} are closed, reducing central order book absorption.`
+          : `High-impact ${ev.country} releases drive immediate repricing of institutional rate expectations and dollar liquidity.`,
+        when_to_act: isHoli ? 'Observe during European / Asian session overlaps' : 'Wait for daily candle close or 30-min structure confirmation after release',
+        impact_if_deviates: isHoli 
+          ? 'Low liquidity can result in exaggerated gap risk or sudden slippage.'
+          : 'Significant deviation triggers aggressive algorithmic rebalancing across correlated asset classes.'
+      };
+    });
+  } else {
+    playbookList = [
+      {
+        event: "Weekly Market Structure Review",
+        date: "Current Trading Session",
+        forecast: "Institutional continuation",
+        plan: "Wait for structure confirmation at key technical levels",
+        why: "Trading in direction of institutional positioning enhances probability",
+        when_to_act: "On test of key liquidity or support/resistance zones",
+        impact_if_deviates: "Invalidates directional thesis; reassess positioning"
+      }
+    ];
+  }
+
   const data = {
     sentiment: {
       label: sentimentLabel,
@@ -205,23 +242,13 @@ export const generateLocalFallbackAnalysis = (
       news_highlights: [
         "Commitment of Traders (COT) weekly reporting reflects commercial and non-commercial positioning.",
         "Macro drivers including Dollar Index (DXY) and interest rate expectations drive directional trend momentum.",
-        "Upcoming economic calendar events should be monitored for potential volatility expansions."
+        "Forex Factory calendar indicates key high impact events and bank holidays driving this week's institutional liquidity."
       ],
       weekly_impact: "Price direction will likely track institutional positioning continuity along with macroeconomic releases.",
       market_sentiment_score: isStrongBull ? 72 : isStrongBear ? 28 : 50,
       key_risks: ["Unexpected central bank statements", "Geopolitical developments", "Calendar data deviations"]
     },
-    playbook: [
-      {
-        event: "Weekly Market Structure Review",
-        date: "Current Trading Session",
-        forecast: "Institutional continuation",
-        plan: "Wait for structure confirmation at key technical levels",
-        why: "Trading in direction of institutional positioning enhances probability",
-        when_to_act: "On test of key liquidity or support/resistance zones",
-        impact_if_deviates: "Invalidates directional thesis; reassess positioning"
-      }
-    ]
+    playbook: playbookList
   };
 
   return JSON.stringify(data, null, 2);

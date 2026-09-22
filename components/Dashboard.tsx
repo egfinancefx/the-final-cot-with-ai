@@ -20,6 +20,7 @@ import HeatmapModal from './HeatmapModal';
 import EducationalGuideModal from './EducationalGuideModal';
 import TradingViewWidget from './TradingViewWidget';
 import { formatCurrency, generateLocalFallbackAnalysis } from '../utils';
+import { streamGemini } from '../streamingParser';
 import { TV_SYMBOL_MAP, ASSET_GROUPS } from '../constants';
 import { LayoutDashboard, TrendingUp, TrendingDown, Activity, ChevronDown, ArrowUpRight, ArrowDownRight, Scale, Minus, Check, Sparkles, Search, ArrowUp, ArrowDown, ArrowUpDown, BarChart2, ArrowLeft, Info, AlertTriangle, Edit3, Map as MapIcon, Star, GraduationCap } from 'lucide-react';
 
@@ -395,28 +396,60 @@ const Dashboard: React.FC<DashboardProps> = ({ summaryData, historyData, history
     setAiAnalysis(null);
 
     let liveQuote: any = null;
+    let ffEvents: any[] = [];
 
     try {
-        // 1. Fetch live spot market price to anchor realistic technical key levels
-        if (selectedItem?.Commodity) {
-            try {
-                const qRes = await fetch(`/api/market-price?commodity=${encodeURIComponent(selectedItem.Commodity)}`);
-                if (qRes.ok) {
-                    liveQuote = await qRes.json();
+        // Fetch live spot market price and Forex Factory calendar in parallel to reduce latency
+        await Promise.allSettled([
+            (async () => {
+                if (selectedItem?.Commodity) {
+                    try {
+                        const qRes = await fetch(`/api/market-price?commodity=${encodeURIComponent(selectedItem.Commodity)}`);
+                        if (qRes.ok) {
+                            liveQuote = await qRes.json();
+                        }
+                    } catch (err) {
+                        console.warn("Could not fetch live market price:", err);
+                    }
                 }
-            } catch (err) {
-                console.warn("Could not fetch live market price for prompt anchoring:", err);
-            }
-        }
+            })(),
+            (async () => {
+                try {
+                    const ffRes = await fetch('/api/forexfactory-calendar');
+                    if (ffRes.ok) {
+                        const ffData = await ffRes.json();
+                        ffEvents = ffData.events || [];
+                    }
+                } catch (err) {
+                    console.warn("Could not fetch Forex Factory calendar:", err);
+                }
+            })()
+        ]);
 
         let prompt = "";
         
         const today = new Date().toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
         const dateContext = latestDate ? `The COT data is current as of ${latestDate}. Today is ${today}.` : `Today is ${today}.`;
         
-        const searchInstruction = `
-            Context Task: Incorporate the most critical **Geopolitical, Economic, and Political** drivers currently affecting ${selectedItem ? selectedItem.Commodity : "the global markets"} based on your training data and current macro themes.
-            Forward Looking Task (Trader Playbook): Predict the types of **upcoming economic events** that would typically impact ${selectedItem ? selectedItem.Commodity : "major global markets"} (e.g., NFP, CPI, FOMC, Unemployment Claims) and explain how the market would react based on the current COT positioning.
+        // Pick top 8 most relevant events to keep prompt lean and response fast
+        const ffEventsSummary = ffEvents.length > 0 
+          ? ffEvents.slice(0, 8).map(ev => 
+              `- [${ev.country}] ${ev.impact === 'Holiday' ? 'BANK HOLIDAY' : 'HIGH IMPACT (RED)'}: "${ev.title}" on ${ev.date ? new Date(ev.date).toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' }) : 'This Week'} | Forecast: ${ev.forecast || '--'}, Previous: ${ev.previous || '--'}`
+            ).join('\n')
+          : '';
+
+        const ffInstruction = ffEventsSummary ? `
+            REAL-TIME FOREX FACTORY SCHEDULED HIGH-IMPACT (RED) NEWS & BANK HOLIDAYS:
+            ${ffEventsSummary}
+
+            MANDATORY DIRECTIVE FOR TRADER'S PLAYBOOK:
+            - You MUST build the "playbook" array specifically from these scheduled REAL events from Forex Factory.
+            - Filter and prioritize events that affect ${selectedItem ? selectedItem.Commodity : "global assets"} (USD events, relevant country currency events, and bank holidays).
+            - For Bank Holidays: address liquidity thinning, bank settlement closures, and potential spread widening.
+            - For High-Impact Red Events: provide the exact forecasted impact, trading triggers, when to act, and risk if actual deviates from forecast.
+        ` : `
+            Context Task: Incorporate the most critical **Geopolitical, Economic, and Political** drivers currently affecting ${selectedItem ? selectedItem.Commodity : "the global markets"}.
+            Forward Looking Task (Trader Playbook): Build the playbook around high-impact (red) economic events and bank holidays.
         `;
 
         if (selectedItem) {
@@ -455,7 +488,7 @@ const Dashboard: React.FC<DashboardProps> = ({ summaryData, historyData, history
 
             ${quoteContext}
             
-            ${searchInstruction}
+            ${ffInstruction}
             
             You MUST return the response in valid JSON format with the following structure. Do not use Markdown formatting outside the JSON strings.
             {
@@ -508,7 +541,7 @@ const Dashboard: React.FC<DashboardProps> = ({ summaryData, historyData, history
             ${dateContext}
             ${JSON.stringify(topMovers)}
             
-            ${searchInstruction}
+            ${ffInstruction}
             
             You MUST return the response in valid JSON format with the following structure. Do not use Markdown formatting outside the JSON strings.
             {
@@ -549,25 +582,29 @@ const Dashboard: React.FC<DashboardProps> = ({ summaryData, historyData, history
             `;
         }
 
-        const apiRes = await fetch('/api/gemini', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                model: 'gemini-3.6-flash',
+        // Clear previous state and immediately open overlay in streaming mode
+        setAiAnalysis("");
+        setIsAiOfflineMode(false);
+
+        const fullText = await streamGemini(
+            {
+                model: 'gemini-3.8-flash',
                 prompt,
-                 
+                thinkingLevel: 'LOW',
                 responseMimeType: "application/json",
                 systemInstruction: "You are an elite, institutional-grade trading mentor. You analyze data with cold, hard logic. You are highly specific and data-driven. Always ground your advice in real-world macroeconomic drivers and current market data. The user trades STRICTLY on the DAILY timeframe. Be decisive, concrete, and responsible. Return ONLY valid JSON."
-            })
-        });
+            },
+            (_chunk, accumulated) => {
+                setAiAnalysis(accumulated);
+            }
+        );
 
-        const resData = await apiRes.json();
-        if (!apiRes.ok || !resData.text) {
-            throw new Error(resData.error || "Failed to generate analysis");
+        if (fullText && fullText.trim().length > 0) {
+            setAiAnalysis(fullText);
+            setIsAiOfflineMode(false);
+        } else {
+            throw new Error("Empty streamed response received");
         }
-
-        setAiAnalysis(resData.text);
-        setIsAiOfflineMode(false);
 
     } catch (error: any) {
         console.warn("AI Generation encountered an issue, generating automated COT quantitative analysis:", error?.message || error);
@@ -577,7 +614,8 @@ const Dashboard: React.FC<DashboardProps> = ({ summaryData, historyData, history
             selectedItem ? selectedItem.Commodity : "Market Overview",
             selectedItem,
             selectedHistory,
-            liveQuote
+            liveQuote,
+            ffEvents
         );
         setAiAnalysis(fallbackText);
     } finally {

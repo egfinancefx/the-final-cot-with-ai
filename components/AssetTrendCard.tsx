@@ -233,11 +233,11 @@ const AssetTrendCard: React.FC<AssetTrendCardProps> = ({
             </div>
             
             {/* Right Column: Gauge Animation */}
-            <div className={`shrink-0 flex items-center justify-center ${compact ? '-mt-0.5 -mr-0.5' : '-mt-2 -mr-2'}`}>
+            <div className={`shrink-0 flex items-center justify-center ${compact ? 'my-auto -mr-0.5' : '-mt-2 -mr-2'}`}>
                 <Gauge 
                     value={longRatio} 
                     centerValue={netPos}
-                    size={compact ? 54 : 80}
+                    size={compact ? 68 : 90}
                     activeFill={themeMode === 'light' ? '#2563eb' : '#3b82f6'}
                     inactiveFill={themeMode === 'light' ? 'rgba(37, 99, 235, 0.15)' : 'rgba(59, 130, 246, 0.2)'}
                     valueClassName={themeMode === 'light' ? 'text-blue-700' : 'text-blue-400'}

@@ -3,7 +3,7 @@ import path from "path";
 import fs from "fs";
 import { createServer as createViteServer } from "vite";
 import { WebSocketServer, WebSocket } from "ws";
-import { GoogleGenAI, LiveServerMessage, Modality } from "@google/genai";
+import { GoogleGenAI, LiveServerMessage, Modality, ThinkingLevel } from "@google/genai";
 import http from "http";
 import cors from "cors";
 import { tradingAssistantPrompt } from "./agentPrompt.ts";
@@ -34,19 +34,25 @@ async function startServer() {
   app.use(cors());
   app.use(express.json());
 
-  const CANDIDATE_MODELS = ["gemini-2.5-flash", "gemini-3.6-flash", "gemini-3.8-flash"];
+  // Prioritize modern, high-speed Gemini 3 series flash models
+  const CANDIDATE_MODELS = ["gemini-3.8-flash", "gemini-3.6-flash"];
 
-  // Helper to execute Gemini requests with automatic fallback across models on 503/429
+  // Helper to execute Gemini requests with automatic fallback across models on errors
   async function executeGeminiWithFallback(
     ai: GoogleGenAI,
     contents: any,
     config: any = {},
-    preferredModel: string = "gemini-2.5-flash"
+    preferredModel: string = "gemini-3.8-flash"
   ): Promise<string> {
     const modelsToTry = [
       preferredModel,
       ...CANDIDATE_MODELS.filter((m) => m !== preferredModel)
     ];
+
+    // Ensure low thinking level by default to minimize latency (<3s instead of 25s+)
+    if (!config.thinkingConfig) {
+      config.thinkingConfig = { thinkingLevel: ThinkingLevel.LOW };
+    }
 
     let lastError: any = null;
 
@@ -66,8 +72,8 @@ async function startServer() {
           fs.appendFileSync("error.log", `Model Error: ${model} ${err?.message || String(err)}\n`);
         } catch (_) {}
         const status = err?.status || err?.code;
-        // If 503 (high demand) or 429 (rate limit/quota), seamlessly attempt next model
-        if (status === 503 || status === 429 || status === 500) {
+        // If 503, 429, 404, or 500, seamlessly attempt next model immediately
+        if (status === 503 || status === 429 || status === 500 || status === 404) {
           continue;
         }
         // If tools caused the failure, try without tools
@@ -96,10 +102,149 @@ async function startServer() {
     throw lastError;
   }
 
+  // Helper to execute streaming Gemini requests with automatic fallback across models on errors
+  async function executeGeminiStreamWithFallback(
+    ai: GoogleGenAI,
+    contents: any,
+    config: any = {},
+    preferredModel: string = "gemini-3.8-flash",
+    onChunk: (chunkText: string) => void
+  ): Promise<void> {
+    const modelsToTry = [
+      preferredModel,
+      ...CANDIDATE_MODELS.filter((m) => m !== preferredModel)
+    ];
+
+    if (!config.thinkingConfig) {
+      config.thinkingConfig = { thinkingLevel: ThinkingLevel.LOW };
+    }
+
+    let lastError: any = null;
+
+    for (const model of modelsToTry) {
+      try {
+        const stream = await ai.models.generateContentStream({
+          model,
+          contents,
+          ...(Object.keys(config).length > 0 ? { config } : {})
+        });
+
+        for await (const chunk of stream) {
+          if (chunk && typeof chunk.text === "string" && chunk.text.length > 0) {
+            onChunk(chunk.text);
+          }
+        }
+        return;
+      } catch (err: any) {
+        lastError = err;
+        try {
+          fs.appendFileSync("error.log", `Stream Model Error: ${model} ${err?.message || String(err)}\n`);
+        } catch (_) {}
+        const status = err?.status || err?.code;
+        if (status === 503 || status === 429 || status === 500 || status === 404) {
+          continue;
+        }
+        if (config.tools) {
+          try {
+            const fallbackConfig = { ...config };
+            delete fallbackConfig.tools;
+            const fallbackStream = await ai.models.generateContentStream({
+              model,
+              contents,
+              ...(Object.keys(fallbackConfig).length > 0 ? { config: fallbackConfig } : {})
+            });
+            for await (const chunk of fallbackStream) {
+              if (chunk && typeof chunk.text === "string" && chunk.text.length > 0) {
+                onChunk(chunk.text);
+              }
+            }
+            return;
+          } catch (retryErr: any) {
+            lastError = retryErr;
+            continue;
+          }
+        }
+      }
+    }
+    throw lastError;
+  }
+
+  // API Route for streaming text / analysis generation (Server-Sent Events)
+  app.post("/api/gemini-stream", async (req, res) => {
+    const {
+      prompt,
+      model = "gemini-3.8-flash",
+      systemInstruction,
+      tools,
+      responseMimeType,
+      thinkingLevel = "LOW"
+    } = req.body;
+
+    if (!prompt) {
+      return res.status(400).json({ error: "Prompt is required" });
+    }
+
+    // Set headers for Server-Sent Events (SSE)
+    res.setHeader("Content-Type", "text/event-stream; charset=utf-8");
+    res.setHeader("Cache-Control", "no-cache, no-transform");
+    res.setHeader("Connection", "keep-alive");
+    res.setHeader("X-Accel-Buffering", "no");
+    if (typeof (res as any).flushHeaders === "function") {
+      (res as any).flushHeaders();
+    }
+
+    try {
+      const ai = getGeminiClient();
+      const config: any = {};
+      if (systemInstruction) config.systemInstruction = systemInstruction;
+      if (tools) config.tools = tools;
+      if (responseMimeType) config.responseMimeType = responseMimeType;
+
+      if (thinkingLevel && (ThinkingLevel as any)[thinkingLevel]) {
+        config.thinkingConfig = { thinkingLevel: (ThinkingLevel as any)[thinkingLevel] };
+      } else {
+        config.thinkingConfig = { thinkingLevel: ThinkingLevel.LOW };
+      }
+
+      await executeGeminiStreamWithFallback(
+        ai,
+        prompt,
+        config,
+        model,
+        (chunkText) => {
+          res.write(`data: ${JSON.stringify({ text: chunkText })}\n\n`);
+          if (typeof (res as any).flush === "function") {
+            (res as any).flush();
+          }
+        }
+      );
+
+      res.write(`data: [DONE]\n\n`);
+      res.end();
+    } catch (e: any) {
+      console.error("Streaming error:", e);
+      const isQuota = e?.status === 429 || (e?.message && (e.message.includes("quota") || e.message.includes("RESOURCE_EXHAUSTED")));
+      const errorMessage = isQuota 
+        ? "You exceeded your current Gemini API quota. Please check your Google AI Studio billing/plan, or try again in a moment." 
+        : (e?.message || "Failed to stream generation");
+
+      res.write(`data: ${JSON.stringify({ error: errorMessage })}\n\n`);
+      res.end();
+    }
+  });
+
   // API Route for standard text / analysis generation
   app.post("/api/gemini", async (req, res) => {
     try {
-      const { prompt, model = "gemini-2.5-flash", systemInstruction, tools, responseMimeType } = req.body;
+      const { 
+        prompt, 
+        model = "gemini-3.8-flash", 
+        systemInstruction, 
+        tools, 
+        responseMimeType,
+        thinkingLevel = "LOW"
+      } = req.body;
+
       if (!prompt) {
         return res.status(400).json({ error: "Prompt is required" });
       }
@@ -108,6 +253,13 @@ async function startServer() {
       if (systemInstruction) config.systemInstruction = systemInstruction;
       if (tools) config.tools = tools;
       if (responseMimeType) config.responseMimeType = responseMimeType;
+
+      // Configure thinking level to ensure lightning-fast responses
+      if (thinkingLevel && (ThinkingLevel as any)[thinkingLevel]) {
+        config.thinkingConfig = { thinkingLevel: (ThinkingLevel as any)[thinkingLevel] };
+      } else {
+        config.thinkingConfig = { thinkingLevel: ThinkingLevel.LOW };
+      }
 
       const text = await executeGeminiWithFallback(ai, prompt, config, model);
       res.json({ text: text || "" });
@@ -129,7 +281,7 @@ async function startServer() {
   // API Route for multi-turn chat
   app.post("/api/chat", async (req, res) => {
     try {
-      const { message, history = [], systemInstruction, model = "gemini-2.5-flash" } = req.body;
+      const { message, history = [], systemInstruction, model = "gemini-3.8-flash" } = req.body;
       if (!message) {
         return res.status(400).json({ error: "Message is required" });
       }
@@ -218,6 +370,116 @@ async function startServer() {
   };
 
   const marketPriceCache = new Map<string, { data: any; timestamp: number }>();
+
+  // Cache for Forex Factory calendar (High Impact Red & Bank Holidays only)
+  let ffCalendarCache: { data: any[]; timestamp: number } | null = null;
+  const FF_CACHE_DURATION = 4 * 60 * 1000; // 4 minutes cache
+
+  // API Route to fetch synced Forex Factory weekly calendar (Red high impact & bank holidays only)
+  app.get("/api/forexfactory-calendar", async (req, res) => {
+    try {
+      const now = Date.now();
+      const forceRefresh = req.query.refresh === 'true';
+      const currencyFilter = (req.query.currency as string || "").toUpperCase();
+      const typeFilter = (req.query.type as string || "").toLowerCase();
+
+      // Return cached if fresh and not forcing refresh
+      if (ffCalendarCache && !forceRefresh && (now - ffCalendarCache.timestamp < FF_CACHE_DURATION)) {
+        let filtered = ffCalendarCache.data;
+        if (currencyFilter) {
+          filtered = filtered.filter(e => e.country?.toUpperCase() === currencyFilter || e.country?.toUpperCase() === 'USD');
+        }
+        if (typeFilter === 'red') {
+          filtered = filtered.filter(e => e.impact === 'High');
+        } else if (typeFilter === 'holiday') {
+          filtered = filtered.filter(e => e.impact === 'Holiday');
+        }
+        return res.json({
+          success: true,
+          events: filtered,
+          allEvents: ffCalendarCache.data,
+          total: filtered.length,
+          syncedAt: new Date(ffCalendarCache.timestamp).toISOString(),
+          source: "Forex Factory"
+        });
+      }
+
+      // Fetch from Forex Factory Fair Economy Media JSON
+      const controller = new AbortController();
+      const timeout = setTimeout(() => controller.abort(), 6000);
+      const ffRes = await fetch("https://nfs.faireconomy.media/ff_calendar_thisweek.json", {
+        signal: controller.signal,
+        headers: {
+          "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+          "Accept": "application/json"
+        }
+      });
+      clearTimeout(timeout);
+
+      if (!ffRes.ok) {
+        throw new Error(`Forex Factory responded with status ${ffRes.status}`);
+      }
+
+      const rawEvents: any[] = await ffRes.json();
+      
+      // Filter ONLY High Impact (Red) and Bank Holidays (Holiday) as explicitly requested
+      const filteredEvents = rawEvents
+        .filter(ev => ev && (ev.impact === "High" || ev.impact === "Holiday"))
+        .map((ev, idx) => ({
+          id: `ff-${idx}-${ev.country}-${ev.date}`,
+          title: ev.title || "Economic Event",
+          country: ev.country || "USD",
+          date: ev.date || new Date().toISOString(),
+          impact: ev.impact as "High" | "Holiday",
+          forecast: ev.forecast || "--",
+          previous: ev.previous || "--",
+          isRed: ev.impact === "High",
+          isHoliday: ev.impact === "Holiday"
+        }));
+
+      ffCalendarCache = {
+        data: filteredEvents,
+        timestamp: now
+      };
+
+      let resultEvents = filteredEvents;
+      if (currencyFilter) {
+        resultEvents = resultEvents.filter(e => e.country?.toUpperCase() === currencyFilter || e.country?.toUpperCase() === 'USD');
+      }
+      if (typeFilter === 'red') {
+        resultEvents = resultEvents.filter(e => e.impact === 'High');
+      } else if (typeFilter === 'holiday') {
+        resultEvents = resultEvents.filter(e => e.impact === 'Holiday');
+      }
+
+      return res.json({
+        success: true,
+        events: resultEvents,
+        allEvents: filteredEvents,
+        total: resultEvents.length,
+        syncedAt: new Date(now).toISOString(),
+        source: "Forex Factory"
+      });
+    } catch (err: any) {
+      console.warn("Forex Factory sync warning:", err?.message || err);
+      if (ffCalendarCache && ffCalendarCache.data.length > 0) {
+        return res.json({
+          success: true,
+          events: ffCalendarCache.data,
+          allEvents: ffCalendarCache.data,
+          total: ffCalendarCache.data.length,
+          syncedAt: new Date(ffCalendarCache.timestamp).toISOString(),
+          isStale: true,
+          source: "Forex Factory (Cached)"
+        });
+      }
+      return res.status(500).json({
+        success: false,
+        error: err.message || "Failed to fetch Forex Factory calendar",
+        events: []
+      });
+    }
+  });
 
   // API Route to get live spot market price for any commodity
   app.get("/api/market-price", async (req, res) => {
