@@ -42,6 +42,7 @@ export interface ComposedChartProps {
   stacked?: boolean;
   /** Gap in px between stacked segments. Default: 0 */
   stackGap?: number;
+  yScaleDomainMax?: number;
   onPhaseChange?: (phase: ChartPhase) => void;
 }
 
@@ -190,6 +191,7 @@ interface ChartInnerProps {
   barGap?: number;
   stacked?: boolean;
   stackGap?: number;
+  yScaleDomainMax?: number;
   onPhaseChange?: (phase: ChartPhase) => void;
 }
 
@@ -210,6 +212,7 @@ function ChartInner({
   barGap,
   stacked = false,
   stackGap = 0,
+  yScaleDomainMax: explicitYScaleDomainMax,
   onPhaseChange,
 }: ChartInnerProps) {
   const { lines, barDataKeys } = useMemo(
@@ -241,13 +244,15 @@ function ChartInner({
     return offsets;
   }, [data, barDataKeys, stacked]);
 
-  const yScaleDomainMax = useMemo(
+  const computedYScaleDomainMax = useMemo(
     () =>
       stacked && barDataKeys.length > 0
         ? computeComposedYScaleDomainMax(data, lines, barDataKeys)
         : undefined,
     [data, lines, barDataKeys, stacked]
   );
+
+  const yScaleDomainMax = explicitYScaleDomainMax ?? computedYScaleDomainMax;
 
   return (
     <TimeSeriesChartInner
@@ -286,7 +291,7 @@ export function ComposedChart({
   animationEasing,
   enterTransition,
   revealSignature,
-  aspectRatio = "2 / 1",
+  aspectRatio,
   className = "",
   children,
   barSize,
@@ -294,6 +299,7 @@ export function ComposedChart({
   barGap = 4,
   stacked = false,
   stackGap = 0,
+  yScaleDomainMax,
   onPhaseChange,
 }: ComposedChartProps) {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -303,7 +309,10 @@ export function ComposedChart({
     <div
       className={cn("relative w-full", className)}
       ref={containerRef}
-      style={{ aspectRatio, touchAction: "none" }}
+      style={{ 
+        ...(aspectRatio ? { aspectRatio } : {}), 
+        touchAction: "none" 
+      }}
     >
       <ParentSize debounceTime={10}>
         {({ width, height }) => (
@@ -324,6 +333,7 @@ export function ComposedChart({
             stackGap={stackGap}
             width={width}
             xDataKey={xDataKey}
+            yScaleDomainMax={yScaleDomainMax}
           >
             {children}
           </ChartInner>

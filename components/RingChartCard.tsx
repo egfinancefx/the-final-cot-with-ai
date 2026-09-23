@@ -2,7 +2,7 @@ import React, { useMemo, useState } from 'react';
 import { SummaryRow, ThemeMode } from '../types';
 import { formatCurrency } from '../utils';
 import { ASSET_GROUPS } from '../constants';
-import { Radar as RadarIcon, Compass, Sparkles, TrendingUp, ShieldCheck } from 'lucide-react';
+import { Radar as RadarIcon, Compass } from 'lucide-react';
 import { RadarChart } from './charts/radar-chart';
 import { RadarGrid } from './charts/radar-grid';
 import { RadarAxis } from './charts/radar-axis';
@@ -78,7 +78,7 @@ export const RadarChartCard: React.FC<RingChartCardProps> = ({
     };
   }, [summaryData]);
 
-  // 2. Metrics & Series Data for Sentiment View (Long vs Short across 5 Sectors)
+  // 2. Metrics & Series Data for Sentiment View in Dark Blue Shades
   const sentimentRadarConfig = useMemo(() => {
     const metrics: RadarMetric[] = [
       { key: 'currencies', label: 'Currencies' },
@@ -88,8 +88,9 @@ export const RadarChartCard: React.FC<RingChartCardProps> = ({
       { key: 'crypto', label: 'Crypto' },
     ];
 
-    const longColor = themeMode === 'light' ? '#1d4ed8' : '#3b82f6';
-    const shortColor = themeMode === 'light' ? '#0284c7' : '#38bdf8';
+    // Rich Dark Blue and Royal Navy Tones
+    const longColor = themeMode === 'light' ? '#1e40af' : '#2563eb'; // Royal Dark Blue
+    const shortColor = themeMode === 'light' ? '#172554' : '#1d4ed8'; // Midnight Navy Blue
 
     const longValues: Record<string, number> = {};
     const shortValues: Record<string, number> = {};
@@ -122,7 +123,7 @@ export const RadarChartCard: React.FC<RingChartCardProps> = ({
     return { metrics, seriesData };
   }, [sectorMetricsMap, themeMode]);
 
-  // 3. Metrics & Series Data for Sectors View (Multi-Factor Breakdown per Sector)
+  // 3. Metrics & Series Data for Sectors View in Harmonious Dark Blue Shades
   const sectorsRadarConfig = useMemo(() => {
     const metrics: RadarMetric[] = [
       { key: 'volume', label: 'Volume %' },
@@ -132,12 +133,13 @@ export const RadarChartCard: React.FC<RingChartCardProps> = ({
       { key: 'activity', label: 'Activity' },
     ];
 
+    // Dark blue gradient palette for sectors
     const sectorColors: Record<string, string> = {
-      'Currencies': themeMode === 'light' ? '#1e40af' : '#60a5fa',
-      'Metals': themeMode === 'light' ? '#b45309' : '#fbbf24',
-      'Indices': themeMode === 'light' ? '#0284c7' : '#38bdf8',
-      'Energy': themeMode === 'light' ? '#047857' : '#34d399',
-      'Crypto': themeMode === 'light' ? '#6d28d9' : '#a78bfa'
+      'Currencies': themeMode === 'light' ? '#1e40af' : '#3b82f6', // Bright Navy
+      'Metals': themeMode === 'light' ? '#1d4ed8' : '#2563eb',     // Royal Blue
+      'Indices': themeMode === 'light' ? '#1e3a8a' : '#60a5fa',    // Steel Blue
+      'Energy': themeMode === 'light' ? '#172554' : '#1d4ed8',     // Deep Midnight
+      'Crypto': themeMode === 'light' ? '#312e81' : '#4338ca'      // Indigo Navy
     };
 
     let maxVolume = 1;
@@ -160,9 +162,9 @@ export const RadarChartCard: React.FC<RingChartCardProps> = ({
 
       return {
         label: group.name,
-        color: sectorColors[group.name] || '#64748b',
+        color: sectorColors[group.name] || '#2563eb',
         values: {
-          volume: Math.round(volShare * 2.5), // Scale up for visual clarity
+          volume: Math.round(volShare * 2.5),
           longRatio: Math.round(lRatio),
           netBias: netScore,
           breadth: breadthScore || 30,
@@ -176,28 +178,29 @@ export const RadarChartCard: React.FC<RingChartCardProps> = ({
 
   const activeConfig = viewMode === 'sentiment' ? sentimentRadarConfig : sectorsRadarConfig;
 
+  // Dark Blue Shades Card Background
   const cardBg = themeMode === 'light' 
-    ? 'bg-white border-slate-200 shadow-xl' 
-    : 'bg-slate-900/80 border-blue-500/10 shadow-2xl backdrop-blur-md';
+    ? 'bg-slate-50 border-blue-900/20 shadow-xl' 
+    : 'bg-[#080f20] border-blue-900/60 shadow-2xl shadow-blue-950/80 backdrop-blur-md';
 
-  const textMain = themeMode === 'light' ? 'text-slate-900' : 'text-white';
-  const textSub = themeMode === 'light' ? 'text-slate-500' : 'text-slate-400';
+  const textMain = themeMode === 'light' ? 'text-blue-950' : 'text-blue-100';
+  const textSub = themeMode === 'light' ? 'text-blue-800/70' : 'text-blue-300/70';
 
   return (
     <div 
       className={`rounded-xl sm:rounded-2xl border p-3 sm:p-3.5 flex flex-col h-full transition-all duration-300 ${cardBg}`}
       style={{
-        '--chart-label': themeMode === 'light' ? '#334155' : '#cbd5e1',
-        '--border': themeMode === 'light' ? 'rgba(203, 213, 225, 0.65)' : 'rgba(51, 65, 85, 0.65)',
-        '--chart-background': themeMode === 'light' ? '#ffffff' : '#0f172a',
-        '--chart-foreground': themeMode === 'light' ? '#0f172a' : '#f8fafc',
-        '--chart-foreground-muted': themeMode === 'light' ? '#64748b' : '#94a3b8',
+        '--chart-label': themeMode === 'light' ? '#1e3a8a' : '#60a5fa',
+        '--border': themeMode === 'light' ? 'rgba(30, 58, 138, 0.25)' : 'rgba(30, 64, 175, 0.45)',
+        '--chart-background': themeMode === 'light' ? '#ffffff' : '#080f20',
+        '--chart-foreground': themeMode === 'light' ? '#0f172a' : '#f1f5f9',
+        '--chart-foreground-muted': themeMode === 'light' ? '#1e40af' : '#93c5fd',
       } as React.CSSProperties}
     >
       {/* Header */}
-      <div className="flex items-center justify-between gap-1.5 mb-1 pb-2 border-b border-inherit">
+      <div className="flex items-center justify-between gap-1.5 mb-1 pb-2 border-b border-blue-900/30">
         <div className="flex items-center gap-2">
-          <div className={`p-1.5 rounded-lg border ${themeMode === 'light' ? 'bg-indigo-50 text-indigo-600 border-indigo-200' : 'bg-indigo-500/10 text-indigo-400 border-indigo-500/20'}`}>
+          <div className={`p-1.5 rounded-lg border shrink-0 ${themeMode === 'light' ? 'bg-blue-100 text-blue-900 border-blue-300' : 'bg-blue-950/80 text-blue-300 border-blue-800/50'}`}>
             <RadarIcon className="w-3.5 h-3.5" />
           </div>
           <div>
@@ -206,9 +209,9 @@ export const RadarChartCard: React.FC<RingChartCardProps> = ({
                 Radar Chart
               </h3>
               <span className={`text-[9px] px-1.5 py-0.2 rounded-full font-medium ${
-                longPct >= 50
-                  ? (themeMode === 'light' ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : 'bg-emerald-500/10 text-emerald-300 border border-emerald-500/20')
-                  : (themeMode === 'light' ? 'bg-rose-50 text-rose-700 border border-rose-200' : 'bg-rose-500/10 text-rose-300 border border-rose-500/20')
+                themeMode === 'light' 
+                  ? 'bg-blue-100 text-blue-900 border border-blue-300' 
+                  : 'bg-blue-950/80 text-blue-300 border border-blue-800/60'
               }`}>
                 {longPct.toFixed(1)}% Bullish
               </span>
@@ -217,8 +220,8 @@ export const RadarChartCard: React.FC<RingChartCardProps> = ({
           </div>
         </div>
 
-        {/* View Switcher */}
-        <div className="flex items-center gap-1 bg-slate-100 dark:bg-slate-800/90 p-0.5 rounded-lg border border-slate-200/70 dark:border-slate-700/70 shrink-0">
+        {/* View Switcher in Dark Blue */}
+        <div className="flex items-center gap-1 bg-blue-950/80 p-0.5 rounded-lg border border-blue-900/60 shrink-0">
           <button
             onClick={() => {
               setViewMode('sentiment');
@@ -226,8 +229,8 @@ export const RadarChartCard: React.FC<RingChartCardProps> = ({
             }}
             className={`px-2 py-0.5 rounded text-[9px] font-medium transition-all ${
               viewMode === 'sentiment'
-                ? (themeMode === 'light' ? 'bg-white text-blue-600 shadow-sm font-semibold' : 'bg-blue-500/30 text-blue-300 font-semibold border border-blue-500/30')
-                : 'text-slate-500 hover:text-slate-800 dark:hover:text-slate-200'
+                ? (themeMode === 'light' ? 'bg-blue-800 text-white shadow-sm font-semibold' : 'bg-blue-600 text-white font-semibold shadow-md border border-blue-500')
+                : 'text-blue-300/70 hover:text-white'
             }`}
           >
             Sentiment
@@ -239,8 +242,8 @@ export const RadarChartCard: React.FC<RingChartCardProps> = ({
             }}
             className={`px-2 py-0.5 rounded text-[9px] font-medium transition-all ${
               viewMode === 'sectors'
-                ? (themeMode === 'light' ? 'bg-white text-blue-600 shadow-sm font-semibold' : 'bg-blue-500/30 text-blue-300 font-semibold border border-blue-500/30')
-                : 'text-slate-500 hover:text-slate-800 dark:hover:text-slate-200'
+                ? (themeMode === 'light' ? 'bg-blue-800 text-white shadow-sm font-semibold' : 'bg-blue-600 text-white font-semibold shadow-md border border-blue-500')
+                : 'text-blue-300/70 hover:text-white'
             }`}
           >
             Sectors
@@ -249,19 +252,19 @@ export const RadarChartCard: React.FC<RingChartCardProps> = ({
       </div>
 
       {/* Radar Chart Visual Centerpiece */}
-      <div className="flex-1 w-full min-h-[165px] max-h-[195px] relative flex items-center justify-center my-0.5">
+      <div className="flex-1 w-full min-h-[185px] max-h-[220px] relative flex items-center justify-center my-0.5">
         <RadarChart
           data={activeConfig.seriesData}
           metrics={activeConfig.metrics}
           hoveredIndex={hoveredIndex}
           onHoverChange={setHoveredIndex}
-          size={185}
+          size={205}
           levels={4}
-          margin={34}
+          margin={36}
         >
           <RadarGrid showLabels={false} stroke="var(--border)" strokeOpacity={0.65} />
           <RadarAxis stroke="var(--border)" strokeOpacity={0.5} />
-          <RadarLabels offset={13} fontSize={9.5} />
+          <RadarLabels offset={14} fontSize={10} />
           {activeConfig.seriesData.map((s, i) => (
             <RadarArea
               key={`radar-area-${s.label}-${i}`}
@@ -276,10 +279,10 @@ export const RadarChartCard: React.FC<RingChartCardProps> = ({
       </div>
 
       {/* Bottom Data Legend & Metrics Row */}
-      <div className="mt-1 pt-1.5 border-t border-inherit">
+      <div className="mt-1 pt-1.5 border-t border-blue-900/30">
         {viewMode === 'sentiment' ? (
           <div className="space-y-1.5">
-            {/* Long & Short Summary Cards */}
+            {/* Long & Short Summary Cards in Dark Blue */}
             <div className="grid grid-cols-2 gap-2 text-xs">
               {/* Long Contracts item */}
               <div 
@@ -287,8 +290,8 @@ export const RadarChartCard: React.FC<RingChartCardProps> = ({
                 onMouseLeave={() => setHoveredIndex(null)}
                 className={`p-1.5 rounded-lg border transition-all cursor-pointer ${
                   hoveredIndex === 0
-                    ? (themeMode === 'light' ? 'bg-blue-50/80 border-blue-300' : 'bg-blue-500/20 border-blue-500/40')
-                    : (themeMode === 'light' ? 'bg-slate-50/80 border-slate-200/60' : 'bg-slate-800/40 border-slate-700/50')
+                    ? 'bg-blue-900/40 border-blue-500/60 shadow-md'
+                    : 'bg-blue-950/60 border-blue-900/50'
                 }`}
               >
                 <div className="flex items-center justify-between">
@@ -297,13 +300,13 @@ export const RadarChartCard: React.FC<RingChartCardProps> = ({
                       className="w-2 h-2 rounded-full shrink-0" 
                       style={{ backgroundColor: activeConfig.seriesData[0]?.color }} 
                     />
-                    <span className="text-[10px] font-medium text-slate-600 dark:text-slate-300">Long</span>
+                    <span className="text-[10px] font-medium text-blue-300">Long</span>
                   </div>
-                  <span className="text-[10px] font-bold text-blue-600 dark:text-blue-400">
+                  <span className="text-[10px] font-bold text-blue-400">
                     {longPct.toFixed(1)}%
                   </span>
                 </div>
-                <div className="text-[11px] font-semibold text-slate-900 dark:text-white mt-0.5">
+                <div className="text-[11px] font-semibold text-blue-100 mt-0.5">
                   {formatCurrency(totalLong)}
                 </div>
               </div>
@@ -314,8 +317,8 @@ export const RadarChartCard: React.FC<RingChartCardProps> = ({
                 onMouseLeave={() => setHoveredIndex(null)}
                 className={`p-1.5 rounded-lg border transition-all cursor-pointer ${
                   hoveredIndex === 1
-                    ? (themeMode === 'light' ? 'bg-cyan-50/80 border-cyan-300' : 'bg-sky-500/20 border-sky-500/40')
-                    : (themeMode === 'light' ? 'bg-slate-50/80 border-slate-200/60' : 'bg-slate-800/40 border-slate-700/50')
+                    ? 'bg-blue-900/40 border-blue-600/60 shadow-md'
+                    : 'bg-blue-950/60 border-blue-900/50'
                 }`}
               >
                 <div className="flex items-center justify-between">
@@ -324,35 +327,35 @@ export const RadarChartCard: React.FC<RingChartCardProps> = ({
                       className="w-2 h-2 rounded-full shrink-0" 
                       style={{ backgroundColor: activeConfig.seriesData[1]?.color }} 
                     />
-                    <span className="text-[10px] font-medium text-slate-600 dark:text-slate-300">Short</span>
+                    <span className="text-[10px] font-medium text-blue-300">Short</span>
                   </div>
-                  <span className="text-[10px] font-bold text-cyan-600 dark:text-sky-400">
+                  <span className="text-[10px] font-bold text-blue-400">
                     {shortPct.toFixed(1)}%
                   </span>
                 </div>
-                <div className="text-[11px] font-semibold text-slate-900 dark:text-white mt-0.5">
+                <div className="text-[11px] font-semibold text-blue-100 mt-0.5">
                   {formatCurrency(totalShort)}
                 </div>
               </div>
             </div>
 
             {/* Bullish vs Bearish Progress Bar */}
-            <div className="w-full bg-slate-200 dark:bg-slate-700/60 h-1.5 rounded-full overflow-hidden flex">
+            <div className="w-full bg-blue-950 border border-blue-900/40 h-1.5 rounded-full overflow-hidden flex">
               <div 
-                className="h-full bg-blue-600 dark:bg-blue-500 transition-all duration-500" 
+                className="h-full bg-blue-500 transition-all duration-500" 
                 style={{ width: `${longPct}%` }}
                 title={`Long: ${longPct.toFixed(1)}%`}
               />
               <div 
-                className="h-full bg-cyan-500 dark:bg-sky-400 transition-all duration-500" 
+                className="h-full bg-blue-800 transition-all duration-500" 
                 style={{ width: `${shortPct}%` }}
                 title={`Short: ${shortPct.toFixed(1)}%`}
               />
             </div>
           </div>
         ) : (
-          /* Sectors Legend */
-          <div className="grid grid-cols-2 sm:grid-cols-3 gap-1.5 pt-0.5">
+          /* Sectors Legend in Dark Blue */
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-1.5 pt-0.5">
             {activeConfig.seriesData.map((item, idx) => {
               const sectorStats = sectorMetricsMap[item.label];
               const vol = sectorStats?.total || 0;
@@ -364,8 +367,8 @@ export const RadarChartCard: React.FC<RingChartCardProps> = ({
                   onMouseLeave={() => setHoveredIndex(null)}
                   className={`px-1.5 py-1 rounded-md border transition-all cursor-pointer flex flex-col justify-between ${
                     isHovered
-                      ? (themeMode === 'light' ? 'bg-blue-50 border-blue-300 shadow-sm' : 'bg-blue-500/20 border-blue-500/40')
-                      : (themeMode === 'light' ? 'bg-slate-50/70 border-slate-200/60 hover:bg-slate-100' : 'bg-slate-800/30 border-slate-700/40 hover:bg-slate-800/60')
+                      ? 'bg-blue-900/50 border-blue-500/60 shadow-md'
+                      : 'bg-blue-950/50 border-blue-900/40 hover:bg-blue-900/30'
                   }`}
                 >
                   <div className="flex items-center gap-1.5 min-w-0">
@@ -373,13 +376,13 @@ export const RadarChartCard: React.FC<RingChartCardProps> = ({
                       className="w-2 h-2 rounded-full shrink-0"
                       style={{ backgroundColor: item.color }}
                     />
-                    <span className="text-[10px] font-medium truncate text-slate-700 dark:text-slate-300">
+                    <span className="text-[10px] font-medium truncate text-blue-200">
                       {item.label}
                     </span>
                   </div>
-                  <div className="flex items-center justify-between text-[9px] text-slate-500 dark:text-slate-400 mt-0.5">
+                  <div className="flex items-center justify-between text-[9px] text-blue-300/80 mt-0.5">
                     <span>{formatCurrency(vol)}</span>
-                    <span className="font-semibold text-slate-700 dark:text-slate-200">
+                    <span className="font-semibold text-blue-200">
                       {totalContracts > 0 ? `${((vol / totalContracts) * 100).toFixed(0)}%` : '0%'}
                     </span>
                   </div>
@@ -395,4 +398,3 @@ export const RadarChartCard: React.FC<RingChartCardProps> = ({
 
 export const RingChartCard = RadarChartCard;
 export default RadarChartCard;
-

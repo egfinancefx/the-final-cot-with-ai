@@ -1,4 +1,3 @@
-
 import React, { useMemo, useState } from 'react';
 import { ResponsiveContainer, AreaChart, Area, YAxis, Tooltip, ReferenceLine, CartesianGrid } from 'recharts';
 import { curveMonotoneX } from "@visx/curve";
@@ -9,22 +8,14 @@ import { Gauge } from './ui/Gauge';
 import { 
   ArrowUpRight, 
   ArrowDownRight, 
-  ArrowUp, 
-  ArrowDown, 
-  Minus,
   Coins, 
-  Bitcoin, 
-  Euro, 
+  DollarSign, 
   TrendingUp, 
   Activity, 
-  DollarSign, 
-  PoundSterling, 
-  JapaneseYen, 
-  SwissFranc, 
-  Wheat, 
   Droplet, 
   Flame, 
-  Sprout 
+  Wheat,
+  Minus
 } from 'lucide-react';
 
 interface AssetTrendCardProps {
@@ -53,49 +44,21 @@ const AssetTrendCard: React.FC<AssetTrendCardProps> = ({
 }) => {
   const [isHovered, setIsHovered] = useState(false);
 
-  // Strict Theme Icon Coloring (Only Light vs Ocean)
+  // Asset icons
   const getAssetIcon = (name: string) => {
     const n = name.toLowerCase();
     const baseClass = `${compact ? 'w-5 h-5' : 'w-7 h-7'} transition-colors duration-300`;
 
-    // Determine color based strictly on Theme Mode first, then Asset Type
-    let colorClass = "";
-
-    if (themeMode === 'light') {
-       if (n.includes('bitcoin') || n.includes('crypto')) colorClass = "text-white";
-       else if (n.includes('gold')) colorClass = "text-yellow-600";
-       else if (n.includes('oil') || n.includes('gas')) colorClass = "text-slate-700";
-       else if (n.includes('euro') || n.includes('pound')) colorClass = "text-blue-600";
-       else colorClass = "text-slate-600";
-    } 
-    else {
-       // Ocean (Default) - Cool Blues/Cyans + Semantic
-       if (n.includes('bitcoin')) colorClass = "text-white";
-       else if (n.includes('gold')) colorClass = "text-yellow-400";
-       else if (n.includes('oil')) colorClass = "text-slate-400";
-       else colorClass = "text-blue-400";
+    if (n.includes('gold') || n.includes('silver') || n.includes('metal')) return <Coins className={baseClass} />;
+    if (n.includes('euro') || n.includes('pound') || n.includes('yen') || n.includes('franc') || n.includes('dollar') || n.includes('dxy')) {
+      return <DollarSign className={baseClass} />;
     }
+    if (n.includes('oil') || n.includes('gasoline')) return <Droplet className={baseClass} />;
+    if (n.includes('gas')) return <Flame className={baseClass} />;
+    if (n.includes('wheat') || n.includes('corn') || n.includes('soy')) return <Wheat className={baseClass} />;
+    if (n.includes('dow') || n.includes('s&p') || n.includes('nasdaq')) return <TrendingUp className={baseClass} />;
 
-    const className = `${baseClass} ${colorClass}`;
-
-    // Icon Selection
-    if (n.includes('bitcoin') || n.includes('btc')) return <Bitcoin className={className} />;
-    if (n.includes('ether') || n.includes('eth')) return <Activity className={className} />;
-    if (n.includes('euro') || n.includes('eur')) return <Euro className={className} />;
-    if (n.includes('pound') || n.includes('british') || n.includes('gbp')) return <PoundSterling className={className} />;
-    if (n.includes('yen') || n.includes('japanese') || n.includes('jpy')) return <JapaneseYen className={className} />;
-    if (n.includes('franc') || n.includes('swiss') || n.includes('chf')) return <SwissFranc className={className} />;
-    if (n.includes('australian') || n.includes('aud')) return <DollarSign className={className} />;
-    if (n.includes('zealand') || n.includes('nzd')) return <DollarSign className={className} />;
-    if (n.includes('canadian') || n.includes('cad')) return <DollarSign className={className} />;
-    if (n.includes('dollar') || n.includes('usd') || n.includes('index')) return <DollarSign className={className} />;
-    if (n.includes('gold') || n.includes('silver') || n.includes('palladium')) return <Coins className={className} />;
-    if (n.includes('natural gas')) return <Flame className={className} />;
-    if (n.includes('oil') || n.includes('gasoline')) return <Droplet className={className} />;
-    if (n.includes('wheat') || n.includes('corn') || n.includes('soy')) return <Wheat className={className} />;
-    if (n.includes('dow') || n.includes('s&p') || n.includes('nasdaq') || n.includes('russell')) return <TrendingUp className={className} />;
-
-    return <Activity className={className} />;
+    return <Activity className={baseClass} />;
   };
 
   const chartData = useMemo(() => {
@@ -122,8 +85,8 @@ const AssetTrendCard: React.FC<AssetTrendCardProps> = ({
 
   if (!summaryRow) {
     return (
-        <div className="bg-slate-900/40 p-6 rounded-2xl border border-blue-500/10 flex items-center justify-center h-48 backdrop-blur-sm">
-            <span className="text-slate-500 text-xs">No data for {title}</span>
+        <div className="bg-[#080f20] p-6 rounded-2xl border border-blue-900/40 flex items-center justify-center h-48 backdrop-blur-sm">
+            <span className="text-blue-400/60 text-xs">No data for {title}</span>
         </div>
     );
   }
@@ -137,64 +100,52 @@ const AssetTrendCard: React.FC<AssetTrendCardProps> = ({
   const totalPos = longPos + shortPos;
   const longRatio = totalPos > 0 ? (longPos / totalPos) * 100 : 50;
   
-  const isNetPositive = netPos > 0;
   const isChangePositive = netChange > 0;
   const chartId = `chart-${title.replace(/\s+/g, '-')}`;
 
-  // Chart Colors - Enforce Blue consistency across themes regardless of sentiment
-  let strokeColor = "#3b82f6";
-  let gradientColor = "#3b82f6";
-  
-  if (themeMode === 'light') {
-      strokeColor = "#2563eb"; // Blue-600
-      gradientColor = "#3b82f6";
-  } else {
-      // Ocean Mode - Always Blue
-      strokeColor = "#3b82f6"; 
-      gradientColor = "#3b82f6";
-  }
+  // Dark Blue Shades Palette for Sparkline
+  const strokeColor = themeMode === 'light' ? "#1e40af" : "#2563eb";
+  const gradientColor = themeMode === 'light' ? "#1d4ed8" : "#1e3a8a";
+  const gradientOpacity = isHovered ? 0.45 : 0.25;
 
-  const gradientOpacity = isHovered ? 0.35 : 0.15;
-
-  // Theme Base Styles
+  // Dark Blue Theme Base Styles (درجات الأزرق الداكن والبحري الفاخر)
   const getThemeBaseStyles = () => {
     if (themeMode === 'light') {
         return isSelected 
-            ? 'bg-white border-blue-500 shadow-xl ring-1 ring-blue-400 z-10' 
-            : 'bg-white border-slate-200 hover:border-blue-500 hover:shadow-blue-500/20 hover:shadow-xl';
+            ? 'bg-slate-50 border-blue-800 shadow-xl ring-1 ring-blue-700 z-10' 
+            : 'bg-white border-blue-900/20 hover:border-blue-900/60 hover:shadow-blue-950/20 hover:shadow-xl';
     }
-    // Ocean / Default
+    // Ocean Dark Blue Mode
     return isSelected 
-        ? 'bg-slate-950 border-blue-500 shadow-[0_0_40px_rgba(59,130,246,0.3)] ring-1 ring-blue-400 z-10' 
-        : 'bg-slate-900/60 border-blue-500/10 hover:border-blue-500/50 hover:bg-slate-900/90 hover:shadow-[0_0_30px_rgba(59,130,246,0.2)]';
+        ? 'bg-[#0b1429] border-blue-500 shadow-[0_0_35px_rgba(30,58,138,0.6)] ring-1 ring-blue-400 z-10' 
+        : 'bg-[#080f20] border-blue-900/60 hover:border-blue-700/80 hover:bg-[#0b1429] hover:shadow-[0_0_30px_rgba(30,58,138,0.45)] shadow-xl shadow-blue-950/80';
   };
 
   const getTextColor = (type: 'primary' | 'secondary' | 'sub') => {
       if (themeMode === 'light') {
-          if (type === 'primary') return 'text-slate-900 group-hover:text-blue-700';
-          if (type === 'secondary') return 'text-slate-600';
-          if (type === 'sub') return 'text-slate-400';
+          if (type === 'primary') return 'text-blue-950 group-hover:text-blue-900';
+          if (type === 'secondary') return 'text-blue-800/80';
+          if (type === 'sub') return 'text-blue-600/70';
       }
-      // Ocean default
-      if (type === 'primary') return 'text-slate-100 group-hover:text-white';
-      if (type === 'secondary') return 'text-slate-400';
-      return 'text-slate-500';
+      if (type === 'primary') return 'text-blue-100 group-hover:text-white';
+      if (type === 'secondary') return 'text-blue-300/80';
+      return 'text-blue-400/60';
   };
 
   const getPillStyle = (positive: boolean) => {
       if (themeMode === 'light') {
-          return positive ? 'bg-blue-100 text-blue-700 border-blue-200' : 'bg-rose-100 text-rose-700 border-rose-200';
+          return positive 
+            ? 'bg-blue-100 text-blue-900 border-blue-300' 
+            : 'bg-rose-100 text-rose-900 border-rose-200';
       }
-      // Ocean
       return positive 
-        ? 'bg-blue-500/10 border-blue-500/30 text-blue-400' 
-        : 'bg-rose-500/10 border-rose-500/30 text-rose-400';
+        ? 'bg-blue-950/90 border-blue-800/80 text-blue-300' 
+        : 'bg-rose-950/50 border-rose-800/40 text-rose-300';
   };
 
-  // Tooltip Style per theme
   const getTooltipStyle = () => {
-      if (themeMode === 'light') return 'bg-white/95 border-slate-200 text-slate-800';
-      return 'bg-slate-900/95 border-blue-500/30 text-slate-300';
+      if (themeMode === 'light') return 'bg-white border-blue-900/20 text-blue-950 shadow-xl';
+      return 'bg-[#080f20] border-blue-900/80 text-blue-100 shadow-2xl';
   };
 
   return (
@@ -212,8 +163,8 @@ const AssetTrendCard: React.FC<AssetTrendCardProps> = ({
             <div className={`flex flex-col ${compact ? 'gap-1.5' : 'gap-3'} flex-1 min-w-0`}>
                 <div className={`flex items-center ${compact ? 'gap-2.5' : 'gap-3'}`}>
                     <div className={`${compact ? 'p-2 rounded-xl' : 'p-3 rounded-xl'} border shrink-0 transition-all duration-300 
-                        ${themeMode === 'light' ? 'bg-slate-100 border-slate-200' : 
-                          'bg-slate-950/60 border-blue-500/10 group-hover:border-blue-500/50 group-hover:shadow-[0_0_15px_rgba(59,130,246,0.15)]'}
+                        ${themeMode === 'light' ? 'bg-blue-100 text-blue-900 border-blue-300' : 
+                          'bg-blue-950/80 border-blue-800/60 text-blue-300 group-hover:border-blue-600 group-hover:shadow-[0_0_15px_rgba(37,99,235,0.25)]'}
                     `}>
                         {getAssetIcon(title)}
                     </div>
@@ -238,9 +189,9 @@ const AssetTrendCard: React.FC<AssetTrendCardProps> = ({
                     value={longRatio} 
                     centerValue={netPos}
                     size={compact ? 68 : 90}
-                    activeFill={themeMode === 'light' ? '#2563eb' : '#3b82f6'}
-                    inactiveFill={themeMode === 'light' ? 'rgba(37, 99, 235, 0.15)' : 'rgba(59, 130, 246, 0.2)'}
-                    valueClassName={themeMode === 'light' ? 'text-blue-700' : 'text-blue-400'}
+                    activeFill={themeMode === 'light' ? '#1e40af' : '#2563eb'}
+                    inactiveFill={themeMode === 'light' ? 'rgba(30, 64, 175, 0.15)' : 'rgba(30, 58, 138, 0.35)'}
+                    valueClassName={themeMode === 'light' ? 'text-blue-900' : 'text-blue-300'}
                     animationDelayMs={index * 140 + 850}
                 />
             </div>
@@ -248,16 +199,14 @@ const AssetTrendCard: React.FC<AssetTrendCardProps> = ({
       </div>
 
       {/* Sparkline Chart */}
-      <div className={`${compact ? 'h-12 sm:h-14 -mb-1 mt-1' : 'h-28 -mb-2 mt-2'} w-full px-0 opacity-80 group-hover:opacity-100 transition-all duration-500 relative z-10`}>
+      <div className={`${compact ? 'h-12 sm:h-14 -mb-1 mt-1' : 'h-28 -mb-2 mt-2'} w-full px-0 opacity-85 group-hover:opacity-100 transition-all duration-500 relative z-10`}>
         <ResponsiveContainer width="100%" height="100%">
-          {/* Added margin to prevent stroke clipping at top/bottom */}
           <AreaChart data={chartData} margin={{ top: compact ? 4 : 12, right: 0, left: 0, bottom: compact ? 4 : 12 }}>
             <defs>
               <linearGradient id={chartId} x1="0" y1="0" x2="0" y2="1">
                 <stop offset="5%" stopColor={gradientColor} stopOpacity={gradientOpacity}/>
                 <stop offset="95%" stopColor={gradientColor} stopOpacity={0}/>
               </linearGradient>
-              {/* Segment sweep highlight animation across X axis */}
               <linearGradient id={`${chartId}-shimmer`} x1="0%" y1="0%" x2="100%" y2="0%">
                 <stop offset="0%" stopColor={strokeColor} stopOpacity="0.1" />
                 <stop offset="50%" stopColor={strokeColor} stopOpacity="0.8">
@@ -266,23 +215,22 @@ const AssetTrendCard: React.FC<AssetTrendCardProps> = ({
                 <stop offset="100%" stopColor={strokeColor} stopOpacity="0.1" />
               </linearGradient>
             </defs>
-            <CartesianGrid vertical={false} stroke={themeMode === 'light' ? '#e2e8f0' : '#1e293b'} strokeDasharray="3 3" opacity={0.5} />
-            <ReferenceLine y={0} stroke={themeMode === 'light' ? '#cbd5e1' : '#334155'} strokeDasharray="3 3" />
+            <CartesianGrid vertical={false} stroke={themeMode === 'light' ? '#cbd5e1' : '#172554'} strokeDasharray="3 3" opacity={0.4} />
+            <ReferenceLine y={0} stroke={themeMode === 'light' ? '#94a3b8' : '#1e3a8a'} strokeDasharray="3 3" />
             <Area 
               type={curveMonotoneX as any} 
               dataKey="value" 
               stroke={strokeColor} 
               strokeWidth={isHovered ? 2.5 : 2}
               fill={`url(#${chartId})`}
-              fillOpacity={0.3}
+              fillOpacity={0.35}
               isAnimationActive={true}
               animationDuration={800}
               animationEasing="ease-in-out"
               animationBegin={index * 140}
               dot={false}
-              activeDot={{ r: 4, strokeWidth: 2, stroke: themeMode === 'light' ? '#fff' : "#000", fill: strokeColor }}
+              activeDot={{ r: 4, strokeWidth: 2, stroke: themeMode === 'light' ? '#fff' : "#080f20", fill: strokeColor }}
             />
-            {/* Animated Segment Line Highlight */}
             <Area 
               type={curveMonotoneX as any} 
               dataKey="value" 
@@ -297,7 +245,7 @@ const AssetTrendCard: React.FC<AssetTrendCardProps> = ({
             />
             <YAxis domain={['dataMin', 'dataMax']} hide />
             <Tooltip 
-                cursor={{ stroke: '#64748b', strokeWidth: 1, strokeDasharray: '4 4' }}
+                cursor={{ stroke: '#3b82f6', strokeWidth: 1, strokeDasharray: '4 4' }}
                 wrapperStyle={{ outline: 'none' }}
                 content={({ active, payload }) => {
                     if (active && payload && payload.length) {
@@ -305,19 +253,19 @@ const AssetTrendCard: React.FC<AssetTrendCardProps> = ({
                         const isPositiveChange = data.change > 0;
                         return (
                             <div className={`backdrop-blur-xl border rounded-xl p-3 shadow-xl text-xs min-w-[140px] animate-in fade-in zoom-in-95 duration-200 ${getTooltipStyle()}`}>
-                                <div className={`font-medium mb-2 pb-2 border-b flex justify-between ${themeMode === 'light' ? 'border-slate-100 text-slate-500' : 'border-white/10 opacity-70'}`}>
+                                <div className={`font-medium mb-2 pb-2 border-b flex justify-between ${themeMode === 'light' ? 'border-blue-100 text-blue-800' : 'border-blue-900/60 text-blue-300'}`}>
                                     <span>{data.fullDate}</span>
                                 </div>
                                 <div className="flex flex-col gap-1.5">
                                     <div className="flex justify-between items-center gap-4">
-                                        <span className="opacity-70">Net Pos</span>
-                                        <span className={`font-mono font-medium ${data.value > 0 ? (themeMode === 'light' ? 'text-blue-600' : 'text-blue-400') : (themeMode === 'light' ? 'text-rose-600' : 'text-rose-400')}`}>
+                                        <span className="opacity-75 text-blue-300">Net Pos</span>
+                                        <span className={`font-mono font-medium ${data.value > 0 ? 'text-blue-300' : 'text-rose-300'}`}>
                                             {formatCurrency(data.value)}
                                         </span>
                                     </div>
                                     <div className="flex justify-between items-center gap-4">
-                                        <span className="opacity-60">Weekly Chg</span>
-                                        <span className={`font-mono font-medium flex items-center ${isPositiveChange ? (themeMode === 'light' ? 'text-emerald-600' : 'text-emerald-400') : data.change < 0 ? (themeMode === 'light' ? 'text-rose-600' : 'text-rose-400') : 'opacity-50'}`}>
+                                        <span className="opacity-70 text-blue-300">Weekly Chg</span>
+                                        <span className={`font-mono font-medium flex items-center ${isPositiveChange ? 'text-emerald-400' : data.change < 0 ? 'text-rose-400' : 'opacity-50'}`}>
                                             {isPositiveChange ? '+' : ''}{formatCurrency(data.change)}
                                         </span>
                                     </div>
@@ -332,45 +280,39 @@ const AssetTrendCard: React.FC<AssetTrendCardProps> = ({
         </ResponsiveContainer>
       </div>
 
-      {/* Long/Short Breakdown Footer */}
+      {/* Long/Short Breakdown Footer in Dark Blue Shades */}
       <div className={`grid grid-cols-2 gap-px mt-0 border-t relative z-10 
-          ${themeMode === 'light' ? 'bg-slate-100 border-slate-200' : 
-            'bg-blue-500/5 border-blue-500/5'}
+          ${themeMode === 'light' ? 'bg-blue-50/60 border-blue-900/20' : 
+            'bg-blue-950/60 border-blue-900/40'}
       `}>
           <div className={`${compact ? 'p-2 sm:p-2.5' : 'p-4'} flex flex-col items-center border-r transition-colors 
-            ${themeMode === 'light' ? 'border-slate-200 hover:bg-white' : 
-              'border-blue-500/5 hover:bg-blue-900/10'}`}>
-              <span className={`${compact ? 'text-[9px] sm:text-[10px] mb-0.5' : 'text-[10px] mb-1'} uppercase font-medium tracking-wide opacity-60`}>Longs</span>
+            ${themeMode === 'light' ? 'border-blue-900/20 hover:bg-blue-50' : 
+              'border-blue-900/40 hover:bg-blue-900/20'}`}>
+              <span className={`${compact ? 'text-[9px] sm:text-[10px] mb-0.5' : 'text-[10px] mb-1'} uppercase font-medium tracking-wide ${themeMode === 'light' ? 'text-blue-800/70' : 'text-blue-300/70'}`}>Longs</span>
               
-              <div className={`flex items-center gap-0.5 sm:gap-1 font-medium font-mono ${compact ? 'text-[13px] sm:text-sm' : 'text-xl'} ${longChange > 0 ? (themeMode === 'light' ? 'text-blue-600' : 'text-blue-400') : (themeMode === 'light' ? 'text-rose-600' : 'text-rose-400')}`}>
+              <div className={`flex items-center gap-0.5 sm:gap-1 font-medium font-mono ${compact ? 'text-[13px] sm:text-sm' : 'text-xl'} ${longChange > 0 ? (themeMode === 'light' ? 'text-blue-800' : 'text-blue-300') : (themeMode === 'light' ? 'text-rose-700' : 'text-rose-400')}`}>
                   {longChange > 0 ? <ArrowUpRight className={compact ? "w-3.5 h-3.5" : "w-5 h-5"} /> : longChange < 0 ? <ArrowDownRight className={compact ? "w-3.5 h-3.5" : "w-5 h-5"} /> : <Minus className={compact ? "w-3.5 h-3.5" : "w-5 h-5"} />}
                   <span>{formatCurrency(Math.abs(longChange))}</span>
               </div>
               
-              <span className={`${compact ? 'text-[9px] sm:text-[10px] mt-0.5' : 'text-[10px] mt-0.5'} font-medium font-mono opacity-50`}>
+              <span className={`${compact ? 'text-[9px] sm:text-[10px] mt-0.5' : 'text-[10px] mt-0.5'} font-medium font-mono ${themeMode === 'light' ? 'text-blue-700/60' : 'text-blue-400/60'}`}>
                   Pos: {formatCurrency(longPos)}
               </span>
           </div>
-          <div className={`${compact ? 'p-2 sm:p-2.5' : 'p-4'} flex flex-col items-center transition-colors ${themeMode === 'light' ? 'hover:bg-white' : 'hover:bg-slate-800/50'}`}>
-              <span className={`${compact ? 'text-[9px] sm:text-[10px] mb-0.5' : 'text-[10px] mb-1'} uppercase font-medium tracking-wide opacity-60`}>Shorts</span>
+          <div className={`${compact ? 'p-2 sm:p-2.5' : 'p-4'} flex flex-col items-center transition-colors 
+            ${themeMode === 'light' ? 'hover:bg-blue-50' : 'hover:bg-blue-900/20'}`}>
+              <span className={`${compact ? 'text-[9px] sm:text-[10px] mb-0.5' : 'text-[10px] mb-1'} uppercase font-medium tracking-wide ${themeMode === 'light' ? 'text-blue-800/70' : 'text-blue-300/70'}`}>Shorts</span>
               
-              <div className={`flex items-center gap-0.5 sm:gap-1 font-medium font-mono ${compact ? 'text-[13px] sm:text-sm' : 'text-xl'} ${shortChange > 0 ? (themeMode === 'light' ? 'text-blue-600' : 'text-blue-400') : (themeMode === 'light' ? 'text-rose-600' : 'text-rose-400')}`}>
+              <div className={`flex items-center gap-0.5 sm:gap-1 font-medium font-mono ${compact ? 'text-[13px] sm:text-sm' : 'text-xl'} ${shortChange > 0 ? (themeMode === 'light' ? 'text-blue-800' : 'text-blue-300') : (themeMode === 'light' ? 'text-rose-700' : 'text-rose-400')}`}>
                   {shortChange > 0 ? <ArrowUpRight className={compact ? "w-3.5 h-3.5" : "w-5 h-5"} /> : shortChange < 0 ? <ArrowDownRight className={compact ? "w-3.5 h-3.5" : "w-5 h-5"} /> : <Minus className={compact ? "w-3.5 h-3.5" : "w-5 h-5"} />}
                   <span>{formatCurrency(Math.abs(shortChange))}</span>
               </div>
-
-              <span className={`${compact ? 'text-[9px] sm:text-[10px] mt-0.5' : 'text-[10px] mt-0.5'} font-medium font-mono opacity-50`}>
+              
+              <span className={`${compact ? 'text-[9px] sm:text-[10px] mt-0.5' : 'text-[10px] mt-0.5'} font-medium font-mono ${themeMode === 'light' ? 'text-blue-700/60' : 'text-blue-400/60'}`}>
                   Pos: {formatCurrency(shortPos)}
               </span>
           </div>
       </div>
-      
-      {/* Subtle Background Glow */}
-      <div className={`absolute top-0 right-0 w-full h-full bg-gradient-to-br to-transparent pointer-events-none transition-opacity duration-500 z-0
-         ${isHovered ? 'opacity-20' : 'opacity-10'}
-         ${themeMode === 'light' ? (isNetPositive ? 'from-blue-50' : 'from-rose-50') : 
-           isNetPositive ? 'from-blue-500/10' : 'from-rose-500/10'}
-      `} />
     </div>
   );
 };

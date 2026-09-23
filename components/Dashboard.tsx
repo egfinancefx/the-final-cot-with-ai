@@ -1,12 +1,19 @@
 
 import React, { useState, useMemo, useRef, useEffect } from 'react';
-import { YAxis, PieChart, Pie, LineChart, Cell } from 'recharts';
-import { AreaChart, Area } from './charts/area-chart';
-import { ComposedChart } from './charts/composed-chart';
-import { Line } from './charts/line';
-import { ReferenceArea } from './charts/reference-area';
-import { XAxis } from './charts/x-axis';
-import { ChartTooltip } from './charts/tooltip';
+import { 
+  ResponsiveContainer, 
+  AreaChart, 
+  Area, 
+  Line, 
+  XAxis, 
+  YAxis, 
+  Tooltip, 
+  CartesianGrid, 
+  ReferenceLine, 
+  PieChart, 
+  Pie, 
+  Cell 
+} from 'recharts';
 import { motion, AnimatePresence } from 'framer-motion';
 import { SummaryRow, HistoryRow, ThemeMode } from '../types';
 import KPICard from './KPICard';
@@ -1023,60 +1030,125 @@ const Dashboard: React.FC<DashboardProps> = ({ summaryData, historyData, history
                                      initial={{ opacity: 0, y: 20 }}
                                      animate={{ opacity: 1, y: 0 }}
                                      transition={{ duration: 0.5, ease: "easeOut" }}
-                                     className="w-full h-full"
+                                     className="w-full h-full min-h-[320px]"
                                  >
-                                     <ComposedChart
-                                       data={mainChartData}
-                                       xDataKey="date"
-                                       animationDuration={1100}
-                                       animationEasing="cubic-bezier(0.85, 0, 0.15, 1)"
-                                     >
-                                     
-                                       <ReferenceArea
-                                         y1={chartStats.avg * 0.9}
-                                         y2={chartStats.avg * 1.1}
-                                         fill="color-mix(in oklch, var(--chart-foreground-muted) 15%, transparent)"
-                                         fillOpacity={1}
-                                         pattern="none"
-                                         patternColor="var(--chart-foreground-muted)"
-                                         stroke="var(--chart-foreground-muted)"
-                                         strokeStyle="dashed"
-                                         strokeDasharray="4,4"
-                                         fadeEdges={true}
-                                         fadeEdgesLength={10}
-                                         axisLabelColor={themeStyles.chartAxis}
-                                         showMarkers={true}
-                                         markerColor={themeStyles.chartAxis}
-                                       />
-                                     
-                                       <Area
-                                         dataKey="value"
-                                         
-                                         fillOpacity={0.3}
-                                         strokeWidth={3}
-                                         fill={trendColor}
-                                         stroke={trendColor}
-                                         fadeEdges
-                                         gradientToOpacity={0}
-                                         showLine
-                                         showHighlight
-                                       />
-                                     
-                                       {mainCompareAssets.map((asset, idx) => (
-                                         <Line
-                                           key={asset}
-                                           dataKey={`compare_${idx}`}
-                                           
-                                           strokeWidth={2}
-                                           stroke={COMPARE_COLORS[idx]}
-                                           fadeEdges
-                                           showHighlight
-                                         />
-                                       ))}
-                                     
-                                       <XAxis />
-                                       <ChartTooltip />
-                                     </ComposedChart>
+                                     <ResponsiveContainer width="100%" height="100%">
+                                         <AreaChart data={mainChartData} margin={{ top: 20, right: 30, left: 10, bottom: 10 }}>
+                                             <defs>
+                                                 <linearGradient id="mainTrendGrad" x1="0" y1="0" x2="0" y2="1">
+                                                     <stop offset="5%" stopColor={trendColor} stopOpacity={0.45}/>
+                                                     <stop offset="95%" stopColor={trendColor} stopOpacity={0.02}/>
+                                                 </linearGradient>
+                                             </defs>
+                                             <CartesianGrid 
+                                                 strokeDasharray="3 3" 
+                                                 stroke={themeStyles.chartGrid} 
+                                                 opacity={themeMode === 'light' ? 0.7 : 0.4}
+                                                 vertical={false} 
+                                             />
+                                             <XAxis 
+                                                 dataKey="date" 
+                                                 stroke={themeStyles.chartAxis} 
+                                                 tickLine={false} 
+                                                 axisLine={false} 
+                                                 dy={10}
+                                                 fontSize={11}
+                                             />
+                                             <YAxis 
+                                                 stroke={themeStyles.chartAxis} 
+                                                 tickLine={false} 
+                                                 axisLine={false} 
+                                                 tickFormatter={(v) => formatCurrency(v)} 
+                                                 domain={['auto', 'auto']}
+                                                 fontSize={11}
+                                             />
+                                             <Tooltip 
+                                                 cursor={{ stroke: themeMode === 'light' ? '#94a3b8' : '#3b82f6', strokeWidth: 1, strokeDasharray: '4 4' }}
+                                                 wrapperStyle={{ outline: 'none' }}
+                                                 content={({ active, payload, label }) => {
+                                                     if (active && payload && payload.length) {
+                                                         const data = payload[0].payload;
+                                                         return (
+                                                             <div className={`p-3.5 rounded-xl border shadow-2xl backdrop-blur-md min-w-[170px] ${
+                                                                 themeMode === 'light' 
+                                                                     ? 'bg-white/95 border-slate-200 text-slate-900 shadow-slate-300/50' 
+                                                                     : 'bg-[#080f20]/95 border-blue-900/80 text-blue-100 shadow-black/80'
+                                                             }`}>
+                                                                 <div className={`text-xs font-semibold mb-2 pb-2 border-b flex justify-between gap-3 ${
+                                                                     themeMode === 'light' ? 'border-slate-200 text-slate-800' : 'border-blue-900/60 text-blue-300'
+                                                                 }`}>
+                                                                     <span>{data.fullDate || label}</span>
+                                                                     <span className="text-blue-400 font-bold">{selectedCommodity}</span>
+                                                                 </div>
+                                                                 <div className="space-y-1.5 text-xs">
+                                                                     <div className="flex justify-between items-center gap-4">
+                                                                         <span className="opacity-70">Net Position:</span>
+                                                                         <span className="font-mono font-bold" style={{ color: trendColor }}>
+                                                                             {formatCurrency(data.value)}
+                                                                         </span>
+                                                                     </div>
+                                                                     {mainCompareAssets.map((asset, idx) => {
+                                                                         const compVal = data[`compare_${idx}`];
+                                                                         if (compVal === undefined) return null;
+                                                                         return (
+                                                                             <div key={asset} className="flex justify-between items-center gap-4">
+                                                                                 <span className="opacity-70">{asset}:</span>
+                                                                                 <span className="font-mono font-semibold" style={{ color: COMPARE_COLORS[idx] }}>
+                                                                                     {formatCurrency(compVal)}
+                                                                                 </span>
+                                                                             </div>
+                                                                         );
+                                                                     })}
+                                                                 </div>
+                                                             </div>
+                                                         );
+                                                     }
+                                                     return null;
+                                                 }}
+                                             />
+                                             <ReferenceLine y={0} stroke={themeStyles.chartAxis} strokeDasharray="3 3" opacity={0.6} />
+                                             {chartStats.avg !== 0 && (
+                                                 <ReferenceLine 
+                                                     y={chartStats.avg} 
+                                                     stroke="#3b82f6" 
+                                                     strokeDasharray="4 4" 
+                                                     opacity={0.7}
+                                                     label={{ 
+                                                         value: `Avg: ${formatCurrency(Math.round(chartStats.avg))}`, 
+                                                         fill: '#3b82f6', 
+                                                         fontSize: 10, 
+                                                         position: 'insideRight' 
+                                                     }} 
+                                                 />
+                                             )}
+                                             <Area 
+                                                 type="monotone" 
+                                                 dataKey="value" 
+                                                 stroke={trendColor} 
+                                                 strokeWidth={3} 
+                                                 fillOpacity={1} 
+                                                 fill="url(#mainTrendGrad)" 
+                                                 dot={renderCustomDot} 
+                                                 activeDot={{ r: 6, stroke: themeMode === 'light' ? '#fff' : '#080f20', strokeWidth: 2 }}
+                                                 isAnimationActive={true}
+                                                 animationDuration={1000}
+                                             />
+                                             {mainCompareAssets.map((asset, idx) => (
+                                                 <Line
+                                                     key={asset}
+                                                     type="monotone"
+                                                     dataKey={`compare_${idx}`}
+                                                     stroke={COMPARE_COLORS[idx]}
+                                                     strokeWidth={2}
+                                                     dot={{ r: 3, fill: COMPARE_COLORS[idx] }}
+                                                     activeDot={{ r: 5 }}
+                                                     name={asset}
+                                                     isAnimationActive={true}
+                                                     animationDuration={1000}
+                                                 />
+                                             ))}
+                                         </AreaChart>
+                                     </ResponsiveContainer>
                                  </motion.div>
                              ) : (
                                 <div className="w-full h-full flex items-center justify-center text-slate-500">
@@ -1125,7 +1197,7 @@ const Dashboard: React.FC<DashboardProps> = ({ summaryData, historyData, history
                                       commodity={assetName}
                                       summaryRow={summary}
                                       historyRow={history}
-                                      dates={historyDates}
+                                      dates={historyDates.slice(0, 6)}
                                       onClick={() => setSelectedCommodity(assetName)}
                                       isSelected={false}
                                       themeMode={themeMode}
@@ -1137,27 +1209,14 @@ const Dashboard: React.FC<DashboardProps> = ({ summaryData, historyData, history
                   })()}
                 </div>
 
-                {/* 2. Below the 3 cards: Radar Chart (Left) + Bar Rounded Chart (Center) */}
+                {/* 2. Below the 3 cards: Total Market Bar Chart (md:col-span-5) + Radar Chart (md:col-span-7) */}
                 <div className="grid grid-cols-1 md:grid-cols-12 gap-2 sm:gap-2.5 flex-1 min-h-0">
-                  {/* Radar Chart (Left) */}
+                  {/* Total Market Bar Chart (Left - Compact col-span-5) */}
                   <motion.div 
                     initial={{ opacity: 0, y: 15 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.5, delay: 0.15 }}
                     className="md:col-span-5 flex flex-col h-full min-h-0"
-                  >
-                    <RadarChartCard 
-                      summaryData={summaryData} 
-                      themeMode={themeMode} 
-                    />
-                  </motion.div>
-
-                  {/* Bar Rounded Chart (Center) */}
-                  <motion.div 
-                    initial={{ opacity: 0, y: 15 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.5, delay: 0.2 }}
-                    className="md:col-span-7 flex flex-col h-full min-h-0"
                   >
                     <BarRoundedChartCard 
                       summaryData={summaryData} 
@@ -1165,6 +1224,19 @@ const Dashboard: React.FC<DashboardProps> = ({ summaryData, historyData, history
                       historyDates={historyDates}
                       themeMode={themeMode}
                       onSelectAsset={(commodity) => setSelectedCommodity(commodity)}
+                    />
+                  </motion.div>
+
+                  {/* Radar Chart (Center/Right - Expanded col-span-7) */}
+                  <motion.div 
+                    initial={{ opacity: 0, y: 15 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.5, delay: 0.2 }}
+                    className="md:col-span-7 flex flex-col h-full min-h-0"
+                  >
+                    <RadarChartCard 
+                      summaryData={summaryData} 
+                      themeMode={themeMode} 
                     />
                   </motion.div>
                 </div>

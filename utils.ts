@@ -65,18 +65,16 @@ export const parseHistoryCSV = (csvText: string): { data: HistoryRow[], dates: s
   const rawHeader = lines[0];
   const headerCells = splitCSVLine(rawHeader).map(cleanCell);
   
-  // We want columns D to I (indices 3 to 8). This represents the newest 6 moves.
-  // Col 0=Commodity, Col 1=52W High, Col 2=52W Low.
-  // Dates start at index 3.
+  // Extract all available history date columns starting from index 3 (Col 0=Commodity, Col 1=52W High, Col 2=52W Low)
   const startIndex = 3;
-  const count = 6;
   
   // Guard against header being too short
-  if (headerCells.length < startIndex + count) {
+  if (headerCells.length <= startIndex) {
       return { data: [], dates: [] };
   }
 
-  const dates = headerCells.slice(startIndex, startIndex + count);
+  // Extract all valid dates from the sheet header (up to all available 50+ weeks)
+  const dates = headerCells.slice(startIndex).filter(cell => cell && !cell.toLowerCase().includes('downloaded'));
   
   const data: HistoryRow[] = [];
 

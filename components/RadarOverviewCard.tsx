@@ -99,28 +99,28 @@ export const RadarOverviewCard: React.FC<RadarOverviewCardProps> = ({
   }, [summaryData, selectedAssets]);
 
   const colors = [
-    { stroke: '#3b82f6', fill: '#3b82f6' }, // Blue
-    { stroke: '#10b981', fill: '#10b981' }, // Emerald
-    { stroke: '#f59e0b', fill: '#f59e0b' }, // Amber
-    { stroke: '#8b5cf6', fill: '#8b5cf6' }  // Purple
+    { stroke: '#2563eb', fill: '#2563eb' }, // Vibrant Royal Navy Blue
+    { stroke: '#1d4ed8', fill: '#1d4ed8' }, // Deep Blue
+    { stroke: '#3b82f6', fill: '#3b82f6' }, // Ocean Blue
+    { stroke: '#1e3a8a', fill: '#1e3a8a' }  // Midnight Navy Blue
   ];
 
   const cardBg = themeMode === 'light' 
-    ? 'bg-white border-slate-200 shadow-xl' 
-    : 'bg-slate-900/80 border-blue-500/10 shadow-2xl backdrop-blur-md';
+    ? 'bg-slate-50 border-blue-900/20 shadow-xl' 
+    : 'bg-[#080f20] border-blue-900/60 shadow-2xl shadow-blue-950/80 backdrop-blur-md';
 
-  const textMain = themeMode === 'light' ? 'text-slate-900' : 'text-white';
-  const textSub = themeMode === 'light' ? 'text-slate-500' : 'text-slate-400';
-  const gridStroke = themeMode === 'light' ? '#e2e8f0' : '#1e293b';
-  const axisTickColor = themeMode === 'light' ? '#64748b' : '#94a3b8';
+  const textMain = themeMode === 'light' ? 'text-blue-950' : 'text-blue-100';
+  const textSub = themeMode === 'light' ? 'text-blue-800/70' : 'text-blue-300/70';
+  const gridStroke = themeMode === 'light' ? 'rgba(30, 58, 138, 0.25)' : 'rgba(30, 64, 175, 0.35)';
+  const axisTickColor = themeMode === 'light' ? '#1e3a8a' : '#60a5fa';
 
   return (
     <div className={`rounded-xl sm:rounded-2xl border p-3 sm:p-3.5 flex flex-col h-full transition-all duration-300 ${cardBg}`}>
       {/* Header */}
-      <div className="flex items-center justify-between gap-1.5 mb-1.5 pb-2 border-b border-inherit">
+      <div className="flex items-center justify-between gap-1.5 mb-1.5 pb-2 border-b border-blue-900/30">
         <div className="flex items-center gap-2">
-          <div className={`p-1.5 rounded-lg border ${themeMode === 'light' ? 'bg-blue-50 text-blue-600 border-blue-200' : 'bg-blue-500/10 text-blue-400 border-blue-500/20'}`}>
-            <Radio className="w-3.5 h-3.5 animate-pulse" />
+          <div className={`p-1.5 rounded-lg border ${themeMode === 'light' ? 'bg-blue-100 text-blue-900 border-blue-300' : 'bg-blue-950/80 text-blue-300 border-blue-800/50'}`}>
+            <Radio className="w-3.5 h-3.5" />
           </div>
           <div>
             <h3 className={`text-xs sm:text-sm font-semibold font-heading tracking-tight leading-tight ${textMain}`}>
@@ -131,15 +131,15 @@ export const RadarOverviewCard: React.FC<RadarOverviewCardProps> = ({
         </div>
 
         {/* Category Pills */}
-        <div className="flex items-center gap-1">
+        <div className="flex items-center gap-1 bg-blue-950/80 p-0.5 rounded-lg border border-blue-900/60">
           {(['top', 'metals', 'currencies'] as const).map(cat => (
             <button
               key={cat}
               onClick={() => setActiveCategory(cat)}
               className={`px-1.5 py-0.5 rounded text-[9px] font-medium uppercase tracking-wider transition-colors ${
                 activeCategory === cat
-                  ? (themeMode === 'light' ? 'bg-blue-600 text-white shadow-sm' : 'bg-blue-500/30 text-blue-300 border border-blue-500/40')
-                  : (themeMode === 'light' ? 'text-slate-500 hover:bg-slate-100' : 'text-slate-400 hover:bg-slate-800')
+                  ? (themeMode === 'light' ? 'bg-blue-800 text-white shadow-sm' : 'bg-blue-600 text-white font-semibold shadow-md')
+                  : 'text-blue-300/70 hover:text-white'
               }`}
             >
               {cat}
