@@ -287,7 +287,9 @@ const Dashboard: React.FC<DashboardProps> = ({ summaryData, historyData, history
     const row = historyData.find(h => h.Commodity === selectedCommodity);
     if (!row) return [];
 
-    return historyDates.map(date => ({
+    // Strictly limit to the last 6 weeks of COT reports
+    const recentDates = historyDates.slice(0, 6);
+    return recentDates.map(date => ({
       date: date.split(',')[0],
       fullDate: date,
       value: row[date] as number
@@ -1334,7 +1336,7 @@ const Dashboard: React.FC<DashboardProps> = ({ summaryData, historyData, history
                     {filteredSummaryData.map((row) => {
                         const historyRow = historyData.find(h => h.Commodity === row.Commodity);
                         const sparklineData = historyRow 
-                        ? historyDates.map(date => ({ value: historyRow[date] as number })).reverse()
+                        ? historyDates.slice(0, 6).map(date => ({ value: historyRow[date] as number })).reverse()
                         : [];
                         
                         // Colors for table values - Blue/White Theme

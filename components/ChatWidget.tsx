@@ -101,8 +101,8 @@ const ChatWidget: React.FC<ChatWidgetProps> = ({ themeMode, summaryData, history
         
         const historyRecord = historyData.find(h => h.Commodity === assetName);
         if (historyRecord) {
-            contextDataStr += `  صافي المراكز في الأسابيع السابقة:\n`;
-            historyDates.forEach(date => {
+            contextDataStr += `  صافي المراكز في آخر 6 أسابيع:\n`;
+            historyDates.slice(0, 6).forEach(date => {
                 if (historyRecord[date] !== undefined) {
                     contextDataStr += `    - ${date}: ${historyRecord[date]}\n`;
                 }

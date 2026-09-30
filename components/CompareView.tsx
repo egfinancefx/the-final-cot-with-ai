@@ -250,8 +250,11 @@ const CompareView: React.FC<CompareViewProps> = ({
   }, [processedAssets]);
 
   const { historicalBarsData, normalizedTrajectoryData, flowDeltaData } = useMemo(() => {
-    // 1. Normalized Trajectory (% Net of Total over history dates)
-    const normData = historyDates.map((date) => {
+    // Strictly limit comparison history to the last 6 weeks
+    const recentDates = historyDates.slice(0, 6);
+
+    // 1. Normalized Trajectory (% Net of Total over past 6 weeks)
+    const normData = recentDates.map((date) => {
       const point: any = { 
         date: date.split(',')[0], 
         fullDate: date 
@@ -268,8 +271,8 @@ const CompareView: React.FC<CompareViewProps> = ({
       return point;
     }).reverse();
 
-    // 2. Historical Raw Bars Data
-    const rawData = historyDates.map((date) => {
+    // 2. Historical Raw Bars Data (Past 6 weeks)
+    const rawData = recentDates.map((date) => {
       const point: any = { date: date.split(',')[0], fullDate: date };
       processedAssets.forEach((item) => {
         const historyRow = historyData.find((h) => h.Commodity === item.asset);

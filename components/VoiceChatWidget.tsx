@@ -110,8 +110,8 @@ export default function VoiceChatWidget({ themeMode, summaryData, historyData, h
             const historyRecord = historyData.find(h => h.Commodity === assetName);
             
             if (historyRecord) {
-                assetHistoryStr += `  الأسابيع السابقة لصافي المراكز (Net Positions):\n`;
-                historyDates.forEach(date => {
+                assetHistoryStr += `  الأسابيع الستة السابقة لصافي المراكز (Net Positions):\n`;
+                historyDates.slice(0, 6).forEach(date => {
                     const val = historyRecord[date];
                     if (val !== undefined) {
                         assetHistoryStr += `    - ${date}: ${val}\n`;
