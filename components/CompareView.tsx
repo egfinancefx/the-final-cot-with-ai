@@ -117,16 +117,17 @@ const CompareView: React.FC<CompareViewProps> = ({
 }) => {
   const [chartView, setChartView] = useState<'normalized' | 'historical' | 'delta' | 'radar'>('radar');
   const isLight = themeMode === 'light';
+  const isColorful = themeMode === 'colorful';
 
   // Base Theme styling
   const themeStyles = {
-    bg: isLight ? 'bg-white' : 'bg-[#0a1120]',
-    cardBg: isLight ? 'bg-slate-50 border-slate-200' : 'bg-[#0f1d36]/90 border-blue-500/20',
-    panelBg: isLight ? 'bg-white border-slate-200 shadow-sm' : 'bg-[#0c172e] border-blue-500/25 shadow-xl',
-    border: isLight ? 'border-slate-200' : 'border-blue-500/20',
-    textMain: isLight ? 'text-slate-900' : 'text-white',
-    textSub: isLight ? 'text-slate-500' : 'text-slate-300',
-    headerGlow: isLight ? 'from-blue-50 to-indigo-50/40' : 'from-blue-950/40 via-slate-900/60 to-transparent',
+    bg: isLight ? 'bg-white' : isColorful ? 'bg-[#0b0c1e]' : 'bg-[#0a1120]',
+    cardBg: isLight ? 'bg-slate-50 border-slate-200' : isColorful ? 'bg-[#14122e]/90 border-purple-500/25' : 'bg-[#0f1d36]/90 border-blue-500/20',
+    panelBg: isLight ? 'bg-white border-slate-200 shadow-sm' : isColorful ? 'bg-[#12102b] border-purple-500/30 shadow-2xl' : 'bg-[#0c172e] border-blue-500/25 shadow-xl',
+    border: isLight ? 'border-slate-200' : isColorful ? 'border-purple-500/25' : 'border-blue-500/20',
+    textMain: isLight ? 'text-slate-900' : isColorful ? 'text-purple-50' : 'text-white',
+    textSub: isLight ? 'text-slate-500' : isColorful ? 'text-purple-300/80' : 'text-slate-300',
+    headerGlow: isLight ? 'from-blue-50 to-indigo-50/40' : isColorful ? 'from-purple-950/40 via-fuchsia-950/20 to-transparent' : 'from-blue-950/40 via-slate-900/60 to-transparent',
   };
 
   const formatCurrency = (value: number) => {
@@ -137,7 +138,11 @@ const CompareView: React.FC<CompareViewProps> = ({
   };
 
   // Comprehensive processed metrics for each asset
-    const ASSET_COLORS = isLight ? ['#2563eb', '#64748b', '#ea580c'] : ['#3b82f6', '#ffffff', '#f97316'];
+  const ASSET_COLORS = isLight 
+    ? ['#2563eb', '#64748b', '#ea580c', '#16a34a', '#9333ea'] 
+    : isColorful
+      ? ['#38bdf8', '#c084fc', '#fbbf24', '#34d399', '#f472b6']
+      : ['#3b82f6', '#ffffff', '#f97316', '#10b981', '#a855f7'];
 
   const processedAssets = useMemo(() => {
     return assets.map((asset, index) => {
@@ -501,16 +506,26 @@ const CompareView: React.FC<CompareViewProps> = ({
             </div>
 
             {/* View Selector Tabs */}
-            <div className={`flex items-center p-1 rounded-2xl border ${isLight ? 'bg-slate-100 border-slate-200' : 'bg-slate-900 border-blue-500/30'}`}>
+            <div className={`flex items-center p-1 rounded-2xl border ${
+              isLight 
+                ? 'bg-slate-100 border-slate-200' 
+                : isColorful
+                  ? 'bg-[#181438] border-purple-500/30'
+                  : 'bg-slate-900 border-blue-500/30'
+            }`}>
               <button
                 onClick={() => setChartView('radar')}
                 className={`px-3 py-1.5 rounded-xl text-xs font-medium transition-all ${
                   chartView === 'radar'
                     ? isLight
                       ? 'bg-white text-blue-700 shadow-sm font-semibold'
-                      : 'bg-blue-600 text-white shadow-sm font-semibold'
+                      : isColorful
+                        ? 'bg-gradient-to-r from-violet-600 to-fuchsia-600 text-white shadow-md shadow-purple-900/50 font-semibold'
+                        : 'bg-blue-600 text-white shadow-sm font-semibold'
                     : isLight
                     ? 'text-slate-600 hover:text-slate-900'
+                    : isColorful
+                    ? 'text-purple-300/80 hover:text-white'
                     : 'text-slate-300 hover:text-white'
                 }`}
               >
@@ -522,9 +537,13 @@ const CompareView: React.FC<CompareViewProps> = ({
                   chartView === 'normalized'
                     ? isLight
                       ? 'bg-white text-blue-700 shadow-sm font-semibold'
-                      : 'bg-blue-600 text-white shadow-sm font-semibold'
+                      : isColorful
+                        ? 'bg-gradient-to-r from-violet-600 to-fuchsia-600 text-white shadow-md shadow-purple-900/50 font-semibold'
+                        : 'bg-blue-600 text-white shadow-sm font-semibold'
                     : isLight
                     ? 'text-slate-600 hover:text-slate-900'
+                    : isColorful
+                    ? 'text-purple-300/80 hover:text-white'
                     : 'text-slate-300 hover:text-white'
                 }`}
               >
@@ -536,9 +555,13 @@ const CompareView: React.FC<CompareViewProps> = ({
                   chartView === 'historical'
                     ? isLight
                       ? 'bg-white text-blue-700 shadow-sm font-semibold'
-                      : 'bg-blue-600 text-white shadow-sm font-semibold'
+                      : isColorful
+                        ? 'bg-gradient-to-r from-violet-600 to-fuchsia-600 text-white shadow-md shadow-purple-900/50 font-semibold'
+                        : 'bg-blue-600 text-white shadow-sm font-semibold'
                     : isLight
                     ? 'text-slate-600 hover:text-slate-900'
+                    : isColorful
+                    ? 'text-purple-300/80 hover:text-white'
                     : 'text-slate-300 hover:text-white'
                 }`}
               >
@@ -550,9 +573,13 @@ const CompareView: React.FC<CompareViewProps> = ({
                   chartView === 'delta'
                     ? isLight
                       ? 'bg-white text-blue-700 shadow-sm font-semibold'
-                      : 'bg-blue-600 text-white shadow-sm font-semibold'
+                      : isColorful
+                        ? 'bg-gradient-to-r from-violet-600 to-fuchsia-600 text-white shadow-md shadow-purple-900/50 font-semibold'
+                        : 'bg-blue-600 text-white shadow-sm font-semibold'
                     : isLight
                     ? 'text-slate-600 hover:text-slate-900'
+                    : isColorful
+                    ? 'text-purple-300/80 hover:text-white'
                     : 'text-slate-300 hover:text-white'
                 }`}
               >

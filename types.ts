@@ -20,4 +20,4 @@ export interface ParsedData {
   historyDates: string[];
 }
 
-export type ThemeMode = 'ocean' | 'light';
+export type ThemeMode = 'ocean' | 'light' | 'colorful';

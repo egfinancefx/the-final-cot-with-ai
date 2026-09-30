@@ -88,9 +88,9 @@ export const RadarChartCard: React.FC<RingChartCardProps> = ({
       { key: 'crypto', label: 'Crypto' },
     ];
 
-    // Rich Dark Blue and Royal Navy Tones
-    const longColor = themeMode === 'light' ? '#1e40af' : '#2563eb'; // Royal Dark Blue
-    const shortColor = themeMode === 'light' ? '#172554' : '#1d4ed8'; // Midnight Navy Blue
+    // Rich Dark Blue and Royal Navy Tones, or Vibrant Emerald/Rose in Colorful
+    const longColor = themeMode === 'light' ? '#1e40af' : themeMode === 'colorful' ? '#10b981' : '#2563eb'; // Royal Dark Blue or Vibrant Emerald
+    const shortColor = themeMode === 'light' ? '#172554' : themeMode === 'colorful' ? '#f43f5e' : '#1d4ed8'; // Midnight Navy Blue or Vibrant Rose
 
     const longValues: Record<string, number> = {};
     const shortValues: Record<string, number> = {};
@@ -133,13 +133,13 @@ export const RadarChartCard: React.FC<RingChartCardProps> = ({
       { key: 'activity', label: 'Activity' },
     ];
 
-    // Dark blue gradient palette for sectors
+    // Dark blue gradient palette for sectors, or vibrant multi-color in Colorful
     const sectorColors: Record<string, string> = {
-      'Currencies': themeMode === 'light' ? '#1e40af' : '#3b82f6', // Bright Navy
-      'Metals': themeMode === 'light' ? '#1d4ed8' : '#2563eb',     // Royal Blue
-      'Indices': themeMode === 'light' ? '#1e3a8a' : '#60a5fa',    // Steel Blue
-      'Energy': themeMode === 'light' ? '#172554' : '#1d4ed8',     // Deep Midnight
-      'Crypto': themeMode === 'light' ? '#312e81' : '#4338ca'      // Indigo Navy
+      'Currencies': themeMode === 'colorful' ? '#a855f7' : themeMode === 'light' ? '#1e40af' : '#3b82f6', // Violet
+      'Metals': themeMode === 'colorful' ? '#06b6d4' : themeMode === 'light' ? '#1d4ed8' : '#2563eb',     // Cyan
+      'Indices': themeMode === 'colorful' ? '#3b82f6' : themeMode === 'light' ? '#1e3a8a' : '#60a5fa',    // Blue
+      'Energy': themeMode === 'colorful' ? '#f59e0b' : themeMode === 'light' ? '#172554' : '#1d4ed8',     // Amber
+      'Crypto': themeMode === 'colorful' ? '#ec4899' : themeMode === 'light' ? '#312e81' : '#4338ca'      // Pink
     };
 
     let maxVolume = 1;
@@ -178,29 +178,37 @@ export const RadarChartCard: React.FC<RingChartCardProps> = ({
 
   const activeConfig = viewMode === 'sentiment' ? sentimentRadarConfig : sectorsRadarConfig;
 
-  // Dark Blue Shades Card Background
+  // Dark Blue Shades or Colorful Card Background
   const cardBg = themeMode === 'light' 
     ? 'bg-slate-50 border-blue-900/20 shadow-xl' 
-    : 'bg-[#080f20] border-blue-900/60 shadow-2xl shadow-blue-950/80 backdrop-blur-md';
+    : themeMode === 'colorful'
+      ? 'bg-[#12102b]/90 border-purple-500/25 shadow-2xl shadow-purple-950/60 backdrop-blur-xl'
+      : 'bg-[#080f20] border-blue-900/60 shadow-2xl shadow-blue-950/80 backdrop-blur-md';
 
-  const textMain = themeMode === 'light' ? 'text-blue-950' : 'text-blue-100';
-  const textSub = themeMode === 'light' ? 'text-blue-800/70' : 'text-blue-300/70';
+  const textMain = themeMode === 'light' ? 'text-blue-950' : themeMode === 'colorful' ? 'text-purple-50' : 'text-blue-100';
+  const textSub = themeMode === 'light' ? 'text-blue-800/70' : themeMode === 'colorful' ? 'text-purple-300/70' : 'text-blue-300/70';
 
   return (
     <div 
       className={`rounded-xl sm:rounded-2xl border p-3 sm:p-3.5 flex flex-col h-full transition-all duration-300 ${cardBg}`}
       style={{
-        '--chart-label': themeMode === 'light' ? '#1e3a8a' : '#60a5fa',
-        '--border': themeMode === 'light' ? 'rgba(30, 58, 138, 0.25)' : 'rgba(30, 64, 175, 0.45)',
-        '--chart-background': themeMode === 'light' ? '#ffffff' : '#080f20',
-        '--chart-foreground': themeMode === 'light' ? '#0f172a' : '#f1f5f9',
-        '--chart-foreground-muted': themeMode === 'light' ? '#1e40af' : '#93c5fd',
+        '--chart-label': themeMode === 'light' ? '#1e3a8a' : themeMode === 'colorful' ? '#c084fc' : '#60a5fa',
+        '--border': themeMode === 'light' ? 'rgba(30, 58, 138, 0.25)' : themeMode === 'colorful' ? 'rgba(168, 85, 247, 0.3)' : 'rgba(30, 64, 175, 0.45)',
+        '--chart-background': themeMode === 'light' ? '#ffffff' : themeMode === 'colorful' ? '#131030' : '#080f20',
+        '--chart-foreground': themeMode === 'light' ? '#0f172a' : themeMode === 'colorful' ? '#faf5ff' : '#f1f5f9',
+        '--chart-foreground-muted': themeMode === 'light' ? '#1e40af' : themeMode === 'colorful' ? '#d8b4fe' : '#93c5fd',
       } as React.CSSProperties}
     >
       {/* Header */}
-      <div className="flex items-center justify-between gap-1.5 mb-1 pb-2 border-b border-blue-900/30">
+      <div className={`flex items-center justify-between gap-1.5 mb-1 pb-2 border-b ${themeMode === 'colorful' ? 'border-purple-500/25' : 'border-blue-900/30'}`}>
         <div className="flex items-center gap-2">
-          <div className={`p-1.5 rounded-lg border shrink-0 ${themeMode === 'light' ? 'bg-blue-100 text-blue-900 border-blue-300' : 'bg-blue-950/80 text-blue-300 border-blue-800/50'}`}>
+          <div className={`p-1.5 rounded-lg border shrink-0 ${
+            themeMode === 'light' 
+              ? 'bg-blue-100 text-blue-900 border-blue-300' 
+              : themeMode === 'colorful'
+                ? 'bg-purple-500/20 text-purple-300 border-purple-500/30'
+                : 'bg-blue-950/80 text-blue-300 border-blue-800/50'
+          }`}>
             <RadarIcon className="w-3.5 h-3.5" />
           </div>
           <div>
@@ -211,7 +219,9 @@ export const RadarChartCard: React.FC<RingChartCardProps> = ({
               <span className={`text-[9px] px-1.5 py-0.2 rounded-full font-medium ${
                 themeMode === 'light' 
                   ? 'bg-blue-100 text-blue-900 border border-blue-300' 
-                  : 'bg-blue-950/80 text-blue-300 border border-blue-800/60'
+                  : themeMode === 'colorful'
+                    ? 'bg-purple-950/80 text-purple-200 border border-purple-500/40'
+                    : 'bg-blue-950/80 text-blue-300 border border-blue-800/60'
               }`}>
                 {longPct.toFixed(1)}% Bullish
               </span>
@@ -220,8 +230,14 @@ export const RadarChartCard: React.FC<RingChartCardProps> = ({
           </div>
         </div>
 
-        {/* View Switcher in Dark Blue */}
-        <div className="flex items-center gap-1 bg-blue-950/80 p-0.5 rounded-lg border border-blue-900/60 shrink-0">
+        {/* View Switcher */}
+        <div className={`flex items-center gap-1 p-0.5 rounded-lg border shrink-0 ${
+          themeMode === 'light' 
+            ? 'bg-slate-100 border-slate-200' 
+            : themeMode === 'colorful'
+              ? 'bg-[#181438] border-purple-500/30'
+              : 'bg-blue-950/80 border-blue-900/60'
+        }`}>
           <button
             onClick={() => {
               setViewMode('sentiment');
@@ -229,8 +245,12 @@ export const RadarChartCard: React.FC<RingChartCardProps> = ({
             }}
             className={`px-2 py-0.5 rounded text-[9px] font-medium transition-all ${
               viewMode === 'sentiment'
-                ? (themeMode === 'light' ? 'bg-blue-800 text-white shadow-sm font-semibold' : 'bg-blue-600 text-white font-semibold shadow-md border border-blue-500')
-                : 'text-blue-300/70 hover:text-white'
+                ? (themeMode === 'light' 
+                    ? 'bg-blue-800 text-white shadow-sm font-semibold' 
+                    : themeMode === 'colorful'
+                      ? 'bg-gradient-to-r from-violet-600 to-fuchsia-600 text-white font-semibold shadow-md shadow-purple-900/50'
+                      : 'bg-blue-600 text-white font-semibold shadow-md border border-blue-500')
+                : (themeMode === 'colorful' ? 'text-purple-300/70 hover:text-white' : 'text-blue-300/70 hover:text-white')
             }`}
           >
             Sentiment
@@ -242,8 +262,12 @@ export const RadarChartCard: React.FC<RingChartCardProps> = ({
             }}
             className={`px-2 py-0.5 rounded text-[9px] font-medium transition-all ${
               viewMode === 'sectors'
-                ? (themeMode === 'light' ? 'bg-blue-800 text-white shadow-sm font-semibold' : 'bg-blue-600 text-white font-semibold shadow-md border border-blue-500')
-                : 'text-blue-300/70 hover:text-white'
+                ? (themeMode === 'light' 
+                    ? 'bg-blue-800 text-white shadow-sm font-semibold' 
+                    : themeMode === 'colorful'
+                      ? 'bg-gradient-to-r from-violet-600 to-fuchsia-600 text-white font-semibold shadow-md shadow-purple-900/50'
+                      : 'bg-blue-600 text-white font-semibold shadow-md border border-blue-500')
+                : (themeMode === 'colorful' ? 'text-purple-300/70 hover:text-white' : 'text-blue-300/70 hover:text-white')
             }`}
           >
             Sectors

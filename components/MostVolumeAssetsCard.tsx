@@ -74,18 +74,30 @@ export const MostVolumeAssetsCard: React.FC<MostVolumeAssetsCardProps> = ({
 
   const cardBg = themeMode === 'light' 
     ? 'bg-white border-slate-200 shadow-xl' 
-    : 'bg-slate-900/80 border-blue-500/10 shadow-2xl backdrop-blur-md';
+    : themeMode === 'colorful'
+      ? 'bg-[#12102b]/90 border-purple-500/25 shadow-2xl shadow-purple-950/60 backdrop-blur-xl'
+      : 'bg-slate-900/80 border-blue-500/10 shadow-2xl backdrop-blur-md';
 
-  const textMain = themeMode === 'light' ? 'text-slate-900' : 'text-white';
-  const textSub = themeMode === 'light' ? 'text-slate-500' : 'text-slate-400';
-  const rowHover = themeMode === 'light' ? 'hover:bg-slate-50 border-slate-100' : 'hover:bg-blue-500/10 border-blue-900/20';
+  const textMain = themeMode === 'light' ? 'text-slate-900' : themeMode === 'colorful' ? 'text-purple-50' : 'text-white';
+  const textSub = themeMode === 'light' ? 'text-slate-500' : themeMode === 'colorful' ? 'text-purple-300/70' : 'text-slate-400';
+  const rowHover = themeMode === 'light' 
+    ? 'hover:bg-slate-50 border-slate-100' 
+    : themeMode === 'colorful'
+      ? 'hover:bg-purple-600/15 border-purple-900/30'
+      : 'hover:bg-blue-500/10 border-blue-900/20';
 
   return (
     <div className={`rounded-xl sm:rounded-2xl border p-3 sm:p-3.5 flex flex-col h-full transition-all duration-300 ${cardBg}`}>
       {/* Header */}
-      <div className="flex items-center justify-between gap-1.5 mb-1.5 pb-2 border-b border-inherit">
+      <div className={`flex items-center justify-between gap-1.5 mb-1.5 pb-2 border-b ${themeMode === 'colorful' ? 'border-purple-500/25' : 'border-inherit'}`}>
         <div className="flex items-center gap-2">
-          <div className={`p-1.5 rounded-lg border ${themeMode === 'light' ? 'bg-orange-50 text-orange-600 border-orange-200' : 'bg-orange-500/10 text-orange-400 border-orange-500/20'}`}>
+          <div className={`p-1.5 rounded-lg border ${
+            themeMode === 'light' 
+              ? 'bg-orange-50 text-orange-600 border-orange-200' 
+              : themeMode === 'colorful'
+                ? 'bg-amber-500/20 text-amber-300 border-amber-500/40 shadow-[0_0_10px_rgba(245,158,11,0.2)]'
+                : 'bg-orange-500/10 text-orange-400 border-orange-500/20'
+          }`}>
             <Flame className="w-3.5 h-3.5" />
           </div>
           <div>
@@ -96,7 +108,13 @@ export const MostVolumeAssetsCard: React.FC<MostVolumeAssetsCardProps> = ({
           </div>
         </div>
 
-        <span className={`text-[9px] font-mono px-1.5 py-0.5 rounded-full border ${themeMode === 'light' ? 'bg-slate-100 text-slate-600 border-slate-200' : 'bg-slate-800 text-slate-300 border-white/10'}`}>
+        <span className={`text-[9px] font-mono px-1.5 py-0.5 rounded-full border ${
+          themeMode === 'light' 
+            ? 'bg-slate-100 text-slate-600 border-slate-200' 
+            : themeMode === 'colorful'
+              ? 'bg-purple-950/80 text-purple-200 border-purple-500/40'
+              : 'bg-slate-800 text-slate-300 border-white/10'
+        }`}>
           This Week
         </span>
       </div>
@@ -128,13 +146,13 @@ export const MostVolumeAssetsCard: React.FC<MostVolumeAssetsCardProps> = ({
                     {index + 1}
                   </span>
 
-                  <div className={`p-1 rounded-md border shrink-0 ${themeMode === 'light' ? 'bg-slate-100 border-slate-200 text-slate-700' : 'bg-slate-800/80 border-blue-500/10 text-blue-400 group-hover:border-blue-400'}`}>
+                  <div className={`p-1 rounded-md border shrink-0 ${themeMode === 'light' ? 'bg-slate-100 border-slate-200 text-slate-700' : themeMode === 'colorful' ? 'bg-[#1e1945] border-purple-500/30 text-purple-300 group-hover:border-purple-400' : 'bg-slate-800/80 border-blue-500/10 text-blue-400 group-hover:border-blue-400'}`}>
                     {getAssetIcon(asset.commodity)}
                   </div>
 
                   <div className="min-w-0 flex-1">
                     <div className="flex items-center gap-1">
-                      <span className={`text-xs font-medium truncate ${textMain} group-hover:text-blue-500 transition-colors`}>
+                      <span className={`text-xs font-medium truncate ${textMain} ${themeMode === 'colorful' ? 'group-hover:text-cyan-300' : 'group-hover:text-blue-500'} transition-colors`}>
                         {asset.commodity}
                       </span>
                     </div>
@@ -143,7 +161,7 @@ export const MostVolumeAssetsCard: React.FC<MostVolumeAssetsCardProps> = ({
                     <div className="flex items-center gap-1.5 mt-0.5">
                       <div className="h-1 w-14 sm:w-16 bg-slate-700/30 rounded-full overflow-hidden flex">
                         <div 
-                          className="h-full bg-blue-500 rounded-l-full" 
+                          className={`h-full ${themeMode === 'colorful' ? 'bg-emerald-400' : 'bg-blue-500'} rounded-l-full`} 
                           style={{ width: `${asset.longPct}%` }}
                           title={`Long: ${asset.longPct.toFixed(0)}%`}
                         />

@@ -5,10 +5,9 @@ import CompareView from './components/CompareView';
 import MarketTicker from './components/MarketTicker';
 import LoginGate from './components/LoginGate';
 import ChatWidget from './components/ChatWidget';
-import VoiceChatWidget from './components/VoiceChatWidget';
 import { parseSummaryCSV, parseHistoryCSV } from './utils';
 import { SUMMARY_SHEET_URL, HISTORY_SHEET_URL } from './constants';
-import { BarChart3, RefreshCw, AlertCircle, Loader2, Sun, LogOut } from 'lucide-react';
+import { BarChart3, RefreshCw, AlertCircle, Loader2, Sun, LogOut, Palette } from 'lucide-react';
 import { SummaryRow, HistoryRow, ThemeMode } from './types';
 
 const App: React.FC = () => {
@@ -102,6 +101,8 @@ const App: React.FC = () => {
     switch (themeMode) {
         case 'light':
             return 'bg-slate-50 text-slate-900 bg-[radial-gradient(at_0%_0%,_hsla(210,100%,96%,1)_0,_transparent_50%),_radial-gradient(at_50%_100%,_hsla(210,100%,98%,1)_0,_transparent_50%)]';
+        case 'colorful':
+            return 'bg-[#090a18] text-purple-50 bg-[radial-gradient(at_0%_0%,_hsla(275,85%,24%,0.45)_0,_transparent_55%),_radial-gradient(at_100%_0%,_hsla(190,95%,28%,0.4)_0,_transparent_55%),_radial-gradient(at_50%_100%,_hsla(330,85%,28%,0.35)_0,_transparent_55%)]';
         case 'ocean':
         default:
             return 'bg-[#0f172a] text-blue-50 bg-[radial-gradient(at_0%_0%,_hsla(222,47%,25%,1)_0,_transparent_50%),_radial-gradient(at_50%_100%,_hsla(217,91%,35%,0.2)_0,_transparent_50%),_radial-gradient(at_100%_0%,_hsla(210,100%,30%,1)_0,_transparent_50%)]';
@@ -111,6 +112,7 @@ const App: React.FC = () => {
   const getHeaderStyles = () => {
     switch (themeMode) {
         case 'light': return 'bg-white/80 border-slate-200';
+        case 'colorful': return 'bg-[#12102b]/85 border-purple-500/25 shadow-[0_4px_30px_rgba(139,92,246,0.15)]';
         case 'ocean': default: return 'bg-slate-900/80 border-blue-800/20';
     }
   };
@@ -127,46 +129,71 @@ const App: React.FC = () => {
         <header className={`w-full border-b backdrop-blur-xl h-14 transition-colors duration-500 ${getHeaderStyles()}`}>
             <div className="max-w-[1920px] mx-auto px-4 sm:px-6 lg:px-8 h-full flex items-center justify-between">
             <div className="flex items-center gap-3">
-                <div className={`p-1.5 rounded-lg shadow-lg ring-1 ring-white/10 ${themeMode === 'light' ? 'bg-blue-600 text-white' : 'bg-gradient-to-br from-blue-600 to-blue-400'}`}>
+                <div className={`p-1.5 rounded-lg shadow-lg ring-1 ring-white/10 ${
+                  themeMode === 'light' 
+                    ? 'bg-blue-600 text-white' 
+                    : themeMode === 'colorful'
+                      ? 'bg-gradient-to-br from-violet-600 via-fuchsia-500 to-cyan-400 text-white shadow-[0_0_15px_rgba(168,85,247,0.4)]'
+                      : 'bg-gradient-to-br from-blue-600 to-blue-400 text-white'
+                }`}>
                     <BarChart3 className="w-5 h-5" />
                 </div>
                 <div className="flex flex-col justify-center">
                     <h1 className={`text-xl font-heading font-medium tracking-tight leading-none ${themeMode === 'light' ? 'text-slate-900' : 'text-white'}`}>
-                    EG-Finance <span className="text-white font-semibold">Fx</span> <span className={themeMode === 'light' ? 'text-blue-600 font-medium' : 'text-blue-300 font-medium'}>COT Data</span>
+                    EG-Finance <span className={themeMode === 'colorful' ? 'text-transparent bg-clip-text bg-gradient-to-r from-pink-400 to-amber-300 font-bold' : 'text-white font-semibold'}>Fx</span> <span className={
+                      themeMode === 'light' 
+                        ? 'text-blue-600 font-medium' 
+                        : themeMode === 'colorful'
+                          ? 'text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-violet-300 font-semibold'
+                          : 'text-blue-300 font-medium'
+                    }>COT Data</span>
                     </h1>
                 </div>
             </div>
 
             <div className="flex items-center gap-3">
-                {/* Theme Switcher */}
-                <div className={`flex items-center gap-1 p-1 rounded-lg border ${themeMode === 'light' ? 'bg-slate-100 border-slate-200' : 'bg-slate-950/50 border-white/5'}`}>
+                {/* Theme Switcher: Dark, Light, Colorful */}
+                <div className={`flex items-center gap-1 p-1 rounded-lg border ${
+                  themeMode === 'light' 
+                    ? 'bg-slate-100 border-slate-200' 
+                    : themeMode === 'colorful'
+                      ? 'bg-[#18153b] border-purple-500/30'
+                      : 'bg-slate-950/50 border-white/5'
+                }`}>
                     <button 
                         onClick={() => setThemeMode('ocean')}
                         className={`p-1.5 rounded-md transition-all ${themeMode === 'ocean' ? 'bg-blue-600 text-white shadow-sm' : 'text-slate-400 hover:text-white'}`}
-                        title="Ocean Dark"
+                        title="Dark Mode (الدارك سيم)"
                     >
                         <div className="w-4 h-4 bg-blue-900 rounded-full border border-blue-400"></div>
                     </button>
                     <button 
                         onClick={() => setThemeMode('light')}
                         className={`p-1.5 rounded-md transition-all ${themeMode === 'light' ? 'bg-white text-blue-600 shadow-sm' : 'text-slate-400 hover:text-white'}`}
-                        title="Light Mode"
+                        title="Light Mode (اللايت سيم)"
                     >
                         <Sun className="w-4 h-4" />
+                    </button>
+                    <button 
+                        onClick={() => setThemeMode('colorful')}
+                        className={`p-1.5 rounded-md transition-all flex items-center justify-center ${themeMode === 'colorful' ? 'bg-gradient-to-r from-violet-600 via-fuchsia-600 to-cyan-500 text-white shadow-[0_0_12px_rgba(217,70,239,0.5)]' : 'text-purple-400 hover:text-white'}`}
+                        title="Colorful Mode (كالر فول سيم)"
+                    >
+                        <Palette className="w-4 h-4" />
                     </button>
                 </div>
 
                 <div className="h-6 w-px bg-current opacity-10 mx-1"></div>
 
                 {latestDate && (
-                    <div className={`hidden sm:flex flex-col items-end mr-2 ${themeMode === 'light' ? 'text-slate-600' : 'text-slate-300'}`}>
+                    <div className={`hidden sm:flex flex-col items-end mr-2 ${themeMode === 'light' ? 'text-slate-600' : themeMode === 'colorful' ? 'text-purple-200' : 'text-slate-300'}`}>
                         <span className="text-[10px] uppercase font-medium opacity-60 leading-none">Data Date</span>
                         <span className="text-xs font-mono font-medium leading-none mt-0.5">{latestDate}</span>
                     </div>
                 )}
 
                 {lastUpdated && !isLoading && (
-                <span className={`hidden lg:block text-xs font-mono ${themeMode === 'light' ? 'text-slate-500' : 'text-slate-400'}`}>
+                <span className={`hidden lg:block text-xs font-mono ${themeMode === 'light' ? 'text-slate-500' : themeMode === 'colorful' ? 'text-purple-300' : 'text-slate-400'}`}>
                     Synced: {lastUpdated.toLocaleTimeString()}
                 </span>
                 )}
@@ -176,7 +203,9 @@ const App: React.FC = () => {
                 className={`flex items-center gap-2 px-3 py-1.5 border rounded-lg text-xs font-medium uppercase tracking-wider transition-all disabled:opacity-50 
                     ${themeMode === 'light' 
                         ? 'bg-white hover:bg-slate-50 border-slate-200 text-blue-600' 
-                        : 'bg-blue-600/10 hover:bg-blue-600/20 border-blue-500/30 text-blue-400'}`}
+                        : themeMode === 'colorful'
+                          ? 'bg-gradient-to-r from-violet-600/20 to-fuchsia-600/20 hover:from-violet-600/30 hover:to-fuchsia-600/30 border-purple-500/40 text-purple-300'
+                          : 'bg-blue-600/10 hover:bg-blue-600/20 border-blue-500/30 text-blue-400'}`}
                 >
                 <RefreshCw className={`w-3.5 h-3.5 ${isLoading ? 'animate-spin' : ''}`} />
                 <span className="hidden sm:inline">Refresh</span>
@@ -187,7 +216,9 @@ const App: React.FC = () => {
                 className={`flex items-center gap-2 px-3 py-1.5 border rounded-lg text-xs font-medium uppercase tracking-wider transition-all 
                     ${themeMode === 'light' 
                         ? 'bg-white hover:bg-red-50 border-red-200 text-red-600' 
-                        : 'bg-red-500/10 hover:bg-red-500/20 border-red-500/30 text-red-400'}`}
+                        : themeMode === 'colorful'
+                          ? 'bg-rose-500/15 hover:bg-rose-500/25 border-rose-500/40 text-rose-300'
+                          : 'bg-red-500/10 hover:bg-red-500/20 border-red-500/30 text-red-400'}`}
                 >
                 <LogOut className="w-3.5 h-3.5" />
                 <span className="hidden sm:inline">Log Out</span>
@@ -256,7 +287,6 @@ const App: React.FC = () => {
         historyData={historyData} 
         historyDates={historyDates} 
       />
-      <VoiceChatWidget themeMode={themeMode} summaryData={summaryData} historyData={historyData} historyDates={historyDates} />
     </div>
   );
 };

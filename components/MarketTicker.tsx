@@ -25,6 +25,17 @@ const MarketTicker: React.FC<MarketTickerProps> = ({ data, themeMode }) => {
         neutral: 'text-slate-400'
       };
     }
+    if (themeMode === 'colorful') {
+      return {
+        bg: 'bg-[#141233]/90 border-b border-purple-500/20 backdrop-blur-md shadow-[0_4px_20px_rgba(139,92,246,0.1)]',
+        text: 'text-purple-200',
+        divider: 'bg-purple-500/30',
+        highlight: 'text-cyan-300 font-semibold',
+        positive: 'text-emerald-400 font-semibold',
+        negative: 'text-rose-400 font-semibold',
+        neutral: 'text-purple-300/60'
+      };
+    }
     return {
       bg: 'bg-slate-950/80 border-b border-blue-500/10 backdrop-blur-md',
       text: 'text-slate-400',

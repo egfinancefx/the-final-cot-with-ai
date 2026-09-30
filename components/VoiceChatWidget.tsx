@@ -251,11 +251,17 @@ export default function VoiceChatWidget({ themeMode, summaryData, historyData, h
         )}
         
         {showSettings && !isActive && !isConnecting && (
-            <div className={`w-64 p-4 rounded-2xl shadow-2xl border flex flex-col gap-3 ${themeMode === 'light' ? 'bg-white border-slate-200' : 'bg-slate-900 border-blue-500/30'}`}>
-                <h4 className={`text-sm font-semibold mb-1 ${themeMode === 'light' ? 'text-slate-800' : 'text-white'}`}>إعدادات الذكاء الاصطناعي</h4>
+            <div className={`w-64 p-4 rounded-2xl shadow-2xl border flex flex-col gap-3 ${
+              themeMode === 'light' 
+                ? 'bg-white border-slate-200' 
+                : themeMode === 'colorful'
+                  ? 'bg-[#14122e] border-purple-500/30 text-purple-100 shadow-[0_0_30px_rgba(139,92,246,0.25)]'
+                  : 'bg-slate-900 border-blue-500/30'
+            }`}>
+                <h4 className={`text-sm font-semibold mb-1 ${themeMode === 'light' ? 'text-slate-800' : themeMode === 'colorful' ? 'text-purple-100' : 'text-white'}`}>إعدادات الذكاء الاصطناعي</h4>
                 
                 <div className="flex flex-col gap-1.5">
-                    <label className={`text-xs font-medium ${themeMode === 'light' ? 'text-slate-600' : 'text-blue-200'}`}>اسمك (كيف يناديك؟)</label>
+                    <label className={`text-xs font-medium ${themeMode === 'light' ? 'text-slate-600' : themeMode === 'colorful' ? 'text-purple-300' : 'text-blue-200'}`}>اسمك (كيف يناديك؟)</label>
                     <input 
                         type="text" 
                         value={userName}
@@ -264,13 +270,15 @@ export default function VoiceChatWidget({ themeMode, summaryData, historyData, h
                         className={`px-3 py-2 text-xs rounded-xl border outline-none ${
                             themeMode === 'light' 
                             ? 'bg-slate-50 border-slate-200 text-slate-800 focus:border-blue-400' 
-                            : 'bg-slate-800 border-slate-700 text-white focus:border-white'
+                            : themeMode === 'colorful'
+                              ? 'bg-[#1a163d] border-purple-500/30 text-purple-100 focus:border-purple-400'
+                              : 'bg-slate-800 border-slate-700 text-white focus:border-white'
                         }`}
                     />
                 </div>
 
                 <div className="flex flex-col gap-1.5">
-                    <label className={`text-xs font-medium ${themeMode === 'light' ? 'text-slate-600' : 'text-blue-200'}`}>أسلوب وشخصية الردود</label>
+                    <label className={`text-xs font-medium ${themeMode === 'light' ? 'text-slate-600' : themeMode === 'colorful' ? 'text-purple-300' : 'text-blue-200'}`}>أسلوب وشخصية الردود</label>
                     <textarea 
                         value={botPersona}
                         onChange={(e) => setBotPersona(e.target.value)}
@@ -279,7 +287,9 @@ export default function VoiceChatWidget({ themeMode, summaryData, historyData, h
                         className={`px-3 py-2 text-xs rounded-xl border outline-none resize-none ${
                             themeMode === 'light' 
                             ? 'bg-slate-50 border-slate-200 text-slate-800 focus:border-blue-400' 
-                            : 'bg-slate-800 border-slate-700 text-white focus:border-white'
+                            : themeMode === 'colorful'
+                              ? 'bg-[#1a163d] border-purple-500/30 text-purple-100 focus:border-purple-400'
+                              : 'bg-slate-800 border-slate-700 text-white focus:border-white'
                         }`}
                     />
                 </div>
@@ -292,8 +302,8 @@ export default function VoiceChatWidget({ themeMode, summaryData, historyData, h
                     onClick={() => setShowSettings(!showSettings)}
                     className={`w-10 h-10 rounded-full shadow-lg transition-all flex items-center justify-center ${
                         showSettings
-                        ? (themeMode === 'light' ? 'bg-slate-200 text-slate-800' : 'bg-slate-700 text-white')
-                        : (themeMode === 'light' ? 'bg-white text-slate-500 hover:text-slate-800' : 'bg-slate-800 text-slate-400 hover:text-white')
+                        ? (themeMode === 'light' ? 'bg-slate-200 text-slate-800' : themeMode === 'colorful' ? 'bg-purple-600 text-white' : 'bg-slate-700 text-white')
+                        : (themeMode === 'light' ? 'bg-white text-slate-500 hover:text-slate-800' : themeMode === 'colorful' ? 'bg-[#181438] text-purple-300 hover:text-white border border-purple-500/30' : 'bg-slate-800 text-slate-400 hover:text-white')
                     }`}
                     title="إعدادات الصوت"
                 >
@@ -306,7 +316,7 @@ export default function VoiceChatWidget({ themeMode, summaryData, historyData, h
                 className={`w-14 h-14 rounded-full shadow-2xl transition-all hover:scale-110 flex items-center justify-center overflow-hidden group ${
                     isActive 
                         ? 'bg-rose-500 text-white animate-pulse shadow-rose-500/50' 
-                        : (themeMode === 'light' ? 'bg-white text-blue-600 border border-slate-200' : 'bg-slate-800 text-white border border-slate-700')
+                        : (themeMode === 'light' ? 'bg-white text-blue-600 border border-slate-200' : themeMode === 'colorful' ? 'bg-gradient-to-r from-violet-600 to-fuchsia-600 text-white border border-purple-400/40 shadow-[0_0_15px_rgba(192,132,252,0.4)]' : 'bg-slate-800 text-white border border-slate-700')
                 }`}
                 title="Live Voice Assistant"
             >

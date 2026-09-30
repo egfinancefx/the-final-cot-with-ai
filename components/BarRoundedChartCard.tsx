@@ -165,32 +165,46 @@ export const BarRoundedChartCard: React.FC<BarRoundedChartCardProps> = ({
   // Deep dark blue shades theme palette
   const cardBg = themeMode === 'light' 
     ? 'bg-slate-50 border-blue-900/20 shadow-xl' 
-    : 'bg-[#080f20] border-blue-900/60 shadow-2xl shadow-blue-950/80 backdrop-blur-md';
+    : themeMode === 'colorful'
+      ? 'bg-[#12102b]/90 border-purple-500/25 shadow-2xl shadow-purple-950/60 backdrop-blur-xl'
+      : 'bg-[#080f20] border-blue-900/60 shadow-2xl shadow-blue-950/80 backdrop-blur-md';
 
-  const textMain = themeMode === 'light' ? 'text-blue-950' : 'text-blue-100';
-  const textSub = themeMode === 'light' ? 'text-blue-800/70' : 'text-blue-300/70';
+  const textMain = themeMode === 'light' ? 'text-blue-950' : themeMode === 'colorful' ? 'text-purple-50' : 'text-blue-100';
+  const textSub = themeMode === 'light' ? 'text-blue-800/70' : themeMode === 'colorful' ? 'text-purple-300/70' : 'text-blue-300/70';
 
-  // CSS variables for dark blue shades
+  // CSS variables for dark blue shades & colorful neon accents
   const chartVariables = useMemo(() => {
-    return themeMode === 'light'
-      ? {
-          '--chart-1': '#1e40af', // Line (revenue): Dark Navy Blue (Blue 800)
-          '--chart-3': '#1d4ed8', // SeriesBar (units): Rich Dark Blue (Blue 700)
-          '--chart-4': '#3b82f6', // Area (runRate): Soft Ocean Blue (Blue 500)
-          '--chart-grid': '#cbd5e1',
-          '--chart-label': '#1e3a8a',
-          '--chart-tooltip-background': 'rgba(15, 23, 42, 0.98)',
-          '--chart-tooltip-foreground': '#f8fafc',
-        }
-      : {
-          '--chart-1': '#2563eb', // Line (revenue): Vibrant Deep Blue (Blue 600)
-          '--chart-3': '#1d4ed8', // SeriesBar (units): Deep Navy Blue (Blue 700)
-          '--chart-4': '#1e3a8a', // Area (runRate): Deep Midnight Blue (Blue 900)
-          '--chart-grid': '#0f172a',
-          '--chart-label': '#60a5fa',
-          '--chart-tooltip-background': 'rgba(8, 15, 32, 0.98)',
-          '--chart-tooltip-foreground': '#f1f5f9',
-        };
+    if (themeMode === 'light') {
+      return {
+        '--chart-1': '#1e40af', // Line (revenue): Dark Navy Blue (Blue 800)
+        '--chart-3': '#1d4ed8', // SeriesBar (units): Rich Dark Blue (Blue 700)
+        '--chart-4': '#3b82f6', // Area (runRate): Soft Ocean Blue (Blue 500)
+        '--chart-grid': '#cbd5e1',
+        '--chart-label': '#1e3a8a',
+        '--chart-tooltip-background': 'rgba(15, 23, 42, 0.98)',
+        '--chart-tooltip-foreground': '#f8fafc',
+      };
+    }
+    if (themeMode === 'colorful') {
+      return {
+        '--chart-1': '#a855f7', // Line (revenue): Radiant Violet
+        '--chart-3': '#06b6d4', // SeriesBar (units): Glowing Neon Cyan
+        '--chart-4': '#ec4899', // Area (runRate): Pink
+        '--chart-grid': '#2e2154',
+        '--chart-label': '#c084fc',
+        '--chart-tooltip-background': 'rgba(22, 19, 56, 0.98)',
+        '--chart-tooltip-foreground': '#f5f3ff',
+      };
+    }
+    return {
+      '--chart-1': '#2563eb', // Line (revenue): Vibrant Deep Blue (Blue 600)
+      '--chart-3': '#1d4ed8', // SeriesBar (units): Deep Navy Blue (Blue 700)
+      '--chart-4': '#1e3a8a', // Area (runRate): Deep Midnight Blue (Blue 900)
+      '--chart-grid': '#0f172a',
+      '--chart-label': '#60a5fa',
+      '--chart-tooltip-background': 'rgba(8, 15, 32, 0.98)',
+      '--chart-tooltip-foreground': '#f1f5f9',
+    };
   }, [themeMode]);
 
   const latest = data[data.length - 1];
@@ -201,9 +215,9 @@ export const BarRoundedChartCard: React.FC<BarRoundedChartCardProps> = ({
       style={chartVariables as React.CSSProperties}
     >
       {/* Clean Minimal Header */}
-      <div className="flex items-center justify-between gap-2 mb-2 pb-2.5 border-b border-blue-900/30">
+      <div className={`flex items-center justify-between gap-2 mb-2 pb-2.5 border-b ${themeMode === 'colorful' ? 'border-purple-500/25' : 'border-blue-900/30'}`}>
         <div className="flex items-center gap-2.5 min-w-0">
-          <div className={`p-1.5 rounded-lg border shrink-0 ${themeMode === 'light' ? 'bg-blue-100 text-blue-900 border-blue-300' : 'bg-blue-950/80 text-blue-300 border-blue-800/50'}`}>
+          <div className={`p-1.5 rounded-lg border shrink-0 ${themeMode === 'light' ? 'bg-blue-100 text-blue-900 border-blue-300' : themeMode === 'colorful' ? 'bg-purple-500/20 text-purple-300 border-purple-500/30' : 'bg-blue-950/80 text-blue-300 border-blue-800/50'}`}>
             <BarChart3 className="w-4 h-4" />
           </div>
           <div className="min-w-0">
@@ -217,8 +231,14 @@ export const BarRoundedChartCard: React.FC<BarRoundedChartCardProps> = ({
         </div>
 
         {/* 12-Week Indicator Badge */}
-        <div className="flex items-center gap-1.5 shrink-0 px-2 py-1 rounded-md bg-blue-950/80 border border-blue-800/60 text-blue-300 text-[10px] font-mono font-medium">
-          <Activity className="w-3 h-3 text-blue-400" />
+        <div className={`flex items-center gap-1.5 shrink-0 px-2 py-1 rounded-md border text-[10px] font-mono font-medium ${
+          themeMode === 'light' 
+            ? 'bg-blue-50 border-blue-200 text-blue-700' 
+            : themeMode === 'colorful' 
+              ? 'bg-purple-950/80 border-purple-500/40 text-purple-200' 
+              : 'bg-blue-950/80 border-blue-800/60 text-blue-300'
+        }`}>
+          <Activity className={`w-3 h-3 ${themeMode === 'colorful' ? 'text-cyan-400' : 'text-blue-400'}`} />
           <span>Past 12 Weeks</span>
         </div>
       </div>
@@ -264,13 +284,13 @@ export const BarRoundedChartCard: React.FC<BarRoundedChartCardProps> = ({
         </ComposedChart>
       </div>
 
-      {/* Clean Bottom Legend in Dark Blue Shades */}
-      <div className={`mt-1 pt-2 border-t border-blue-900/30 flex items-center justify-between gap-2 text-[10px] ${textSub}`}>
+      {/* Clean Bottom Legend */}
+      <div className={`mt-1 pt-2 border-t flex items-center justify-between gap-2 text-[10px] ${textSub} ${themeMode === 'colorful' ? 'border-purple-500/25' : 'border-blue-900/30'}`}>
         <div className="flex items-center gap-2">
           {/* SeriesBar: Units */}
           <div className="flex items-center gap-1.5">
             <span className="w-2.5 h-3 bg-[var(--chart-3)] rounded-t-[2px] shrink-0" />
-            <span className="font-medium text-blue-200">
+            <span className={`font-medium ${themeMode === 'colorful' ? 'text-purple-200' : 'text-blue-200'}`}>
               Net Change (Bars):{' '}
               <strong className={latest && Number(latest.rawNetChange) >= 0 ? 'text-emerald-400' : 'text-rose-400'}>
                 {latest ? (Number(latest.rawNetChange) > 0 ? `+${formatCurrency(Number(latest.rawNetChange))}` : formatCurrency(Number(latest.rawNetChange))) : '—'}
@@ -280,8 +300,8 @@ export const BarRoundedChartCard: React.FC<BarRoundedChartCardProps> = ({
         </div>
 
         {/* Status Indicator */}
-        <div className="text-[9px] font-mono text-blue-300/80 flex items-center gap-1">
-          <Activity className="w-3 h-3 text-blue-400" />
+        <div className={`text-[9px] font-mono flex items-center gap-1 ${themeMode === 'colorful' ? 'text-purple-300/80' : 'text-blue-300/80'}`}>
+          <Activity className={`w-3 h-3 ${themeMode === 'colorful' ? 'text-cyan-400' : 'text-blue-400'}`} />
           <span>CFTC Verified</span>
         </div>
       </div>

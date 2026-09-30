@@ -103,17 +103,22 @@ const AssetTrendCard: React.FC<AssetTrendCardProps> = ({
   const isChangePositive = netChange > 0;
   const chartId = `chart-${title.replace(/\s+/g, '-')}`;
 
-  // Dark Blue Shades Palette for Sparkline
-  const strokeColor = themeMode === 'light' ? "#1e40af" : "#2563eb";
-  const gradientColor = themeMode === 'light' ? "#1d4ed8" : "#1e3a8a";
+  // Palette for Sparkline
+  const strokeColor = themeMode === 'light' ? "#1e40af" : themeMode === 'colorful' ? "#c084fc" : "#2563eb";
+  const gradientColor = themeMode === 'light' ? "#1d4ed8" : themeMode === 'colorful' ? "#7c3aed" : "#1e3a8a";
   const gradientOpacity = isHovered ? 0.45 : 0.25;
 
-  // Dark Blue Theme Base Styles (درجات الأزرق الداكن والبحري الفاخر)
+  // Theme Base Styles
   const getThemeBaseStyles = () => {
     if (themeMode === 'light') {
         return isSelected 
             ? 'bg-slate-50 border-blue-800 shadow-xl ring-1 ring-blue-700 z-10' 
             : 'bg-white border-blue-900/20 hover:border-blue-900/60 hover:shadow-blue-950/20 hover:shadow-xl';
+    }
+    if (themeMode === 'colorful') {
+        return isSelected 
+            ? 'bg-gradient-to-br from-[#24174d] to-[#161a45] border-fuchsia-400 shadow-[0_0_35px_rgba(217,70,239,0.35)] ring-1 ring-fuchsia-300 z-10' 
+            : 'bg-[#12102b]/90 border-purple-500/25 hover:border-purple-400/60 hover:bg-[#1a163d] hover:shadow-[0_0_30px_rgba(168,85,247,0.3)] shadow-xl shadow-purple-950/60';
     }
     // Ocean Dark Blue Mode
     return isSelected 
@@ -127,6 +132,11 @@ const AssetTrendCard: React.FC<AssetTrendCardProps> = ({
           if (type === 'secondary') return 'text-blue-800/80';
           if (type === 'sub') return 'text-blue-600/70';
       }
+      if (themeMode === 'colorful') {
+          if (type === 'primary') return 'text-purple-50 group-hover:text-white';
+          if (type === 'secondary') return 'text-purple-200/80';
+          if (type === 'sub') return 'text-purple-300/70';
+      }
       if (type === 'primary') return 'text-blue-100 group-hover:text-white';
       if (type === 'secondary') return 'text-blue-300/80';
       return 'text-blue-400/60';
@@ -138,6 +148,11 @@ const AssetTrendCard: React.FC<AssetTrendCardProps> = ({
             ? 'bg-blue-100 text-blue-900 border-blue-300' 
             : 'bg-rose-100 text-rose-900 border-rose-200';
       }
+      if (themeMode === 'colorful') {
+          return positive 
+            ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40 shadow-[0_0_10px_rgba(16,185,129,0.2)]' 
+            : 'bg-rose-500/20 text-rose-300 border-rose-500/40 shadow-[0_0_10px_rgba(244,63,94,0.2)]';
+      }
       return positive 
         ? 'bg-blue-950/90 border-blue-800/80 text-blue-300' 
         : 'bg-rose-950/50 border-rose-800/40 text-rose-300';
@@ -145,6 +160,7 @@ const AssetTrendCard: React.FC<AssetTrendCardProps> = ({
 
   const getTooltipStyle = () => {
       if (themeMode === 'light') return 'bg-white border-blue-900/20 text-blue-950 shadow-xl';
+      if (themeMode === 'colorful') return 'bg-[#181438] border-purple-500/40 text-purple-100 shadow-2xl';
       return 'bg-[#080f20] border-blue-900/80 text-blue-100 shadow-2xl';
   };
 
@@ -164,6 +180,7 @@ const AssetTrendCard: React.FC<AssetTrendCardProps> = ({
                 <div className={`flex items-center ${compact ? 'gap-2.5' : 'gap-3'}`}>
                     <div className={`${compact ? 'p-2 rounded-xl' : 'p-3 rounded-xl'} border shrink-0 transition-all duration-300 
                         ${themeMode === 'light' ? 'bg-blue-100 text-blue-900 border-blue-300' : 
+                          themeMode === 'colorful' ? 'bg-purple-500/20 border-purple-500/30 text-purple-300 group-hover:border-purple-400 group-hover:shadow-[0_0_15px_rgba(168,85,247,0.3)]' :
                           'bg-blue-950/80 border-blue-800/60 text-blue-300 group-hover:border-blue-600 group-hover:shadow-[0_0_15px_rgba(37,99,235,0.25)]'}
                     `}>
                         {getAssetIcon(title)}
@@ -189,9 +206,9 @@ const AssetTrendCard: React.FC<AssetTrendCardProps> = ({
                     value={longRatio} 
                     centerValue={netPos}
                     size={compact ? 68 : 90}
-                    activeFill={themeMode === 'light' ? '#1e40af' : '#2563eb'}
-                    inactiveFill={themeMode === 'light' ? 'rgba(30, 64, 175, 0.15)' : 'rgba(30, 58, 138, 0.35)'}
-                    valueClassName={themeMode === 'light' ? 'text-blue-900' : 'text-blue-300'}
+                    activeFill={themeMode === 'light' ? '#1e40af' : themeMode === 'colorful' ? '#c084fc' : '#2563eb'}
+                    inactiveFill={themeMode === 'light' ? 'rgba(30, 64, 175, 0.15)' : themeMode === 'colorful' ? 'rgba(192, 132, 252, 0.2)' : 'rgba(30, 58, 138, 0.35)'}
+                    valueClassName={themeMode === 'light' ? 'text-blue-900' : themeMode === 'colorful' ? 'text-purple-200' : 'text-blue-300'}
                     animationDelayMs={index * 140 + 850}
                 />
             </div>
@@ -280,35 +297,37 @@ const AssetTrendCard: React.FC<AssetTrendCardProps> = ({
         </ResponsiveContainer>
       </div>
 
-      {/* Long/Short Breakdown Footer in Dark Blue Shades */}
+      {/* Long/Short Breakdown Footer */}
       <div className={`grid grid-cols-2 gap-px mt-0 border-t relative z-10 
           ${themeMode === 'light' ? 'bg-blue-50/60 border-blue-900/20' : 
+            themeMode === 'colorful' ? 'bg-purple-950/40 border-purple-500/25' :
             'bg-blue-950/60 border-blue-900/40'}
       `}>
           <div className={`${compact ? 'p-2 sm:p-2.5' : 'p-4'} flex flex-col items-center border-r transition-colors 
             ${themeMode === 'light' ? 'border-blue-900/20 hover:bg-blue-50' : 
+              themeMode === 'colorful' ? 'border-purple-500/25 hover:bg-purple-600/15' :
               'border-blue-900/40 hover:bg-blue-900/20'}`}>
-              <span className={`${compact ? 'text-[9px] sm:text-[10px] mb-0.5' : 'text-[10px] mb-1'} uppercase font-medium tracking-wide ${themeMode === 'light' ? 'text-blue-800/70' : 'text-blue-300/70'}`}>Longs</span>
+              <span className={`${compact ? 'text-[9px] sm:text-[10px] mb-0.5' : 'text-[10px] mb-1'} uppercase font-medium tracking-wide ${themeMode === 'light' ? 'text-blue-800/70' : themeMode === 'colorful' ? 'text-purple-300/80' : 'text-blue-300/70'}`}>Longs</span>
               
-              <div className={`flex items-center gap-0.5 sm:gap-1 font-medium font-mono ${compact ? 'text-[13px] sm:text-sm' : 'text-xl'} ${longChange > 0 ? (themeMode === 'light' ? 'text-blue-800' : 'text-blue-300') : (themeMode === 'light' ? 'text-rose-700' : 'text-rose-400')}`}>
+              <div className={`flex items-center gap-0.5 sm:gap-1 font-medium font-mono ${compact ? 'text-[13px] sm:text-sm' : 'text-xl'} ${longChange > 0 ? (themeMode === 'light' ? 'text-blue-800' : themeMode === 'colorful' ? 'text-emerald-400' : 'text-blue-300') : (themeMode === 'light' ? 'text-rose-700' : 'text-rose-400')}`}>
                   {longChange > 0 ? <ArrowUpRight className={compact ? "w-3.5 h-3.5" : "w-5 h-5"} /> : longChange < 0 ? <ArrowDownRight className={compact ? "w-3.5 h-3.5" : "w-5 h-5"} /> : <Minus className={compact ? "w-3.5 h-3.5" : "w-5 h-5"} />}
                   <span>{formatCurrency(Math.abs(longChange))}</span>
               </div>
               
-              <span className={`${compact ? 'text-[9px] sm:text-[10px] mt-0.5' : 'text-[10px] mt-0.5'} font-medium font-mono ${themeMode === 'light' ? 'text-blue-700/60' : 'text-blue-400/60'}`}>
+              <span className={`${compact ? 'text-[9px] sm:text-[10px] mt-0.5' : 'text-[10px] mt-0.5'} font-medium font-mono ${themeMode === 'light' ? 'text-blue-700/60' : themeMode === 'colorful' ? 'text-purple-300/60' : 'text-blue-400/60'}`}>
                   Pos: {formatCurrency(longPos)}
               </span>
           </div>
           <div className={`${compact ? 'p-2 sm:p-2.5' : 'p-4'} flex flex-col items-center transition-colors 
-            ${themeMode === 'light' ? 'hover:bg-blue-50' : 'hover:bg-blue-900/20'}`}>
-              <span className={`${compact ? 'text-[9px] sm:text-[10px] mb-0.5' : 'text-[10px] mb-1'} uppercase font-medium tracking-wide ${themeMode === 'light' ? 'text-blue-800/70' : 'text-blue-300/70'}`}>Shorts</span>
+            ${themeMode === 'light' ? 'hover:bg-blue-50' : themeMode === 'colorful' ? 'hover:bg-purple-600/15' : 'hover:bg-blue-900/20'}`}>
+              <span className={`${compact ? 'text-[9px] sm:text-[10px] mb-0.5' : 'text-[10px] mb-1'} uppercase font-medium tracking-wide ${themeMode === 'light' ? 'text-blue-800/70' : themeMode === 'colorful' ? 'text-purple-300/80' : 'text-blue-300/70'}`}>Shorts</span>
               
-              <div className={`flex items-center gap-0.5 sm:gap-1 font-medium font-mono ${compact ? 'text-[13px] sm:text-sm' : 'text-xl'} ${shortChange > 0 ? (themeMode === 'light' ? 'text-blue-800' : 'text-blue-300') : (themeMode === 'light' ? 'text-rose-700' : 'text-rose-400')}`}>
+              <div className={`flex items-center gap-0.5 sm:gap-1 font-medium font-mono ${compact ? 'text-[13px] sm:text-sm' : 'text-xl'} ${shortChange > 0 ? (themeMode === 'light' ? 'text-blue-800' : themeMode === 'colorful' ? 'text-emerald-400' : 'text-blue-300') : (themeMode === 'light' ? 'text-rose-700' : 'text-rose-400')}`}>
                   {shortChange > 0 ? <ArrowUpRight className={compact ? "w-3.5 h-3.5" : "w-5 h-5"} /> : shortChange < 0 ? <ArrowDownRight className={compact ? "w-3.5 h-3.5" : "w-5 h-5"} /> : <Minus className={compact ? "w-3.5 h-3.5" : "w-5 h-5"} />}
                   <span>{formatCurrency(Math.abs(shortChange))}</span>
               </div>
               
-              <span className={`${compact ? 'text-[9px] sm:text-[10px] mt-0.5' : 'text-[10px] mt-0.5'} font-medium font-mono ${themeMode === 'light' ? 'text-blue-700/60' : 'text-blue-400/60'}`}>
+              <span className={`${compact ? 'text-[9px] sm:text-[10px] mt-0.5' : 'text-[10px] mt-0.5'} font-medium font-mono ${themeMode === 'light' ? 'text-blue-700/60' : themeMode === 'colorful' ? 'text-purple-300/60' : 'text-blue-400/60'}`}>
                   Pos: {formatCurrency(shortPos)}
               </span>
           </div>

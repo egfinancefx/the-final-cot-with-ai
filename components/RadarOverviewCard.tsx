@@ -98,7 +98,12 @@ export const RadarOverviewCard: React.FC<RadarOverviewCardProps> = ({
     });
   }, [summaryData, selectedAssets]);
 
-  const colors = [
+  const colors = themeMode === 'colorful' ? [
+    { stroke: '#c084fc', fill: '#c084fc' }, // Violet
+    { stroke: '#38bdf8', fill: '#38bdf8' }, // Cyan
+    { stroke: '#fbbf24', fill: '#fbbf24' }, // Amber
+    { stroke: '#34d399', fill: '#34d399' }  // Emerald
+  ] : [
     { stroke: '#2563eb', fill: '#2563eb' }, // Vibrant Royal Navy Blue
     { stroke: '#1d4ed8', fill: '#1d4ed8' }, // Deep Blue
     { stroke: '#3b82f6', fill: '#3b82f6' }, // Ocean Blue
@@ -107,19 +112,27 @@ export const RadarOverviewCard: React.FC<RadarOverviewCardProps> = ({
 
   const cardBg = themeMode === 'light' 
     ? 'bg-slate-50 border-blue-900/20 shadow-xl' 
-    : 'bg-[#080f20] border-blue-900/60 shadow-2xl shadow-blue-950/80 backdrop-blur-md';
+    : themeMode === 'colorful'
+      ? 'bg-[#12102b]/90 border-purple-500/25 shadow-2xl shadow-purple-950/60 backdrop-blur-xl'
+      : 'bg-[#080f20] border-blue-900/60 shadow-2xl shadow-blue-950/80 backdrop-blur-md';
 
-  const textMain = themeMode === 'light' ? 'text-blue-950' : 'text-blue-100';
-  const textSub = themeMode === 'light' ? 'text-blue-800/70' : 'text-blue-300/70';
-  const gridStroke = themeMode === 'light' ? 'rgba(30, 58, 138, 0.25)' : 'rgba(30, 64, 175, 0.35)';
-  const axisTickColor = themeMode === 'light' ? '#1e3a8a' : '#60a5fa';
+  const textMain = themeMode === 'light' ? 'text-blue-950' : themeMode === 'colorful' ? 'text-purple-50' : 'text-blue-100';
+  const textSub = themeMode === 'light' ? 'text-blue-800/70' : themeMode === 'colorful' ? 'text-purple-300/70' : 'text-blue-300/70';
+  const gridStroke = themeMode === 'light' ? 'rgba(30, 58, 138, 0.25)' : themeMode === 'colorful' ? 'rgba(168, 85, 247, 0.3)' : 'rgba(30, 64, 175, 0.35)';
+  const axisTickColor = themeMode === 'light' ? '#1e3a8a' : themeMode === 'colorful' ? '#c084fc' : '#60a5fa';
 
   return (
     <div className={`rounded-xl sm:rounded-2xl border p-3 sm:p-3.5 flex flex-col h-full transition-all duration-300 ${cardBg}`}>
       {/* Header */}
-      <div className="flex items-center justify-between gap-1.5 mb-1.5 pb-2 border-b border-blue-900/30">
+      <div className={`flex items-center justify-between gap-1.5 mb-1.5 pb-2 border-b ${themeMode === 'colorful' ? 'border-purple-500/25' : 'border-blue-900/30'}`}>
         <div className="flex items-center gap-2">
-          <div className={`p-1.5 rounded-lg border ${themeMode === 'light' ? 'bg-blue-100 text-blue-900 border-blue-300' : 'bg-blue-950/80 text-blue-300 border-blue-800/50'}`}>
+          <div className={`p-1.5 rounded-lg border ${
+            themeMode === 'light' 
+              ? 'bg-blue-100 text-blue-900 border-blue-300' 
+              : themeMode === 'colorful'
+                ? 'bg-purple-500/20 text-purple-300 border-purple-500/30'
+                : 'bg-blue-950/80 text-blue-300 border-blue-800/50'
+          }`}>
             <Radio className="w-3.5 h-3.5" />
           </div>
           <div>
@@ -131,15 +144,25 @@ export const RadarOverviewCard: React.FC<RadarOverviewCardProps> = ({
         </div>
 
         {/* Category Pills */}
-        <div className="flex items-center gap-1 bg-blue-950/80 p-0.5 rounded-lg border border-blue-900/60">
+        <div className={`flex items-center gap-1 p-0.5 rounded-lg border ${
+          themeMode === 'light'
+            ? 'bg-slate-100 border-slate-200'
+            : themeMode === 'colorful'
+              ? 'bg-[#181438] border-purple-500/30'
+              : 'bg-blue-950/80 border-blue-900/60'
+        }`}>
           {(['top', 'metals', 'currencies'] as const).map(cat => (
             <button
               key={cat}
               onClick={() => setActiveCategory(cat)}
               className={`px-1.5 py-0.5 rounded text-[9px] font-medium uppercase tracking-wider transition-colors ${
                 activeCategory === cat
-                  ? (themeMode === 'light' ? 'bg-blue-800 text-white shadow-sm' : 'bg-blue-600 text-white font-semibold shadow-md')
-                  : 'text-blue-300/70 hover:text-white'
+                  ? (themeMode === 'light' 
+                      ? 'bg-blue-800 text-white shadow-sm' 
+                      : themeMode === 'colorful'
+                        ? 'bg-gradient-to-r from-violet-600 to-fuchsia-600 text-white font-semibold shadow-md shadow-purple-900/50'
+                        : 'bg-blue-600 text-white font-semibold shadow-md')
+                  : (themeMode === 'colorful' ? 'text-purple-300/70 hover:text-white' : 'text-blue-300/70 hover:text-white')
               }`}
             >
               {cat}

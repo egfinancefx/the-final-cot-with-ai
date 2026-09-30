@@ -43,14 +43,14 @@ const CompareModal: React.FC<CompareModalProps> = ({ isOpen, onClose, onCompare,
   };
 
   const themeStyles = {
-    overlay: themeMode === 'light' ? 'bg-slate-900/40 backdrop-blur-md' : 'bg-black/75 backdrop-blur-md',
-    modal: themeMode === 'light' ? 'bg-white border-slate-200' : 'bg-slate-900 border-white/10',
-    textMain: themeMode === 'light' ? 'text-slate-900' : 'text-white',
-    textSub: themeMode === 'light' ? 'text-slate-500' : 'text-slate-400',
-    groupHeader: themeMode === 'light' ? 'bg-slate-50 text-slate-500' : 'bg-slate-800/50 text-slate-400',
-    itemHover: themeMode === 'light' ? 'hover:bg-slate-50' : 'hover:bg-white/5',
-    itemSelected: themeMode === 'light' ? 'bg-blue-50 border-blue-200' : 'bg-blue-500/20 border-blue-500/30',
-    itemBorder: themeMode === 'light' ? 'border-slate-200' : 'border-white/5',
+    overlay: themeMode === 'light' ? 'bg-slate-900/40 backdrop-blur-md' : themeMode === 'colorful' ? 'bg-black/80 backdrop-blur-lg' : 'bg-black/75 backdrop-blur-md',
+    modal: themeMode === 'light' ? 'bg-white border-slate-200' : themeMode === 'colorful' ? 'bg-[#14122e] border-purple-500/30 shadow-[0_0_50px_rgba(139,92,246,0.3)]' : 'bg-slate-900 border-white/10',
+    textMain: themeMode === 'light' ? 'text-slate-900' : themeMode === 'colorful' ? 'text-purple-50' : 'text-white',
+    textSub: themeMode === 'light' ? 'text-slate-500' : themeMode === 'colorful' ? 'text-purple-300/80' : 'text-slate-400',
+    groupHeader: themeMode === 'light' ? 'bg-slate-50 text-slate-500' : themeMode === 'colorful' ? 'bg-purple-950/50 text-purple-300' : 'bg-slate-800/50 text-slate-400',
+    itemHover: themeMode === 'light' ? 'hover:bg-slate-50' : themeMode === 'colorful' ? 'hover:bg-purple-600/15' : 'hover:bg-white/5',
+    itemSelected: themeMode === 'light' ? 'bg-blue-50 border-blue-200' : themeMode === 'colorful' ? 'bg-purple-600/30 border-purple-400/50 shadow-[0_0_15px_rgba(192,132,252,0.2)]' : 'bg-blue-500/20 border-blue-500/30',
+    itemBorder: themeMode === 'light' ? 'border-slate-200' : themeMode === 'colorful' ? 'border-purple-500/20' : 'border-white/5',
   };
 
   return createPortal(

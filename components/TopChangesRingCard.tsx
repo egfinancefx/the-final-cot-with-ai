@@ -30,6 +30,14 @@ const BLUE_PALETTE_DARK = [
   '#0284c7', // Deep Ocean Blue (Sky 600)
 ];
 
+const COLORFUL_PALETTE = [
+  '#c084fc', // Vibrant Violet
+  '#38bdf8', // Radiant Sky/Cyan
+  '#fbbf24', // Warm Golden Amber
+  '#34d399', // Brilliant Emerald
+  '#f472b6', // Hot Neon Pink
+];
+
 // Specific target asset groups requested: Currencies, Metals, and strictly (Nasdaq, S&P 500, Dow Jones)
 const TARGET_COMMODITIES = new Set([
   // 1. Currencies
@@ -162,7 +170,7 @@ export const TopChangesRingCard: React.FC<TopChangesRingCardProps> = ({
     }
 
     const maxChange = Math.max(...top5.map(r => Math.abs(r["Net Change"] || 0)), 1);
-    const palette = themeMode === 'light' ? BLUE_PALETTE_LIGHT : BLUE_PALETTE_DARK;
+    const palette = themeMode === 'light' ? BLUE_PALETTE_LIGHT : themeMode === 'colorful' ? COLORFUL_PALETTE : BLUE_PALETTE_DARK;
 
     const data: RingData[] = top5.map((row, idx) => {
       const absVal = Math.abs(row["Net Change"] || 0);
@@ -179,10 +187,12 @@ export const TopChangesRingCard: React.FC<TopChangesRingCardProps> = ({
 
   const cardBg = themeMode === 'light' 
     ? 'bg-white border-slate-200/80 shadow-sm' 
-    : 'bg-slate-900/80 border-slate-800/80 shadow-lg backdrop-blur-sm';
+    : themeMode === 'colorful'
+      ? 'bg-[#12102b]/90 border-purple-500/25 shadow-2xl shadow-purple-950/60 backdrop-blur-xl'
+      : 'bg-slate-900/80 border-slate-800/80 shadow-lg backdrop-blur-sm';
 
-  const textMain = themeMode === 'light' ? 'text-slate-900' : 'text-slate-100';
-  const textSub = themeMode === 'light' ? 'text-slate-500' : 'text-slate-400';
+  const textMain = themeMode === 'light' ? 'text-slate-900' : themeMode === 'colorful' ? 'text-purple-50' : 'text-slate-100';
+  const textSub = themeMode === 'light' ? 'text-slate-500' : themeMode === 'colorful' ? 'text-purple-300/70' : 'text-slate-400';
 
   return (
     <div className={`rounded-xl sm:rounded-2xl border p-3 sm:p-3.5 flex flex-col h-full transition-all duration-300 ${cardBg}`}>

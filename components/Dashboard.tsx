@@ -355,6 +355,28 @@ const Dashboard: React.FC<DashboardProps> = ({ summaryData, historyData, history
             aiButton: 'from-blue-100 to-blue-100 text-blue-700 border-blue-200'
         };
     } 
+    if (themeMode === 'colorful') {
+        return {
+            headerBg: 'bg-[#12102b]/85 border-purple-500/25 shadow-2xl shadow-purple-950/50',
+            textMain: 'text-purple-50',
+            textSub: 'text-purple-300/80',
+            chartBg: 'bg-[#12102b]/90 border-purple-500/25 shadow-2xl shadow-purple-950/60 backdrop-blur-xl',
+            chartGrid: '#2e2154',
+            chartAxis: '#a78bfa',
+            trendColorPositive: '#c084fc', // Vibrant Violet
+            trendColorNeutral: '#38bdf8',  // Radiant Cyan
+            tableHeader: 'bg-[#19153b] text-purple-200 border-purple-500/30',
+            tableRow: 'hover:bg-purple-600/15 border-purple-900/30 text-purple-100',
+            tableDivider: 'divide-purple-900/30',
+            tableRowSelected: 'bg-gradient-to-r from-purple-600/30 to-fuchsia-600/20 border-l-fuchsia-400',
+            dropdownBg: 'bg-[#161338]/95 border-purple-500/30 text-purple-100',
+            dropdownItemHover: 'hover:bg-purple-600/25',
+            pieChartFill: '#c084fc',
+            pieChartBg: '#4c1d95',
+            activeButtonBg: 'bg-gradient-to-r from-violet-600 to-fuchsia-600 text-white shadow-lg shadow-purple-900/50',
+            aiButton: 'from-violet-600/30 to-fuchsia-600/30 text-purple-200 border-purple-400/40'
+        };
+    }
     // Default (Ocean)
     return {
         headerBg: 'bg-slate-900/80 border-blue-500/10 shadow-2xl',
