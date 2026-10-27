@@ -214,6 +214,12 @@ export async function streamGemini(
         try {
           const parsedEvent = JSON.parse(dataContent);
           if (parsedEvent.error) {
+            // If the stream delivered substantial content before closing with Incomplete JSON segment notice,
+            // return accumulated text gracefully so cleanAndCompleteJson can parse it!
+            if (accumulated.trim().length > 30 && (parsedEvent.error.includes("Incomplete JSON segment") || parsedEvent.error.includes("stream ended"))) {
+              console.warn("Stream finished with trailing segment notice, returning accumulated text:", accumulated.length);
+              return accumulated;
+            }
             throw new Error(parsedEvent.error);
           }
           if (parsedEvent.text) {
@@ -221,7 +227,7 @@ export async function streamGemini(
             onChunk(parsedEvent.text, accumulated);
           }
         } catch (e: any) {
-          if (e.message && (e.message.includes("quota") || e.message.includes("exceeded"))) {
+          if (e.message && (e.message.includes("quota") || e.message.includes("exceeded") || e.message.includes("Streaming error") || e.message.includes("Failed to initiate"))) {
             throw e;
           }
         }

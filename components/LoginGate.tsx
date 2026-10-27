@@ -1,21 +1,25 @@
 import React, { useState, useEffect } from 'react';
 import { BarChart3, Loader2, Mail, AlertCircle, ArrowRight, Sparkles } from 'lucide-react';
 
+import { AUTH_SHEET_URL } from '../constants';
+
 interface LoginGateProps {
-  onLogin: () => void;
+  onLogin: (email: string) => void;
+  initialError?: string | null;
 }
 
-const SHEET_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTXv9PB3EtBUtXpbL7PFkpRmg8URXsJEdG3S5aZFOBV8ni7QavAWZ-j3q5pLj478mcxgMzK-aW6t04i/pub?output=csv';
-
-const LoginGate: React.FC<LoginGateProps> = ({ onLogin }) => {
+const LoginGate: React.FC<LoginGateProps> = ({ onLogin, initialError }) => {
   const [email, setEmail] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(initialError || null);
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
     setMounted(true);
-  }, []);
+    if (initialError) {
+      setError(initialError);
+    }
+  }, [initialError]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -30,7 +34,7 @@ const LoginGate: React.FC<LoginGateProps> = ({ onLogin }) => {
     setError(null);
 
     try {
-      const response = await fetch(SHEET_CSV_URL, { cache: 'no-store' });
+      const response = await fetch(AUTH_SHEET_URL, { cache: 'no-store' });
       
       if (!response.ok) {
         throw new Error('Failed to connect to the authentication server.');
@@ -56,7 +60,7 @@ const LoginGate: React.FC<LoginGateProps> = ({ onLogin }) => {
       }
 
       if (isAuthorized) {
-        onLogin();
+        onLogin(trimmedEmail);
       } else {
         setError('Access denied. This email is not authorized. Please contact support.');
       }

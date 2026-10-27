@@ -79,8 +79,15 @@ const AIAnalysisOverlay: React.FC<AIAnalysisOverlayProps> = ({ isAiOfflineMode, 
   const [parsedData, setParsedData] = useState<AnalysisData | null>(null);
   
   // Translation State & In-Memory Cache
-  const [currentLang, setCurrentLang] = useState('English');
+  const [currentLang, setCurrentLang] = useState(() => {
+    try {
+      return localStorage.getItem('eg_ai_lang') || 'Arabic';
+    } catch (_) {
+      return 'Arabic';
+    }
+  });
   const [isTranslating, setIsTranslating] = useState(false);
+  const [translationNotice, setTranslationNotice] = useState<string | null>(null);
   const [isLangMenuOpen, setIsLangMenuOpen] = useState(false);
   const langMenuRef = useRef<HTMLDivElement>(null);
   const translationCacheRef = useRef<Record<string, AnalysisData>>({});
@@ -237,8 +244,8 @@ const AIAnalysisOverlay: React.FC<AIAnalysisOverlayProps> = ({ isAiOfflineMode, 
             if (cleanJson.startsWith('{') || cleanJson.startsWith('[')) {
                 const data = JSON.parse(cleanJson);
                 setParsedData(data);
-                if (!isLoading && currentLang === 'English') {
-                    translationCacheRef.current['English'] = data;
+                if (!isLoading) {
+                    translationCacheRef.current[currentLang] = data;
                 }
                 return;
             }
@@ -252,10 +259,10 @@ const AIAnalysisOverlay: React.FC<AIAnalysisOverlayProps> = ({ isAiOfflineMode, 
             return incremental || prev;
         });
 
-        if (!isLoading && currentLang === 'English') {
+        if (!isLoading) {
             const completed = cleanAndCompleteJson(cleanJson);
             if (completed) {
-                translationCacheRef.current['English'] = completed;
+                translationCacheRef.current[currentLang] = completed;
             }
         }
     } else if (!isLoading) {
@@ -291,67 +298,80 @@ const AIAnalysisOverlay: React.FC<AIAnalysisOverlayProps> = ({ isAiOfflineMode, 
     }
   };
 
-  const handleLanguageChange = async (lang: string) => {
+  const handleLanguageChange = async (targetLang: string) => {
     setIsLangMenuOpen(false);
-    if (lang === currentLang) return;
+    setTranslationNotice(null);
+    if (targetLang === currentLang) return;
 
     // 1. Instant Cache Hit: Return in 0ms without network call
-    if (translationCacheRef.current[lang]) {
-        setCurrentLang(lang);
-        setParsedData(translationCacheRef.current[lang]);
+    if (translationCacheRef.current[targetLang]) {
+        setCurrentLang(targetLang);
+        setParsedData(translationCacheRef.current[targetLang]);
+        try {
+            localStorage.setItem('eg_ai_lang', targetLang);
+        } catch (_) {}
         return;
     }
 
-    if (lang === 'English') {
-        setCurrentLang('English');
-        if (translationCacheRef.current['English']) {
-            setParsedData(translationCacheRef.current['English']);
-        }
-        return;
-    }
-
-    // Always translate from base English data for highest fidelity
-    const sourceData = translationCacheRef.current['English'] || parsedData;
+    const sourceData = parsedData;
     if (!sourceData) return;
 
-    setCurrentLang(lang);
     setIsTranslating(true);
 
     try {
+        const targetDesc = targetLang === 'Arabic' 
+            ? 'natural, high-level institutional financial Arabic (اللغة العربية الفصحى الاحترافية لأسواق المال وتداول العملات والسلع)'
+            : targetLang === 'French' 
+            ? 'professional financial French' 
+            : 'clear, professional financial English';
+
         const prompt = `You are a high-speed institutional financial translation engine.
-Translate the string values in this financial JSON into ${lang === 'Arabic' ? 'natural, professional financial Arabic (العربية الفصحى لأسواق المال والتحليل المالي)' : lang}.
+Translate the string values in this financial JSON into ${targetDesc}.
 
 RULES:
 1. Translate ONLY string values. Keep ALL JSON keys in English verbatim.
-2. Keep numbers, percentages, ticker symbols (e.g. USD, EUR, DXY, COT), price targets ($), and dates in Latin text/digits.
+2. Keep numbers, percentages, ticker symbols (e.g. USD, EUR, DXY, COT, XAU), price targets ($), and dates in Latin text/digits.
 3. For Arabic, use accurate trading terminology (e.g., Risk-On: شهية مخاطرة مرتفعة, Risk-Off: تجنب المخاطر, Support: دعم, Resistance: مقاومة, Pivot: نقطة محورية, Bank Holiday: عطلة بنكية).
-4. Return ONLY valid JSON matching the exact schema.
+4. Return ONLY valid JSON matching the exact schema. No markdown ticks outside the JSON.
 
 ${JSON.stringify(sourceData)}`;
 
-        const fullTranslated = await streamGemini(
-            {
-                model: 'gemini-3.8-flash',
+        // Fast, single-turn non-streaming request using fast model (never blocks the UI thread)
+        const res = await fetch('/api/gemini', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                model: 'gemini-3.1-flash-lite',
                 prompt,
-                thinkingLevel: 'LOW',
-                responseMimeType: "application/json"
-            },
-            (_chunk, accumulated) => {
-                const partial = cleanAndCompleteJson(accumulated);
-                if (partial) {
-                    setParsedData(prev => parseIncrementalAnalysis(prev, accumulated));
-                }
-            }
-        );
+                responseMimeType: "application/json",
+                thinkingLevel: 'LOW'
+            })
+        });
 
-        const clean = fullTranslated.replace(/```json\n?|\n?```/g, '').trim();
-        const finalData = cleanAndCompleteJson(clean);
-        if (finalData) {
-            translationCacheRef.current[lang] = finalData;
-            setParsedData(finalData);
+        if (!res.ok) {
+            throw new Error(`Translation API returned HTTP ${res.status}`);
         }
-    } catch (error) {
+
+        const data = await res.json();
+        const rawText = data.text || '';
+        const clean = rawText.replace(/```json\n?|\n?```/g, '').trim();
+        const finalData = cleanAndCompleteJson(clean);
+
+        if (finalData && typeof finalData === 'object' && (finalData.sentiment || finalData.perspective)) {
+            translationCacheRef.current[currentLang] = sourceData;
+            translationCacheRef.current[targetLang] = finalData;
+            setParsedData(finalData);
+            setCurrentLang(targetLang);
+            try {
+                localStorage.setItem('eg_ai_lang', targetLang);
+            } catch (_) {}
+        } else {
+            throw new Error("Invalid translated data format");
+        }
+    } catch (error: any) {
         console.error("Translation failed:", error);
+        setTranslationNotice(targetLang === 'Arabic' ? 'تعذرت الترجمة الفورية مؤقتاً، يرجى المحاولة لاحقاً.' : 'Translation temporarily unavailable.');
+        setTimeout(() => setTranslationNotice(null), 4000);
     } finally {
         setIsTranslating(false);
     }
@@ -1406,18 +1426,31 @@ ${JSON.stringify(sourceData)}`;
             <div className="relative" ref={langMenuRef}>
                 <button
                     onClick={() => setIsLangMenuOpen(!isLangMenuOpen)}
-                    className="flex items-center gap-2 px-3.5 py-2 bg-slate-800/60 hover:bg-slate-700/60 rounded-xl border border-white/10 text-xs font-medium text-slate-200 transition-all hover:border-white/20 active:scale-95 shadow-sm"
+                    disabled={isTranslating}
+                    className="flex items-center gap-2 px-3.5 py-2 bg-slate-800/60 hover:bg-slate-700/60 rounded-xl border border-white/10 text-xs font-medium text-slate-200 transition-all hover:border-white/20 active:scale-95 shadow-sm disabled:opacity-70"
                 >
-                    <Languages className="w-3.5 h-3.5 text-blue-400" />
-                    <span className="font-semibold">{currentLang === 'Arabic' ? 'العربية' : currentLang}</span>
+                    {isTranslating ? (
+                        <Loader2 className="w-3.5 h-3.5 text-blue-400 animate-spin" />
+                    ) : (
+                        <Languages className="w-3.5 h-3.5 text-blue-400" />
+                    )}
+                    <span className="font-semibold">
+                        {isTranslating ? (currentLang === 'Arabic' ? 'جاري الترجمة...' : 'Translating...') : (currentLang === 'Arabic' ? 'العربية' : currentLang)}
+                    </span>
                     <ChevronDown className={`w-3 h-3 text-slate-400 transition-transform ${isLangMenuOpen ? 'rotate-180' : ''}`} />
                 </button>
+
+                {translationNotice && (
+                    <div className="absolute top-full right-0 mt-2 p-2 px-3 bg-rose-500/20 border border-rose-500/30 text-rose-300 text-xs rounded-xl shadow-xl z-50 whitespace-nowrap animate-fade-in">
+                        {translationNotice}
+                    </div>
+                )}
 
                 {isLangMenuOpen && (
                     <div className="absolute top-full right-0 mt-2 w-48 bg-slate-900/95 backdrop-blur-xl border border-white/10 rounded-xl shadow-2xl overflow-hidden z-50 animate-in fade-in zoom-in-95 duration-100 ring-1 ring-black/50 divide-y divide-white/5">
                         {[
-                            { id: 'English', label: 'English', sub: 'Default (EN)' },
-                            { id: 'Arabic', label: 'العربية', sub: 'ترجمة فورية فائقة السرعة' },
+                            { id: 'Arabic', label: 'العربية', sub: 'اللغة الافتراضية' },
+                            { id: 'English', label: 'English', sub: 'Institutional EN' },
                             { id: 'French', label: 'Français', sub: 'French (FR)' }
                         ].map((item) => (
                             <button

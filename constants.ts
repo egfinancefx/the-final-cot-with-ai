@@ -1,5 +1,8 @@
 
 // Google Sheets CSV Export URLs
+// Authorized Users Email Sheet
+export const AUTH_SHEET_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTXv9PB3EtBUtXpbL7PFkpRmg8URXsJEdG3S5aZFOBV8ni7QavAWZ-j3q5pLj478mcxgMzK-aW6t04i/pub?output=csv";
+
 // Net Positions Sheet
 export const SUMMARY_SHEET_URL = "https://docs.google.com/spreadsheets/d/1vERLh_6ywf_buGaMpxdCkF2ES94W9M_a6hLNxobRsuo/export?format=csv";
 

@@ -34,8 +34,12 @@ async function startServer() {
   app.use(cors());
   app.use(express.json());
 
-  // Prioritize modern, high-speed Gemini 3 series flash models
-  const CANDIDATE_MODELS = ["gemini-3.8-flash", "gemini-3.6-flash"];
+  // Prioritize modern, high-speed Gemini 3 series flash models with robust fallbacks
+  const CANDIDATE_MODELS = [
+    "gemini-3.8-flash",
+    "gemini-flash-latest",
+    "gemini-3.1-flash-lite"
+  ];
 
   // Helper to execute Gemini requests with automatic fallback across models on errors
   async function executeGeminiWithFallback(
@@ -63,7 +67,7 @@ async function startServer() {
           contents,
           ...(Object.keys(config).length > 0 ? { config } : {})
         });
-        if (response && typeof response.text === "string") {
+        if (response && typeof response.text === "string" && response.text.length > 0) {
           return response.text;
         }
       } catch (err: any) {
@@ -71,11 +75,7 @@ async function startServer() {
         try {
           fs.appendFileSync("error.log", `Model Error: ${model} ${err?.message || String(err)}\n`);
         } catch (_) {}
-        const status = err?.status || err?.code;
-        // If 503, 429, 404, or 500, seamlessly attempt next model immediately
-        if (status === 503 || status === 429 || status === 500 || status === 404) {
-          continue;
-        }
+        
         // If tools caused the failure, try without tools
         if (config.tools) {
           try {
@@ -86,17 +86,16 @@ async function startServer() {
               contents,
               ...(Object.keys(fallbackConfig).length > 0 ? { config: fallbackConfig } : {})
             });
-            if (fallbackRes && typeof fallbackRes.text === "string") {
+            if (fallbackRes && typeof fallbackRes.text === "string" && fallbackRes.text.length > 0) {
               return fallbackRes.text;
             }
           } catch (retryErr: any) {
             lastError = retryErr;
-            try {
-              fs.appendFileSync("error.log", `Retry Error: ${retryErr?.message || String(retryErr)}\n`);
-            } catch (_) {}
-            continue;
           }
         }
+
+        // On any error (503, 429, demand spike, network), seamlessly try next model
+        continue;
       }
     }
     throw lastError;
@@ -109,7 +108,7 @@ async function startServer() {
     config: any = {},
     preferredModel: string = "gemini-3.8-flash",
     onChunk: (chunkText: string) => void
-  ): Promise<void> {
+  ): Promise<{ chunksSent: number; textReceived: string }> {
     const modelsToTry = [
       preferredModel,
       ...CANDIDATE_MODELS.filter((m) => m !== preferredModel)
@@ -120,8 +119,13 @@ async function startServer() {
     }
 
     let lastError: any = null;
+    let chunksSent = 0;
+    let textReceived = "";
 
     for (const model of modelsToTry) {
+      chunksSent = 0;
+      textReceived = "";
+
       try {
         const stream = await ai.models.generateContentStream({
           model,
@@ -131,20 +135,28 @@ async function startServer() {
 
         for await (const chunk of stream) {
           if (chunk && typeof chunk.text === "string" && chunk.text.length > 0) {
+            chunksSent++;
+            textReceived += chunk.text;
             onChunk(chunk.text);
           }
         }
-        return;
+        return { chunksSent, textReceived };
       } catch (err: any) {
         lastError = err;
         try {
           fs.appendFileSync("error.log", `Stream Model Error: ${model} ${err?.message || String(err)}\n`);
         } catch (_) {}
-        const status = err?.status || err?.code;
-        if (status === 503 || status === 429 || status === 500 || status === 404) {
-          continue;
+
+        // If chunks were already delivered and error is "Incomplete JSON segment at the end",
+        // the model stream finished but the SSE stream was closed without a trailing delimiter.
+        // We already delivered text to client! Treat as successfully completed.
+        if (chunksSent > 0 && textReceived.length > 20 && (err?.message?.includes("Incomplete JSON segment") || err?.message?.includes("stream ended"))) {
+          console.warn(`Stream on ${model} ended with incomplete segment notice, but delivered ${chunksSent} chunks (${textReceived.length} chars). Completed.`);
+          return { chunksSent, textReceived };
         }
-        if (config.tools) {
+
+        // If tools failed before any chunks were sent, try without tools
+        if (config.tools && chunksSent === 0) {
           try {
             const fallbackConfig = { ...config };
             delete fallbackConfig.tools;
@@ -155,17 +167,43 @@ async function startServer() {
             });
             for await (const chunk of fallbackStream) {
               if (chunk && typeof chunk.text === "string" && chunk.text.length > 0) {
+                chunksSent++;
+                textReceived += chunk.text;
                 onChunk(chunk.text);
               }
             }
-            return;
+            return { chunksSent, textReceived };
           } catch (retryErr: any) {
             lastError = retryErr;
-            continue;
           }
         }
+
+        // If no chunks were sent, continue to next candidate model
+        if (chunksSent === 0) {
+          continue;
+        }
+
+        // If some chunks were sent and another error happened, throw to avoid corrupt mixed streams
+        throw err;
       }
     }
+
+    // If streaming failed on all models before sending any chunk, fallback to non-streaming generateContent!
+    if (chunksSent === 0) {
+      console.log("Streaming failed on all candidate models. Falling back to non-streaming generateContent...");
+      try {
+        const fullText = await executeGeminiWithFallback(ai, contents, config, preferredModel);
+        if (fullText && typeof fullText === "string" && fullText.length > 0) {
+          chunksSent = 1;
+          textReceived = fullText;
+          onChunk(fullText);
+          return { chunksSent, textReceived };
+        }
+      } catch (nonStreamErr: any) {
+        lastError = nonStreamErr;
+      }
+    }
+
     throw lastError;
   }
 
@@ -228,8 +266,10 @@ async function startServer() {
         ? "You exceeded your current Gemini API quota. Please check your Google AI Studio billing/plan, or try again in a moment." 
         : (e?.message || "Failed to stream generation");
 
-      res.write(`data: ${JSON.stringify({ error: errorMessage })}\n\n`);
-      res.end();
+      if (!res.writableEnded) {
+        res.write(`data: ${JSON.stringify({ error: errorMessage })}\n\n`);
+        res.end();
+      }
     }
   });
 

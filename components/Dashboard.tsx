@@ -430,37 +430,55 @@ const Dashboard: React.FC<DashboardProps> = ({ summaryData, historyData, history
     let ffEvents: any[] = [];
 
     try {
-        // Fetch live spot market price and Forex Factory calendar in parallel to reduce latency
-        await Promise.allSettled([
-            (async () => {
-                if (selectedItem?.Commodity) {
+        // Fetch live spot market price and Forex Factory calendar in parallel with a strict 2-second timeout so it never hangs
+        const timeoutPromise = new Promise((resolve) => setTimeout(resolve, 2000));
+        await Promise.race([
+            Promise.allSettled([
+                (async () => {
+                    if (selectedItem?.Commodity) {
+                        try {
+                            const qRes = await fetch(`/api/market-price?commodity=${encodeURIComponent(selectedItem.Commodity)}`);
+                            if (qRes.ok) {
+                                liveQuote = await qRes.json();
+                            }
+                        } catch (err) {
+                            console.warn("Could not fetch live market price:", err);
+                        }
+                    }
+                })(),
+                (async () => {
                     try {
-                        const qRes = await fetch(`/api/market-price?commodity=${encodeURIComponent(selectedItem.Commodity)}`);
-                        if (qRes.ok) {
-                            liveQuote = await qRes.json();
+                        const ffRes = await fetch('/api/forexfactory-calendar');
+                        if (ffRes.ok) {
+                            const ffData = await ffRes.json();
+                            ffEvents = ffData.events || [];
                         }
                     } catch (err) {
-                        console.warn("Could not fetch live market price:", err);
+                        console.warn("Could not fetch Forex Factory calendar:", err);
                     }
-                }
-            })(),
-            (async () => {
-                try {
-                    const ffRes = await fetch('/api/forexfactory-calendar');
-                    if (ffRes.ok) {
-                        const ffData = await ffRes.json();
-                        ffEvents = ffData.events || [];
-                    }
-                } catch (err) {
-                    console.warn("Could not fetch Forex Factory calendar:", err);
-                }
-            })()
+                })()
+            ]),
+            timeoutPromise
         ]);
 
         let prompt = "";
         
         const today = new Date().toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
         const dateContext = latestDate ? `The COT data is current as of ${latestDate}. Today is ${today}.` : `Today is ${today}.`;
+
+        const userLang = (typeof window !== 'undefined' ? localStorage.getItem('eg_ai_lang') : null) || 'Arabic';
+        const isArabic = userLang === 'Arabic';
+
+        const languageDirective = isArabic ? `
+            MANDATORY LANGUAGE DIRECTIVE (NATIVE ARABIC):
+            - You MUST write all descriptive narrative fields in professional, fluent, institutional financial Arabic (اللغة العربية الفصحى الاحترافية لأسواق المال والتحليل المالي لتقرير الالتزام للمتداولين COT).
+            - This includes "sentiment.reason", "perspective", "actionable_advice", "institutional_bias", "global_context.weekly_impact", "global_context.news_highlights" (every bullet point), "global_context.key_risks", and "playbook" details ("plan", "why", "when_to_act", "impact_if_deviates").
+            - Keep all JSON keys, numerical figures, percentages (%), and currency ticker symbols (e.g. USD, EUR, XAU, COT, S1, R1, PP) strictly in English/Latin format.
+            - For "sentiment.label", write "Risk-On (شهية مخاطرة)", "Risk-Off (تجنب مخاطر)", or "Neutral (محايد)".
+        ` : `
+            LANGUAGE DIRECTIVE:
+            - Write all narrative fields in decisive, institutional financial English.
+        `;
         
         // Pick top 8 most relevant events to keep prompt lean and response fast
         const ffEventsSummary = ffEvents.length > 0 
@@ -520,6 +538,8 @@ const Dashboard: React.FC<DashboardProps> = ({ summaryData, historyData, history
             ${quoteContext}
             
             ${ffInstruction}
+
+            ${languageDirective}
             
             You MUST return the response in valid JSON format with the following structure. Do not use Markdown formatting outside the JSON strings.
             {
@@ -574,6 +594,8 @@ const Dashboard: React.FC<DashboardProps> = ({ summaryData, historyData, history
             
             ${ffInstruction}
             
+            ${languageDirective}
+
             You MUST return the response in valid JSON format with the following structure. Do not use Markdown formatting outside the JSON strings.
             {
               "sentiment": {
@@ -617,6 +639,29 @@ const Dashboard: React.FC<DashboardProps> = ({ summaryData, historyData, history
         setAiAnalysis("");
         setIsAiOfflineMode(false);
 
+        let lastThrottleTime = 0;
+        let pendingAccumulated = "";
+        let throttleTimer: any = null;
+
+        const handleThrottledStreamUpdate = (text: string, isFinal = false) => {
+            pendingAccumulated = text;
+            const now = Date.now();
+            if (isFinal || now - lastThrottleTime > 160) {
+                lastThrottleTime = now;
+                if (throttleTimer) {
+                    clearTimeout(throttleTimer);
+                    throttleTimer = null;
+                }
+                setAiAnalysis(text);
+            } else if (!throttleTimer) {
+                throttleTimer = setTimeout(() => {
+                    throttleTimer = null;
+                    lastThrottleTime = Date.now();
+                    setAiAnalysis(pendingAccumulated);
+                }, 160);
+            }
+        };
+
         const fullText = await streamGemini(
             {
                 model: 'gemini-3.8-flash',
@@ -626,12 +671,17 @@ const Dashboard: React.FC<DashboardProps> = ({ summaryData, historyData, history
                 systemInstruction: "You are an elite, institutional-grade trading mentor. You analyze data with cold, hard logic. You are highly specific and data-driven. Always ground your advice in real-world macroeconomic drivers and current market data. The user trades STRICTLY on the DAILY timeframe. Be decisive, concrete, and responsible. Return ONLY valid JSON."
             },
             (_chunk, accumulated) => {
-                setAiAnalysis(accumulated);
+                handleThrottledStreamUpdate(accumulated, false);
             }
         );
 
+        if (throttleTimer) {
+            clearTimeout(throttleTimer);
+            throttleTimer = null;
+        }
+
         if (fullText && fullText.trim().length > 0) {
-            setAiAnalysis(fullText);
+            handleThrottledStreamUpdate(fullText, true);
             setIsAiOfflineMode(false);
         } else {
             throw new Error("Empty streamed response received");

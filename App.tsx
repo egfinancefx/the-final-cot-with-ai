@@ -6,7 +6,7 @@ import MarketTicker from './components/MarketTicker';
 import LoginGate from './components/LoginGate';
 import ChatWidget from './components/ChatWidget';
 import { parseSummaryCSV, parseHistoryCSV } from './utils';
-import { SUMMARY_SHEET_URL, HISTORY_SHEET_URL } from './constants';
+import { SUMMARY_SHEET_URL, HISTORY_SHEET_URL, AUTH_SHEET_URL } from './constants';
 import { BarChart3, RefreshCw, AlertCircle, Loader2, Sun, LogOut, Palette } from 'lucide-react';
 import { SummaryRow, HistoryRow, ThemeMode } from './types';
 
@@ -18,6 +18,15 @@ const App: React.FC = () => {
       return false;
     }
   });
+  const [userEmail, setUserEmail] = useState<string>(() => {
+    try {
+      return localStorage.getItem('eg_user_email') || '';
+    } catch (e) {
+      return '';
+    }
+  });
+  const [authRevokedMessage, setAuthRevokedMessage] = useState<string | null>(null);
+
   const [summaryData, setSummaryData] = useState<SummaryRow[]>([]);
   const [historyData, setHistoryData] = useState<HistoryRow[]>([]);
   const [historyDates, setHistoryDates] = useState<string[]>([]);
@@ -32,22 +41,85 @@ const App: React.FC = () => {
   // Theme State
   const [themeMode, setThemeMode] = useState<ThemeMode>('ocean');
 
-  const handleLogin = useCallback(() => {
+  const handleLogin = useCallback((email: string) => {
+    const cleanEmail = email.trim().toLowerCase();
     try {
       localStorage.setItem('eg_auth', 'true');
+      localStorage.setItem('eg_user_email', cleanEmail);
     } catch (e) {}
+    setUserEmail(cleanEmail);
+    setAuthRevokedMessage(null);
     setIsAuthenticated(true);
   }, []);
 
-  const handleLogout = useCallback(() => {
+  const handleLogout = useCallback((reason?: string) => {
     try {
       localStorage.removeItem('eg_auth');
+      localStorage.removeItem('eg_user_email');
     } catch (e) {}
+    setUserEmail('');
     setIsAuthenticated(false);
+    if (reason && typeof reason === 'string') {
+      setAuthRevokedMessage(reason);
+    }
   }, []);
+
+  // Continuous verification: check if current user email is still present in Google Sheets
+  const verifyAuthorization = useCallback(async (): Promise<boolean> => {
+    const emailToCheck = (userEmail || localStorage.getItem('eg_user_email') || '').trim().toLowerCase();
+    
+    // If authenticated flag is true but email is completely missing, force re-login
+    if (!emailToCheck) {
+      handleLogout("يرجى تسجيل الدخول بالبريد الإلكتروني المصرح به.");
+      return false;
+    }
+
+    try {
+      const response = await fetch(AUTH_SHEET_URL, { cache: 'no-store' });
+      if (!response.ok) {
+        // In case of transient sheet connectivity issue, don't kick out immediately
+        return true;
+      }
+
+      const csvText = await response.text();
+      const rows = csvText.split(/\r?\n/);
+      let isAuthorized = false;
+
+      for (let i = 0; i < rows.length; i++) {
+        const row = rows[i];
+        if (!row) continue;
+        const cols = row.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/);
+        for (const col of cols) {
+          const cellEmail = col.replace(/^"|"$/g, '').trim().toLowerCase();
+          if (cellEmail === emailToCheck) {
+            isAuthorized = true;
+            break;
+          }
+        }
+        if (isAuthorized) break;
+      }
+
+      if (!isAuthorized) {
+        console.warn(`Access revoked: email ${emailToCheck} was removed from the authorized sheet.`);
+        handleLogout("تم إنهاء جلستك: تم إلغاء صلاحية الوصول أو انتهاء الاشتراك لهذا البريد الإلكتروني.");
+        return false;
+      }
+
+      return true;
+    } catch (err) {
+      // Network offline/glitch, preserve session
+      console.warn("Auth verification network error:", err);
+      return true;
+    }
+  }, [userEmail, handleLogout]);
 
   const fetchData = useCallback(async () => {
     if (!isAuthenticated) return;
+    
+    // First, verify that user is still authorized in the Google Sheet
+    const stillAuthorized = await verifyAuthorization();
+    if (!stillAuthorized) return;
+
     setIsLoading(true);
     setError(null);
     try {
@@ -75,14 +147,38 @@ const App: React.FC = () => {
     } finally {
       setIsLoading(false);
     }
-  }, [isAuthenticated]);
+  }, [isAuthenticated, verifyAuthorization]);
 
-  // Initial fetch
+  // Initial fetch and verify
   useEffect(() => {
     if (isAuthenticated) {
       fetchData();
     }
   }, [fetchData, isAuthenticated]);
+
+  // Auto-verify when tab becomes active / gains focus
+  useEffect(() => {
+    if (!isAuthenticated) return;
+    const checkOnActive = () => {
+      verifyAuthorization();
+    };
+    window.addEventListener('focus', checkOnActive);
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible') {
+        checkOnActive();
+      }
+    };
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+
+    // Also periodic verification every 2 minutes in background
+    const interval = setInterval(checkOnActive, 2 * 60 * 1000);
+
+    return () => {
+      window.removeEventListener('focus', checkOnActive);
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+      clearInterval(interval);
+    };
+  }, [isAuthenticated, verifyAuthorization]);
 
   // Calculate the latest date from the data
   const latestDate = React.useMemo(() => {
@@ -118,7 +214,7 @@ const App: React.FC = () => {
   };
 
   if (!isAuthenticated) {
-    return <LoginGate onLogin={handleLogin} />;
+    return <LoginGate onLogin={handleLogin} initialError={authRevokedMessage} />;
   }
 
   return (
@@ -212,7 +308,7 @@ const App: React.FC = () => {
                 </button>
 
                 <button 
-                onClick={handleLogout}
+                onClick={() => handleLogout()}
                 className={`flex items-center gap-2 px-3 py-1.5 border rounded-lg text-xs font-medium uppercase tracking-wider transition-all 
                     ${themeMode === 'light' 
                         ? 'bg-white hover:bg-red-50 border-red-200 text-red-600' 
